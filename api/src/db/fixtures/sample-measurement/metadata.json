@@ -1,0 +1,45 @@
+{
+  "clientId": "6f1c2d0e-9a4b-4c1e-8d2f-3b5a7c9e1f00",
+  "name": "Apartamento de ejemplo",
+  "scannedAt": "2026-10-16T18:20:11.000Z",
+  "footprint": {
+    "width": 8.5,
+    "length": 4
+  },
+  "isMerged": true,
+  "geometryVersion": 1,
+  "rooms": [
+    {
+      "id": "dfd31cde-2b77-4430-9e2e-75a3e5d739c7",
+      "index": 0,
+      "name": "Sala",
+      "type": "livingRoom",
+      "floorArea": 20,
+      "isFloorApproximate": false,
+      "perimeter": 18,
+      "ceilingHeight": 2.5,
+      "wallCount": 4,
+      "doorCount": 2,
+      "windowCount": 1,
+      "openingCount": 0,
+      "objectCount": 2
+    },
+    {
+      "id": "38993a05-db55-4e6a-b620-33bf6625dbe7",
+      "index": 1,
+      "name": "Dormitorio",
+      "type": "bedroom",
+      "floorArea": 14,
+      "isFloorApproximate": false,
+      "perimeter": 15,
+      "ceilingHeight": 2.5,
+      "wallCount": 4,
+      "doorCount": 1,
+      "windowCount": 1,
+      "openingCount": 0,
+      "objectCount": 1
+    }
+  ],
+  "appVersion": "1.0 (1)",
+  "deviceModel": "Simulator"
+}
