@@ -3,6 +3,7 @@ import { createRoot, type Root } from 'react-dom/client';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, expect, it, vi } from 'vitest';
 import App from './App';
+import fixture from './measurements/__fixtures__/two-room-apartment.geometry.json';
 import { AppConfigContext } from './AppConfigContext';
 import { writeAuth } from './providers/authStorage';
 import { jsonResponse } from './test-utils';
@@ -29,9 +30,22 @@ const users = [
   { id: 1, email: 'admin@example.com', name: null, active: true, lastLoginAt: '2026-10-16T14:00:00Z', createdAt: '2026-10-16T14:00:00Z', updatedAt: '2026-10-16T14:00:00Z' },
   { id: 2, email: 'ana@example.com', name: 'Ana Pérez', active: true, lastLoginAt: null, createdAt: '2026-10-16T14:00:00Z', updatedAt: '2026-10-16T14:00:00Z' },
 ];
+const measurement = {
+  id: 1, name: 'Apartamento', roomCount: 2, totalFloorArea: 34, isAreaApproximate: false,
+  scannedAt: '2026-10-16T14:00:00Z', createdAt: '2026-10-16T14:00:00Z', createdBy: 'admin@example.com',
+  footprint: { width: 8.5, length: 4 }, isMerged: true, notes: 'Notas de prueba',
+  files: { geometry: { size: 100 }, floorPlan: { size: 100 } },
+  rooms: fixture.rooms.map((r, i) => ({ id: r.id, index: i, name: i ? 'Dormitorio' : 'Sala', type: r.detectedType, floorArea: i ? 14 : 20, isFloorApproximate: false, perimeter: i ? 15 : 18, ceilingHeight: 2.5 })),
+};
 const config = { apiUrl: 'http://api.test/api', appTitle: 'Inventario de limpieza', currency: 'USD' };
 
 it.each([
+  ['/measurements', ['Mediciones', 'Apartamento', '34,0 m²', 'Habitaciones']],
+  ['/measurements/1', ['Nombre', 'Notas', 'Guardar']],
+  ['/measurements/1/show', ['Apartamento', 'Plano', '3D', 'Medidas', 'Archivos']],
+  ['/measurements/1/show/model', ['Tu navegador no puede mostrar la vista 3D.']],
+  ['/measurements/1/show/measures', ['Resumen', '34,0 m²', 'Sala', 'Dormitorio', 'Paredes']],
+  ['/measurements/1/show/files', ['Plano (PNG)', 'Geometría (JSON)', 'Descargar']],
   ['/login', ['Correo electrónico', 'Contraseña', 'Iniciar sesión']],
   ['/', ['Productos activos', 'Existencias bajas', 'Movimientos recientes', 'Entrada']],
   ['/products', ['Productos', 'Nombre', 'Cantidad', 'Crear', '2 cajas']],
@@ -52,12 +66,16 @@ it.each([
 ])('renders %s in Spanish', async (path, labels) => {
   vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
   vi.stubGlobal('scrollTo', vi.fn());
+  URL.createObjectURL = vi.fn(() => 'blob:test');
+  URL.revokeObjectURL = vi.fn();
   if (path !== '/login') {
     writeAuth({ token: 'test-token', expiresAt: new Date(Date.now() + 3600_000).toISOString(), userId: 1, email: 'admin@example.com', name: null });
   }
   vi.stubGlobal('fetch', vi.fn(async (input: string | URL | Request) => {
     const url = new URL(String(input));
     const resource = url.pathname.split('/')[2];
+    if (url.pathname.includes('/files/')) return new Response(JSON.stringify(fixture), { headers: { 'Content-Type': 'application/json' } });
+    if (resource === 'measurements') return jsonResponse(/\/\d+$/.test(url.pathname) ? measurement : [measurement], { headers: { 'Content-Range': 'measurements 0-0/1' } });
     if (resource === 'stats') {
       return jsonResponse({ products: { total: 1, active: 1, lowStock: 1, outOfStock: 0 }, stockValue: 3 });
     }

@@ -21,7 +21,7 @@
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>NSCameraUsageDescription</key>
-	<string>RoomScanner usa la cámara y el escáner LiDAR para medir habitaciones y crear planos. Los escaneos se quedan en tu dispositivo.</string>
+	<string>RoomScanner usa la cámara y el escáner LiDAR para medir habitaciones y crear planos. Las mediciones se suben al servidor de tu organización.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -33,5 +33,14 @@
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 	</array>
+	<key>APIBaseURL</key>
+	<string>$(API_BASE_URL)</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>RoomScanner se conecta a un servidor de tu red local para iniciar sesión y subir mediciones.</string>
 </dict>
 </plist>

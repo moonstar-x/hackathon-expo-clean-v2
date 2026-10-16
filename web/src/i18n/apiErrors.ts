@@ -21,6 +21,11 @@ const messages: Record<string, string> = {
   'A user with this email already exists': 'Ya existe un usuario con este correo electrónico.',
   'You cannot delete your own account': 'No puedes eliminar tu propia cuenta.',
   'You cannot deactivate your own account': 'No puedes desactivar tu propia cuenta.',
+  'This measurement was uploaded by another user': 'Otra cuenta ya subió esta medición.',
+  'Measurement part is too large': 'El archivo supera el tamaño permitido.',
+  'Expected multipart/form-data': 'La medición debe enviarse como formulario con archivos.',
+  'Invalid multipart body': 'El formulario de archivos no es válido.',
+  'Measurement file not found': 'No se encontró el archivo de la medición.',
   'Required': 'Obligatorio',
   'Must be a string': 'Debe ser texto.',
   'Must be a number': 'Debe ser un número.',
@@ -47,6 +52,7 @@ const codeMessages: Record<string, string> = {
   INSUFFICIENT_STOCK: 'No hay existencias suficientes para registrar esta salida.',
   VALIDATION_ERROR: messages['Validation failed'],
   RATE_LIMITED: messages['Too many login attempts'],
+  UNSUPPORTED_MEDIA_TYPE: 'El formato del archivo no es compatible.',
   PAYLOAD_TOO_LARGE: messages['Request body is too large'],
   INTERNAL_ERROR: messages['Internal server error'],
 };
@@ -65,7 +71,7 @@ export function translateApiMessage(message: unknown, fallback = 'No se pudo com
   }
   match = /^Must have at most (\d+) decimal places$/.exec(message);
   if (match) return `Debe tener como máximo ${match[1]} decimales.`;
-  match = /^(Category|Supplier|Product|Stock movement|User) (\d+) (does not exist|not found)$/.exec(message);
+  match = /^(Category|Supplier|Product|Stock movement|User|Measurement) (\d+) (does not exist|not found)$/.exec(message);
   if (match) {
     const resource = {
       Category: 'La categoría',
@@ -73,6 +79,7 @@ export function translateApiMessage(message: unknown, fallback = 'No se pudo com
       Product: 'El producto',
       'Stock movement': 'El movimiento',
       User: 'El usuario',
+      Measurement: 'La medición',
     }[match[1]];
     return `${resource} con ID ${match[2]} no existe.`;
   }

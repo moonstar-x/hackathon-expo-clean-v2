@@ -1,5 +1,8 @@
+import { readFileSync } from 'node:fs';
 import type Database from 'better-sqlite3';
 import { createCategoriesRepository } from '../modules/categories/repository.ts';
+import { createMeasurementsRepository } from '../modules/measurements/repository.ts';
+import { type UploadedFiles, validateUpload } from '../modules/measurements/schemas.ts';
 import { createProductsRepository } from '../modules/products/repository.ts';
 import type { ProductCreateInput } from '../modules/products/schemas.ts';
 import { createStockMovementsRepository } from '../modules/stockMovements/repository.ts';
@@ -100,6 +103,7 @@ export interface SeedResult {
  * movement ledger so the §5.6 invariants hold.
  */
 export function seed(db: Database.Database, { createdBy }: { createdBy: string }): SeedResult {
+  seedMeasurement(db, createdBy);
   const count = (sql: string) => db.prepare<[], number>(sql).pluck().get()!;
   if (count('SELECT COUNT(*) FROM products') > 0) return { seeded: false };
 
@@ -154,4 +158,14 @@ export function seed(db: Database.Database, { createdBy }: { createdBy: string }
       movements: count('SELECT COUNT(*) FROM stock_movements'),
     };
   })();
+}
+
+/** Independent from inventory seeding, so an existing installation also gets a sample. */
+function seedMeasurement(db: Database.Database, email: string) {
+  if (db.prepare<[], number>('SELECT COUNT(*) FROM measurements').pluck().get()) return;
+  const directory = new URL('./fixtures/sample-measurement/', import.meta.url);
+  const files: UploadedFiles = Object.fromEntries([['geometry', 'geometry.json'], ['floorPlan', 'floor-plan.png'], ['thumbnail', 'thumbnail.png']].map(([kind, name]) => [kind, [{ buffer: readFileSync(new URL(name, directory)) }]]));
+  const metadata = validateUpload(JSON.parse(readFileSync(new URL('metadata.json', directory), 'utf8')), files);
+  const user = db.prepare<[string], { id: number; email: string }>('SELECT id, email FROM users WHERE email = ? COLLATE NOCASE').get(email) ?? { id: null, email };
+  createMeasurementsRepository(db, { publicUrl: 'http://localhost' }).upload(metadata, files, user);
 }

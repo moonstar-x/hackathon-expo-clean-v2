@@ -2,6 +2,7 @@ import SwiftUI
 
 /// One row of the Home list (HOME-1, HOME-2).
 struct LocationRow: View {
+    @Environment(\.sessionStore) private var session
     @ObservedObject var location: Location
     @AppStorage(UnitSystem.storageKey) private var unitPreference: UnitSystem = .automatic
 
@@ -31,6 +32,7 @@ struct LocationRow: View {
                     Text(formatter.area(location.totalFloorArea))
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
+                    SyncStatusView(location: location, compact: true)
                 }
             }
         }
@@ -70,6 +72,18 @@ struct LocationRow: View {
         var parts = [location.displayName, String(localized: .locationRowA11YScannedOn(date: date)), rooms]
         if location.status == .complete {
             parts.append(formatter.spokenArea(location.totalFloorArea))
+            if location.ownerUserID != 0 && location.ownerUserID != session?.session?.user.id {
+                parts.append(String(localized: .syncOtherAccount))
+            } else {
+                let label: String = switch location.syncStatus {
+                case .pending: String(localized: .syncPending)
+                case .uploading: String(localized: .syncUploading)
+                case .uploaded: String(localized: .syncUploaded)
+                case .failed: String(localized: .syncFailed)
+                case .localOnly: String(localized: .syncLocalOnly)
+                }
+                parts.append(label)
+            }
         } else {
             parts.append(String(localized: .locationRowA11YIncomplete))
         }

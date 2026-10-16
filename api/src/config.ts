@@ -1,4 +1,5 @@
 import path from 'node:path';
+import { isIP } from 'node:net';
 import { fileURLToPath } from 'node:url';
 import jwt, { type SignOptions } from 'jsonwebtoken';
 import { z } from 'zod';
@@ -36,10 +37,33 @@ const isJwtDuration = (value: string) => {
   }
 };
 
+const proxyValue = (value: string): boolean | number | string[] | undefined => {
+  if (value === 'false') return false;
+  if (value === 'true') return true;
+  if (/^\d+$/.test(value) && Number.isSafeInteger(Number(value))) return Number(value);
+  const entries = value.split(',').map((s) => s.trim());
+  if (entries.every((entry) => {
+    if (['loopback', 'linklocal', 'uniquelocal'].includes(entry)) return true;
+    const [address, bits, extra] = entry.split('/');
+    const family = isIP(address);
+    return family !== 0 && extra === undefined && (bits === undefined || (/^\d+$/.test(bits) && Number(bits) <= (family === 4 ? 32 : 128)));
+  })) return entries;
+  return undefined;
+};
+const validPublicUrl = (value: string) => {
+  try {
+    const url = new URL(value);
+    return ['http:', 'https:'].includes(url.protocol) && !url.username && !url.password && !url.search && !url.hash && !value.includes('?') && !value.includes('#');
+  } catch { return false; }
+};
+
 const schema = z
   .object({
     NODE_ENV: env(z.enum(['development', 'test', 'production']).default('development')),
     PORT: env(z.coerce.number().int().min(1).max(65535).default(4000)),
+    PUBLIC_URL: env(z.string().trim().refine(validPublicUrl, 'must be an absolute http(s) URL without credentials, query or fragment').optional()),
+    TRUST_PROXY: env(z.string().trim().default('false').refine((v) => proxyValue(v) !== undefined, 'must be a boolean, hop count, or trusted address/subnet list').transform(proxyValue)),
+    UPLOAD_MAX_FILE_MB: env(z.coerce.number().int().min(1).max(500).default(50)),
     DATABASE_PATH: env(z.string().trim().default('./data/inventory.db')),
     CORS_ORIGIN: env(
       z
@@ -61,6 +85,9 @@ const schema = z
   })
   .superRefine((cfg, ctx) => {
     if (cfg.NODE_ENV !== 'production') return;
+    if (!cfg.PUBLIC_URL || !cfg.PUBLIC_URL.startsWith('https://')) {
+      ctx.addIssue({ code: 'custom', path: ['PUBLIC_URL'], message: 'is required and must use https in production' });
+    }
     for (const key of ['JWT_SECRET', 'ADMIN_PASSWORD'] as const) {
       if (cfg[key] === PLACEHOLDERS[key]) {
         ctx.addIssue({ code: 'custom', path: [key], message: 'must be changed from the .env.example placeholder in production' });
@@ -105,6 +132,9 @@ export function loadConfig(source: Record<string, string | undefined> = process.
     env: e.NODE_ENV,
     isProduction: e.NODE_ENV === 'production',
     port: e.PORT,
+    publicUrl: (e.PUBLIC_URL ?? `http://localhost:${e.PORT}`).replace(/\/+$/, ''),
+    trustProxy: e.TRUST_PROXY,
+    uploadMaxFileBytes: e.UPLOAD_MAX_FILE_MB * 1024 * 1024,
     databasePath,
     corsOrigins: Object.freeze(e.CORS_ORIGIN),
     jwtSecret: e.JWT_SECRET,

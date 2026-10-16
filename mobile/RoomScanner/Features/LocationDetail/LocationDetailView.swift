@@ -65,7 +65,7 @@ private struct LocationDetailContent: View {
                 Button(.commonDelete, role: .destructive) { delete() }
                 Button(.commonCancel, role: .cancel) {}
             } message: {
-                Text(.commonCannotUndo)
+                if location.syncStatus == .uploaded { Text(.syncDeleteUploaded) } else { Text(.commonCannotUndo) }
             }
             .alert(Text(.commonSomethingWentWrong),
                    isPresented: Binding(get: { model.errorMessage != nil }, set: { if !$0 { model.errorMessage = nil } })) {
@@ -102,6 +102,7 @@ private struct LocationDetailContent: View {
         VStack(spacing: 0) {
             VStack(spacing: 10) {
                 header(geometry)
+                SyncStatusView(location: location).frame(maxWidth: .infinity, alignment: .leading)
                 Picker(.detailTabPicker, selection: $model.selectedTab) {
                     ForEach(DetailTab.allCases) { tab in
                         Text(tab.title).tag(tab)

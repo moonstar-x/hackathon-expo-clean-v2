@@ -225,6 +225,7 @@ export const spanishMessages = {
     },
   },
   resources: {
+    measurements: { name: 'Medición |||| Mediciones', fields: { ...fields, roomCount: 'Habitaciones', totalFloorArea: 'Superficie total', scannedAt: 'Fecha del escaneo', createdBy: 'Subido por', createdAt: 'Fecha de subida', scannedAt_gte: 'Desde', scannedAt_lte: 'Hasta' } },
     products: { name: 'Producto |||| Productos', fields },
     'stock-movements': { name: 'Movimiento de inventario |||| Movimientos de inventario', fields },
     categories: { name: 'Categoría |||| Categorías', fields },
