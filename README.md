@@ -4,7 +4,7 @@ A small ERP-style inventory for a cleaning company: which products it has, how m
 
 | Folder | What | Stack | Docs |
 |---|---|---|---|
-| [`api/`](api/) | REST backend: categories, suppliers, products, append-only stock movement ledger, stats, users, measurement uploads | Node.js 24, Express 5, SQLite, zod, JWT | [api/README.md](api/README.md) |
+| [`api/`](api/) | REST backend: categories, suppliers, products, append-only stock movement ledger, stats, users, measurement uploads | Node.js 24, TypeScript, Express 5, SQLite, zod, JWT | [api/README.md](api/README.md) |
 | [`web/`](web/) | Admin UI: catalog management, stock movements, low-stock dashboard, users, floor plans and 3D measurements | react-admin 5, Vite, TypeScript | [web/README.md](web/README.md) |
 | [`mobile/`](mobile/) | iPhone room scanning, required login, durable measurement uploads | SwiftUI, RoomPlan, Core Data, Keychain | [mobile/README.md](mobile/README.md) |
 
@@ -24,7 +24,7 @@ For a deployed admin, `VITE_API_URL` is `PUBLIC_URL` plus `/api`. A local admin 
 
 ## Run locally
 
-Requires Node.js 24 (22 or later works).
+Requires Node.js 24 (22.18 or later works).
 
 ```bash
 # Terminal 1: API on http://localhost:4000

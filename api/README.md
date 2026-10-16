@@ -2,7 +2,7 @@
 
 REST backend for the cleaning products inventory ([SPEC-002](../spec/SPEC-002.md), user accounts in [SPEC-003](../spec/SPEC-003.md)). It stores categories, suppliers, products, an append-only ledger of **stock movements**, and the **users** who can log in. A product's on-hand quantity changes only through movements, so every change is auditable.
 
-Stack: Node.js 24 (≥ 22), Express 5, SQLite (`better-sqlite3`), zod, JWT auth. Plain JavaScript ES modules with no build step.
+Stack: Node.js 24 (≥ 22.18), Express 5, SQLite (`better-sqlite3`), zod, JWT auth. TypeScript (strict) ES modules with no build step: Node runs the `.ts` files directly through its built-in type stripping, and `tsc` only type-checks. So the code may only use erasable TypeScript syntax: no `enum`, no `namespace` with runtime code, no constructor parameter properties.
 
 This service is independent of the admin UI in `../web`. It shares no code with it and talks to it only over HTTP.
 
@@ -23,7 +23,7 @@ curl -s localhost:4000/health   # {"status":"ok","db":"ok"}
 
 ## Configuration
 
-Every setting comes from environment variables. `src/server.js` loads `api/.env` with dotenv, and real environment variables take precedence over the file. Invalid or missing values stop the process with exit code 1, and **every** problem is listed by variable name.
+Every setting comes from environment variables. `src/server.ts` loads `api/.env` with dotenv, and real environment variables take precedence over the file. Invalid or missing values stop the process with exit code 1, and **every** problem is listed by variable name.
 
 | Variable | Required | Default | Meaning |
 |---|---|---|---|
@@ -53,7 +53,8 @@ User accounts live in the database. While the `users` table is **empty**, the se
 | `npm run dev` | Start with `node --watch` (restarts on change) |
 | `npm start` | Start the server |
 | `npm test` | Run the Vitest suite (in-memory SQLite; no `.env` needed) |
-| `npm run lint` | ESLint |
+| `npm run typecheck` | `tsc` type check (no output files) |
+| `npm run lint` | ESLint with typescript-eslint |
 | `npm run db:migrate` | Apply pending `migrations/NNN_*.sql` files |
 | `npm run db:seed` | Seed demo data, only if there are no products yet |
 | `npm run db:reset` | Delete the DB file (plus `-wal`/`-shm`), migrate and seed |
@@ -191,13 +192,13 @@ curl -s $API/api/stats -H "Authorization: Bearer $TOKEN"
 
 ```
 src/
-  server.js        entry point: env → config → DB → migrate → listen; graceful shutdown
-  app.js           createApp({ db, config }) → Express app (used by tests)
-  config.js        loadConfig(env) → frozen config, or a ConfigError listing every problem
+  server.ts        entry point: env → config → DB → migrate → listen; graceful shutdown
+  app.ts           createApp({ db, config }) → Express app (used by tests)
+  config.ts        loadConfig(env) → frozen config, or a ConfigError listing every problem
   db/              connection (pragmas), migration runner, seed data
   lib/             errors, list protocol (sort/range/filter → bound SQL), rounding, zod helpers, CRUD router, password hashing
   middleware/      requireAuth, error handler, 404
-  modules/<name>/  router.js, repository.js (SQL + snake_case ↔ camelCase), schemas.js (zod)
+  modules/<name>/  router.ts, repository.ts (SQL + snake_case ↔ camelCase, row and API types), schemas.ts (zod + inferred input types)
 migrations/        NNN_description.sql, applied in order and tracked in schema_migrations
 scripts/           db-migrate, db-seed, db-reset
 test/              Vitest + supertest; each file builds its own in-memory app

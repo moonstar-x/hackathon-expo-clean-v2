@@ -33,6 +33,7 @@ struct LocationRepositoryTests {
         let id = try await repository.createDraft(name: "Draft", createdAt: .now)
         for (index, room) in geometry.rooms.enumerated() {
             try await repository.appendRoom(locationID: id, roomID: room.id, index: index, name: "Room \(index + 1)",
+                                            type: index == 0 ? .operatingRoom : nil,
                                             capturedRoomJSON: Data("{}".utf8),
                                             floorArea: Double(RoomMetrics.floorArea(of: room) ?? 0),
                                             capturedAt: .now)
@@ -61,6 +62,27 @@ struct LocationRepositoryTests {
         #expect(raw.rooms.map(\.id) == geometry.rooms.map(\.id), "Rooms come back in capture order")
         #expect(raw.canRebuild)
         #expect(raw.structureJSON == nil)
+    }
+
+    @Test func appendSetAndClearRoomType() async throws {
+        let (_, geometry) = try await makeDraftWithTwoRooms()
+        let context = persistence.container.newBackgroundContext()
+        let storedType = { (roomID: UUID) in
+            try context.performAndWait {
+                let request = Room.fetchRequest()
+                request.predicate = NSPredicate(format: "id == %@", roomID as CVarArg)
+                return try context.fetch(request).first?.typeRaw
+            }
+        }
+        let first = geometry.rooms[0].id, second = geometry.rooms[1].id
+        #expect(try storedType(first) == "operatingRoom", "appendRoom stores the type")
+        #expect(try storedType(second) == nil)
+
+        try await repository.setRoomType(roomID: second, to: .hallway)
+        #expect(try storedType(second) == "hallway")
+
+        try await repository.setRoomType(roomID: first, to: nil)
+        #expect(try storedType(first) == nil)
     }
 
     @Test func renameLocationAndRoom() async throws {
