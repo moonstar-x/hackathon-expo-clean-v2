@@ -86,4 +86,4 @@ The 3D viewer loads `three` and `OrbitControls` lazily in a separate bundle. It 
 
 ### SPEC-004 notes
 
-All P0 web requirements are implemented and covered by geometry, scene, formatting, file-access and route smoke tests. P2 interactive SVG plan is skipped. Interactive WebGL operation and light/dark rendering still need a browser walkthrough with a real GPU; automated jsdom tests cover the fallback.
+All P0 web requirements are implemented and covered by geometry, scene, formatting, file-access and route smoke tests. P2 interactive SVG plan is skipped. Browser automation access was not approved. Interactive WebGL operation and light/dark rendering still need a browser walkthrough with a real GPU; automated jsdom tests cover the fallback.

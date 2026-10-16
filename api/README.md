@@ -29,6 +29,9 @@ Every setting comes from environment variables. `src/server.js` loads `api/.env`
 |---|---|---|---|
 | `NODE_ENV` | no | `development` | `development`, `test` or `production` |
 | `PORT` | no | `4000` | HTTP port (1–65535) |
+| `PUBLIC_URL` | in production | `http://localhost:<PORT>` | Public HTTP(S) base URL; HTTPS required in production; optional proxy path prefix. No credentials, query or fragment. |
+| `TRUST_PROXY` | no | `false` | Express trusted proxies: boolean, hop count, IP/subnet list or named ranges. Usually `1` behind a tunnel. |
+| `UPLOAD_MAX_FILE_MB` | no | `50` | Maximum bytes per measurement file, in MB (integer 1–500). |
 | `DATABASE_PATH` | no | `./data/inventory.db` | SQLite file, relative to `api/`. `:memory:` is allowed. The parent directory is created if missing. |
 | `CORS_ORIGIN` | **yes** | – | Comma-separated origins allowed to call the API, e.g. `http://localhost:5173` |
 | `JWT_SECRET` | **yes** | – | At least 32 characters. Generate one with `node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"` |

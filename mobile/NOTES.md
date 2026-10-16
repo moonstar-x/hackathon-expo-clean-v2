@@ -2,7 +2,22 @@
 
 Deviations from SPEC-001, items skipped or left unverified, and known risks. Updated 2026-10-16.
 
-## Status
+## SPEC-004 status
+
+- Implemented configuration/ATS, required login, Keychain sessions, deferred session loss during capture, model version 2 with lightweight migration, owner-aware durable uploads, all sync indicators, Settings actions, CSV/raw/USDZ payloads, retry backoff, network recovery and background execution time.
+- API: clean `npm ci`, lint and 179 tests passed. Web: clean `npm ci`, lint, typecheck, 82 tests and production build passed.
+- HTTP walkthrough on a disposable SQLite database passed: health, upload 201, replay 200 with the same ID, absolute links, byte downloads, rename and cascading delete.
+- Swift networking/session code was compiled and executed on macOS against that API: URL validation, login, authenticated /me, 401 mapping, multipart file upload/replay, session storage/restore/expiry passed. The networking, persistence, payload and queue source also compiles with temporary macOS stubs for iOS-only rendering/background APIs and generated localization symbols, with no compiler warnings. This is limited verification, not an iOS build or execution of Swift Testing suites.
+- **Xcode, XcodeGen, iOS SDK/Simulator, Swift Testing and xcstringstool are unavailable on this Mac.** `xcodegen generate` fails with command not found; `xcodebuild` reports the active developer directory is CommandLineTools. The required iOS build/test, generated-symbol integration, `sync-strings.sh`, actual Keychain accessibility, v1 migration, Simulator sample rendering/upload and all device checks remain unverified. No LiDAR device is available.
+- Browser automation access was not approved. Web route smoke tests include all four Show tabs and the jsdom WebGL fallback, but real GPU controls, theme appearance and visual browser walkthrough remain unverified.
+
+### SPEC-004 deviations and skipped items
+
+- P1 seed PNGs are temporary CoreGraphics drawings of the real sample geometry, rather than exports from the iOS renderer. The geometry itself was encoded from the actual Swift sample with sorted keys. `ContractFixtureTests.exportFixtureWhenRequested` and the README document replacement with matching app-rendered PNGs when Xcode is available.
+- P2 interactive SVG plan and best-effort rename synchronization are skipped. One-way uploads preserve the server copy on subsequent local edits/deletion as required.
+- P0/P1 mobile code is implemented, but the environmental verification limitations above must be resolved before claiming the full Definition of Done or a warning-free iOS build.
+
+## SPEC-001 status (previous implementation)
 
 - Every [P0] and [P1] requirement is implemented.
 - `xcodegen generate` followed by `xcodebuild … clean build test` succeeds on the iPhone 17 Pro Simulator

@@ -4,10 +4,23 @@ A small ERP-style inventory for a cleaning company: which products it has, how m
 
 | Folder | What | Stack | Docs |
 |---|---|---|---|
-| [`api/`](api/) | REST backend: categories, suppliers, products, append-only stock movement ledger, stats, users | Node.js 24, Express 5, SQLite, zod, JWT | [api/README.md](api/README.md) |
-| [`web/`](web/) | Admin UI: catalog management, stock movements, low-stock dashboard, user management | react-admin 5, Vite, TypeScript | [web/README.md](web/README.md) |
+| [`api/`](api/) | REST backend: categories, suppliers, products, append-only stock movement ledger, stats, users, measurement uploads | Node.js 24, Express 5, SQLite, zod, JWT | [api/README.md](api/README.md) |
+| [`web/`](web/) | Admin UI: catalog management, stock movements, low-stock dashboard, users, floor plans and 3D measurements | react-admin 5, Vite, TypeScript | [web/README.md](web/README.md) |
+| [`mobile/`](mobile/) | iPhone room scanning, required login, durable measurement uploads | SwiftUI, RoomPlan, Core Data, Keychain | [mobile/README.md](mobile/README.md) |
 
-The two services are **independent**. Each has its own `package.json`, lockfile, `.env` and README, and they share no code. There is no root `package.json` and no workspaces. They communicate only over HTTP, so each one installs, runs, tests and deploys on its own.
+The three parts are **independent** and share no runtime code. The API and web each have their own `package.json`, lockfile and `.env`; mobile has its own XcodeGen configuration. There is no root `package.json` and no workspaces. They communicate only over HTTP, so each one installs, runs, tests and deploys on its own.
+
+RoomScanner uploads the dimensions, floor plan PNG, geometry and available RoomPlan exports from the iPhone. Operators use **Mediciones** in the admin to inspect, rename, download and delete those shared copies. Scans remain on the device, and queued uploads retry after connectivity or login returns. See [SPEC-004](spec/SPEC-004.md).
+
+## Run with a phone
+
+1. Start the API using the local instructions below.
+2. Start `cloudflared tunnel --url http://localhost:4000` (or `ngrok http 4000`).
+3. Set `PUBLIC_URL` in `api/.env` to the tunnel's HTTPS address and `TRUST_PROXY=1`, then restart the API.
+4. Set `API_BASE_URL = https:/$()/your-tunnel-host` in `mobile/Config/API.local.xcconfig` (gitignored). The `$()` preserves the URL in xcconfig syntax.
+5. Generate the project, build to a LiDAR iPhone and log in with an API account. Scan and save; open **Mediciones** in the admin. For the Simulator, use `http:/$()/localhost:4000` and **Depuración → Agregar lugar de ejemplo**.
+
+For a deployed admin, `VITE_API_URL` is `PUBLIC_URL` plus `/api`. A local admin may keep its localhost URL. Tunnel addresses change when restarted. See the mobile README for same-Wi-Fi `.local` access and the full verification checklist.
 
 ## Run locally
 
@@ -37,4 +50,6 @@ To use other ports, change `PORT` (and `CORS_ORIGIN`) in `api/.env`, and `VITE_A
 ```bash
 cd api && npm ci && npm run lint && npm test
 cd web && npm ci && npm run lint && npm run typecheck && npm test && npm run build
+cd mobile && xcodegen generate && xcodebuild -project RoomScanner.xcodeproj -scheme RoomScanner \
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=latest' build test
 ```

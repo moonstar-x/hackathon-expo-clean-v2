@@ -12,7 +12,7 @@ export const metadataSchema = z.object({
   clientId: uuid, name: requiredText(100),
   scannedAt: z.iso.datetime({ offset: true }).transform((v) => new Date(v).toISOString()),
   footprint: z.object({ width: number, length: number }).nullable(),
-  isMerged: z.boolean(), geometryVersion: z.number().int().min(1),
+  isMerged: z.boolean(), geometryVersion: z.number().int().min(1).max(1_000_000),
   rooms: z.array(z.object({
     id: uuid, index: count, name: requiredText(100),
     type: z.enum(['bedroom', 'bathroom', 'kitchen', 'livingRoom', 'diningRoom']).nullable(),

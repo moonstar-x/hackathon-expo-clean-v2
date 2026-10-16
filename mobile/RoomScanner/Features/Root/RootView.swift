@@ -32,6 +32,9 @@ struct RootView: View {
             queue.run()
             await session.refresh()
         }
+        .onChange(of: session.session?.user) { _, user in
+            if !session.isCapturing { persistence.repository.setCurrentOwner(user) }
+        }
         .onChange(of: session.isCapturing) { _, capturing in
             if !capturing { persistence.repository.setCurrentOwner(session.session?.user) }
         }

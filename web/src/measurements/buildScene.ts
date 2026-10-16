@@ -17,11 +17,11 @@ export function buildScene(geometry: ScanGeometry, { showObjects }: { showObject
     const color = ['storage', 'bed', 'table', 'sofa', 'chair'].includes(e.category) ? 'rgb(140,158,184)' : ['refrigerator', 'stove', 'washerDryer', 'oven', 'dishwasher', 'television'].includes(e.category) ? 'rgb(158,173,158)' : 'rgb(184,168,148)';
     box(e, e.dimensions[2], color, 0.9);
   });
-  const palette = ['#B8D6F2', '#BFDFC4', '#F2D0A8', '#D6C4EB', '#B8DFDF', '#EBC4D6'];
+  const palette = ['#007AFF', '#34C759', '#FF9500', '#AF52DE', '#FF2D55', '#30B0C7', '#FFCC00', '#00C7BE'];
   geometry.rooms.forEach((room, i) => {
     if (room.floorPolygon.length < 3) return;
     const shape = new THREE.Shape(room.floorPolygon.map(([x, z]) => new THREE.Vector2(x, -z)));
-    const floor = new THREE.Mesh(new THREE.ShapeGeometry(shape), new THREE.MeshStandardMaterial({ color: palette[i % palette.length], side: THREE.DoubleSide }));
+    const floor = new THREE.Mesh(new THREE.ShapeGeometry(shape), new THREE.MeshStandardMaterial({ color: palette[i % palette.length], transparent: true, opacity: 0.6, side: THREE.DoubleSide }));
     floor.rotation.x = -Math.PI / 2;
     floor.position.y = room.walls.length ? Math.min(...room.walls.map((w) => w.transform.c3[1] - w.dimensions[1] / 2)) : 0;
     group.add(floor);
