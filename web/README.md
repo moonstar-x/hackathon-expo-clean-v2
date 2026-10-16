@@ -70,6 +70,7 @@ src/
   Layout.tsx  theme.ts the CleanCode layout (AppBar + sectioned menu) and theme
   components/          the shared kit, appBar/, menu/, login/, list/, fields/, dashboard/, one folder per resource
   constants/ types/ styles/ hooks/ utils/ i18n/ providers/
+  measurements/        Mediciones (SPEC-004): views, 3D viewer, geometry, authenticated files, shared fixture
   resources/           thin page shells and each resource's ResourceProps
 tests/                 lib/ (logic) and components/ (screens), with renderWithAdmin
 public/                icons, manifest.webmanifest and sw.js
@@ -84,3 +85,15 @@ See [design.md §8](design.md#8-code-conventions) for what goes where.
 - **ESLint instead of oxlint.** The current Vite template ships oxlint. This app uses the ESLint flat config that the template used before, as the spec requires (`eslint.config.js`, `npm run lint` → `eslint .`).
 - The dashboard's "Out of stock" link uses the API's `outOfStock` product filter, an addition to the spec's filter whitelist.
 - **Installable (PWA).** `public/manifest.webmanifest` and `public/sw.js`, registered by production builds only (dev keeps Vite's HMR). The worker caches just the page and Vite's content-hashed `/assets/`; API calls go to another origin and always hit the network. Try it with `npm run build && npm run preview`.
+
+## Mediciones (SPEC-004)
+
+Mediciones is first in the menu. Its list supports uploader/date/search filters, authenticated thumbnails, metric areas, and confirmed bulk deletion. Edit changes name and notes. Show has Plano (the phone's PNG), 3D (orbit, zoom, reset and furniture toggle), Medidas (summary and expandable room tables), and Archivos (authenticated downloads).
+
+`VITE_API_URL` is the API's `PUBLIC_URL` plus `/api`, including any proxy prefix. Files are fetched through that configured address with the stored bearer token, rather than using the absolute links returned by the server. Images use revocable Blob URLs; immutable file requests are cached by account. A 401 follows the normal logout path.
+
+The 3D viewer loads `three` and `OrbitControls` lazily in a separate bundle. It validates the Swift geometry format, uses column-major transforms and merged render surfaces, and cleans up GPU resources on unmount. A missing WebGL context displays a Spanish fallback. An invalid/newer geometry version does not prevent viewing the PNG or room metrics.
+
+### SPEC-004 notes
+
+All P0 web requirements are implemented and covered by geometry, scene, formatting, file-access and route smoke tests. P2 interactive SVG plan is skipped. Browser automation access was not approved. Interactive WebGL operation and light/dark rendering still need a browser walkthrough with a real GPU; automated jsdom tests cover the fallback.

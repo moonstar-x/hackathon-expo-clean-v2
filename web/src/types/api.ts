@@ -1,5 +1,5 @@
-// The API's records, as SPEC-002 §5 and SPEC-003 describe them. Duplicated on purpose: the admin
-// shares no code with the API.
+// The API's records, as SPEC-002 §5, SPEC-003 and SPEC-004 describe them. Duplicated on purpose:
+// the admin shares no code with the API.
 
 export type Unit = 'unit' | 'box' | 'pack' | 'roll' | 'pair' | 'L' | 'mL' | 'gal' | 'kg' | 'g';
 
@@ -79,6 +79,52 @@ export interface Stats {
   products: { total: number; active: number; lowStock: number; outOfStock: number };
   stockValue: number;
   movementsLast30Days: Record<MovementType, number>;
+}
+
+export type MeasurementFileKind = 'geometry' | 'floorPlan' | 'thumbnail' | 'model' | 'csv' | 'raw';
+
+export interface MeasurementFile {
+  url: string;
+  contentType: string;
+  size: number;
+}
+
+export interface MeasurementRoom {
+  id: string;
+  index: number;
+  name: string;
+  type: 'bedroom' | 'bathroom' | 'kitchen' | 'livingRoom' | 'diningRoom' | null;
+  floorArea: number | null;
+  isFloorApproximate: boolean;
+  perimeter: number;
+  ceilingHeight: number | null;
+  wallCount: number;
+  doorCount: number;
+  windowCount: number;
+  openingCount: number;
+  objectCount: number;
+}
+
+export interface Measurement {
+  id: number;
+  clientId: string;
+  name: string;
+  notes: string | null;
+  scannedAt: string;
+  roomCount: number;
+  totalFloorArea: number;
+  isAreaApproximate: boolean;
+  footprint: { width: number; length: number } | null;
+  isMerged: boolean;
+  geometryVersion: number;
+  rooms: MeasurementRoom[];
+  appVersion: string | null;
+  deviceModel: string | null;
+  userId: number | null;
+  createdBy: string;
+  files: Partial<Record<MeasurementFileKind, MeasurementFile>>;
+  createdAt: string;
+  updatedAt: string;
 }
 
 /** The error body every API endpoint answers with. */

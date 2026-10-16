@@ -1,4 +1,5 @@
 import type { ErrorRequestHandler } from 'express';
+import multer from 'multer';
 import { ZodError, type z } from 'zod';
 import type { Config } from '../config.ts';
 import { type FieldErrors, HttpError } from '../lib/errors.ts';
@@ -18,6 +19,11 @@ type ExpressError = { type?: string; expose?: boolean; status?: number; message?
 
 function toHttpError(err: unknown): HttpError | null {
   if (err instanceof HttpError) return err;
+
+  if (err instanceof multer.MulterError) {
+    const large = ['LIMIT_FILE_SIZE', 'LIMIT_FIELD_VALUE'].includes(err.code);
+    return new HttpError(large ? 413 : 400, large ? 'PAYLOAD_TOO_LARGE' : 'BAD_REQUEST', large ? 'Measurement part is too large' : 'Invalid multipart body', err.field ? { [err.field]: err.message } : undefined);
+  }
 
   if (err instanceof ZodError) {
     const errors = zodIssuesToErrors(err.issues);

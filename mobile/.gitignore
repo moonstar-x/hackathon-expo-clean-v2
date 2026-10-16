@@ -4,3 +4,4 @@ DerivedData/
 .build/
 .DS_Store
 Config/Signing.local.xcconfig
+Config/API.local.xcconfig

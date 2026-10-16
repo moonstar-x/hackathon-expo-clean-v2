@@ -3,6 +3,7 @@ import { createRoot, type Root } from 'react-dom/client';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, expect, it, vi } from 'vitest';
 import App from '../../../src/App';
+import fixture from '../../../src/measurements/__fixtures__/two-room-apartment.geometry.json';
 import { AppConfigContext } from '../../../src/AppConfigContext';
 import { writeAuth } from '../../../src/providers/authStorage';
 import type { AppConfig } from '../../../src/types/config';
@@ -72,12 +73,45 @@ const users: Record<string, unknown>[] = [
     updatedAt: '2026-10-16T14:00:00Z',
   },
 ];
-const config: AppConfig = { apiUrl: 'http://api.test/api', appTitle: 'Inventario de limpieza', currency: 'USD' };
+const measurement: Record<string, unknown> = {
+  id: 1,
+  name: 'Apartamento',
+  roomCount: 2,
+  totalFloorArea: 34,
+  isAreaApproximate: false,
+  scannedAt: '2026-10-16T14:00:00Z',
+  createdAt: '2026-10-16T14:00:00Z',
+  createdBy: 'admin@example.com',
+  footprint: { width: 8.5, length: 4 },
+  isMerged: true,
+  notes: 'Notas de prueba',
+  files: { geometry: { size: 100 }, floorPlan: { size: 100 } },
+  rooms: fixture.rooms.map(
+    (room: { id: string; detectedType: string }, index: number): Record<string, unknown> => ({
+      id: room.id,
+      index,
+      name: index ? 'Dormitorio' : 'Sala',
+      type: room.detectedType,
+      floorArea: index ? 14 : 20,
+      isFloorApproximate: false,
+      perimeter: index ? 15 : 18,
+      ceilingHeight: 2.5,
+    }),
+  ),
+};
+const config: AppConfig ={ apiUrl: 'http://api.test/api', appTitle: 'Inventario de limpieza', currency: 'USD' };
 
 const fakeApi = (input: string | URL | Request): Promise<Response> => {
   const url: URL = new URL(input instanceof Request ? input.url : String(input));
   const resource: string = url.pathname.split('/')[2] ?? '';
   const isOne: boolean = /\/\d+$/.test(url.pathname);
+  // Every measurement file answers with the geometry; images only reach the stubbed createObjectURL.
+  if (url.pathname.includes('/files/')) return Promise.resolve(jsonResponse(fixture));
+  if (resource === 'measurements') {
+    return Promise.resolve(
+      jsonResponse(isOne ? measurement : [measurement], { headers: { 'Content-Range': 'measurements 0-0/1' } }),
+    );
+  }
   if (resource === 'stats') {
     return Promise.resolve(
       jsonResponse({ products: { total: 1, active: 1, lowStock: 1, outOfStock: 0 }, stockValue: 3 }),
@@ -105,6 +139,12 @@ const fakeApi = (input: string | URL | Request): Promise<Response> => {
 };
 
 it.each([
+  ['/measurements', ['Mediciones', 'Apartamento', '34,0 m²', 'Habitaciones']],
+  ['/measurements/1', ['Nombre', 'Notas', 'Guardar']],
+  ['/measurements/1/show', ['Apartamento', 'Plano', '3D', 'Medidas', 'Archivos']],
+  ['/measurements/1/show/model', ['Tu navegador no puede mostrar la vista 3D.']],
+  ['/measurements/1/show/measures', ['Resumen', '34,0 m²', 'Sala', 'Dormitorio', 'Paredes']],
+  ['/measurements/1/show/files', ['Plano (PNG)', 'Geometría (JSON)', 'Descargar']],
   ['/login', ['Correo electrónico', 'Contraseña', 'Iniciar sesión']],
   ['/', ['Productos activos', 'Existencias bajas', 'Movimientos recientes', 'Entrada']],
   ['/products', ['Productos', 'Nombre', 'Cantidad', 'Crear', '2 cajas']],
@@ -127,6 +167,9 @@ it.each([
   ['/users/1', ['Nueva contraseña', 'No puedes desactivar tu propia cuenta.']],
 ])('renders %s in Spanish', async (path: string, labels: string[]): Promise<void> => {
   vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
+  // jsdom has no object URLs; the measurement images and downloads ask for them.
+  URL.createObjectURL = vi.fn((): string => 'blob:test');
+  URL.revokeObjectURL = vi.fn();
   if (path !== '/login') {
     writeAuth({
       token: 'test-token',

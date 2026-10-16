@@ -29,6 +29,9 @@ Every setting comes from environment variables. `src/server.ts` loads `api/.env`
 |---|---|---|---|
 | `NODE_ENV` | no | `development` | `development`, `test` or `production` |
 | `PORT` | no | `4000` | HTTP port (1–65535) |
+| `PUBLIC_URL` | in production | `http://localhost:<PORT>` | Public HTTP(S) base URL; HTTPS required in production; optional proxy path prefix. No credentials, query or fragment. |
+| `TRUST_PROXY` | no | `false` | Express trusted proxies: boolean, hop count, IP/subnet list or named ranges. Usually `1` behind a tunnel. |
+| `UPLOAD_MAX_FILE_MB` | no | `50` | Maximum bytes per measurement file, in MB (integer 1–500). |
 | `DATABASE_PATH` | no | `./data/inventory.db` | SQLite file, relative to `api/`. `:memory:` is allowed. The parent directory is created if missing. |
 | `CORS_ORIGIN` | **yes** | – | Comma-separated origins allowed to call the API, e.g. `http://localhost:5173` |
 | `JWT_SECRET` | **yes** | – | At least 32 characters. Generate one with `node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"` |
@@ -207,3 +210,37 @@ test/              Vitest + supertest; each file builds its own in-memory app
 - **`outOfStock` product filter** (`true` → `quantity = 0`, `false` → `quantity > 0`). The admin dashboard's "Out of stock" card links to this filtered list.
 - Tokens issued before user accounts existed (`sub` = the admin email) are rejected after the upgrade, so everyone logs in once more.
 - `better-sqlite3` ships prebuilt binaries for macOS, Linux and Windows, so `npm ci` does not need a compiler. npm 11 may print an "install scripts not covered by allowScripts" warning, which is safe to ignore.
+
+## Public URL
+
+`PUBLIC_URL` is the address where `/health` lives, without an `/api` suffix or trailing slash. It accepts an optional path prefix that a proxy strips before forwarding. Query strings, fragments and credentials are rejected. It defaults to `http://localhost:<PORT>` in development; production requires an explicit HTTPS URL.
+
+In production, put the API behind HTTPS and set `PUBLIC_URL=https://your-api.example.com` and `TRUST_PROXY=1` for one proxy hop. `TRUST_PROXY` also accepts `false` (default), `true`, a nonnegative hop count, or comma-separated trusted IPs/subnets and `loopback`, `linklocal`, `uniquelocal`. Trust only the proxies in your deployment. `UPLOAD_MAX_FILE_MB` limits each measurement file (integer 1–500, default 50).
+
+For a phone, start `cloudflared tunnel --url http://localhost:4000` (or `ngrok http 4000`), copy the HTTPS address to `PUBLIC_URL`, set `TRUST_PROXY=1`, and restart the API. Put that same address in `mobile/Config/API.local.xcconfig` using `https:/$()/host`. Quick tunnel addresses change on restart. Alternatively, use `http://<mac-name>.local:4000` on the same Wi-Fi. The Simulator can use `http://localhost:4000` directly. `CORS_ORIGIN` lists browser origins; it is unrelated to the API address and doesn't apply to iOS.
+
+## Measurements
+
+Every endpoint requires a bearer token. All active accounts can list, view, rename and delete measurements.
+
+- `POST /api/measurements`: multipart `metadata` JSON field, required `geometry` JSON and `floorPlan` PNG files; optional `thumbnail` PNG, `model` USDZ, `csv` UTF-8 and `raw` JSON. Each part occurs once. Returns 201 plus an absolute `Location`; replaying the same `clientId` with the same account returns 200. Another account receives 409 `CONFLICT`.
+- `GET /api/measurements`: standard sort/range/filter protocol. Sort by id, name, scannedAt, roomCount, totalFloorArea, createdBy, createdAt, updatedAt; default createdAt DESC. Filters: id, q, userId, createdBy, scannedAt_gte/lte (date-only upper bound includes the whole day).
+- `GET /api/measurements/:id`, `PUT /api/measurements/:id` (merge name/notes only), `DELETE /api/measurements/:id` (cascades files).
+- `GET /api/measurements/:id/files/:kind`: immutable authenticated bytes, SHA-256 ETag, private caching and conditional 304. Add `?download=1` for an attachment with a readable filename. Lists never load BLOBs.
+
+Additional errors: 400 `BAD_REQUEST` for malformed/duplicate/unknown multipart parts or invalid metadata JSON; 413 `PAYLOAD_TOO_LARGE` for a file over the configured limit or metadata over 1 MB; 415 `UNSUPPORTED_MEDIA_TYPE` for non-multipart uploads; 422 `VALIDATION_ERROR` with nested field/part errors; 409 `CONFLICT` for an upload owned by another user. Files return 404 when absent. Uploads are atomic SQLite transactions and retain the uploader's email after account deletion.
+
+With `$API` set to the base URL and `$TOKEN` from login:
+
+```bash
+curl -s -X POST "$API/api/measurements" -H "Authorization: Bearer $TOKEN" \
+  -F 'metadata=<test/fixtures/metadata.json' \
+  -F 'geometry=@test/fixtures/two-room-apartment.geometry.json;type=application/json' \
+  -F 'floorPlan=@src/db/fixtures/sample-measurement/floor-plan.png;type=image/png'
+```
+
+`db:seed` independently inserts “Apartamento de ejemplo” when measurements is empty, with two rooms and 34 m².
+
+### SPEC-004 notes
+
+The geometry fixture was encoded from the actual Swift sample using JSONEncoder with sorted keys. The seed floor plan and thumbnail are temporary CoreGraphics drawings of that geometry: Xcode is unavailable here, so replacing them with exports from `FloorPlanImageRenderer` remains unverified. No API P0 requirements are skipped.

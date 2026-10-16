@@ -7,6 +7,7 @@ import AppLayout from './Layout';
 import { createAuthProvider } from './providers/authProvider';
 import { createDataProvider } from './providers/dataProvider';
 import categories from './resources/categories';
+import measurements from './resources/measurements';
 import products from './resources/products';
 import stockMovements from './resources/stock-movements';
 import suppliers from './resources/suppliers';
@@ -39,6 +40,7 @@ const App = ({ config }: AppProps): ReactElement => {
       // <Authenticated>, and the login page sends a signed-in user home.
       disableTelemetry
     >
+      <Resource name="measurements" {...measurements} />
       <Resource name="products" {...products} />
       <Resource name="stock-movements" {...stockMovements} />
       <Resource name="categories" {...categories} />

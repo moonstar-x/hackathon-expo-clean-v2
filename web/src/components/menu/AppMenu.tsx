@@ -3,12 +3,14 @@ import { Menu } from 'react-admin';
 import SectionLabel from './SectionLabel';
 
 /**
- * Home, then the screens by what they are for: the stock itself, the catalog behind it (what is
- * stocked and who supplies it), and who can sign in. SPEC-002's menu order is kept.
+ * Home and Mediciones (first, as SPEC-004 asks), then the screens by what they are for: the stock
+ * itself, the catalog behind it (what is stocked and who supplies it), and who can sign in.
+ * SPEC-002's menu order is kept.
  */
 const AppMenu = (): ReactElement => (
   <Menu>
     <Menu.DashboardItem />
+    <Menu.ResourceItem name="measurements" />
     <SectionLabel label="app.menu.inventory" />
     <Menu.ResourceItem name="products" />
     {/* "Movimientos de inventario" would be cut at the sidebar's width; under Inventario, "Movimientos" says it. */}

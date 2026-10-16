@@ -16,6 +16,20 @@ const commonFields: StringMap = {
 
 const appSpanish: StringMap = {
   resources: {
+    measurements: {
+      name: 'Medición |||| Mediciones',
+      fields: {
+        ...commonFields,
+        notes: 'Notas',
+        roomCount: 'Habitaciones',
+        totalFloorArea: 'Superficie total',
+        scannedAt: 'Fecha del escaneo',
+        createdBy: 'Subido por',
+        createdAt: 'Fecha de subida',
+        scannedAt_gte: 'Desde',
+        scannedAt_lte: 'Hasta',
+      },
+    },
     products: {
       name: 'Producto |||| Productos',
       fields: {

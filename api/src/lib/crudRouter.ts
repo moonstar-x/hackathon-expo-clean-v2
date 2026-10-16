@@ -12,12 +12,13 @@ export interface RequestContext {
 
 /**
  * What a resource's repository must implement for `createCrudRouter`.
- * `create`, `update` and `remove` may return a promise.
+ * `create`, `update` and `remove` may return a promise. `create` is only
+ * needed when a `createSchema` is given.
  */
 export interface CrudRepository<T extends { id: number }, C, U> {
   list(parsed: ParsedListQuery): { records: T[]; total: number };
   findById(id: number): T | null;
-  create(data: C, ctx: RequestContext): T | Promise<T>;
+  create?(data: C, ctx: RequestContext): T | Promise<T>;
   update(id: number, data: U, current: T, ctx: RequestContext): T | Promise<T>;
   remove(id: number, current: T, ctx: RequestContext): void | Promise<void>;
 }
@@ -25,7 +26,8 @@ export interface CrudRepository<T extends { id: number }, C, U> {
 interface CrudRouterOptions<T extends { id: number }, CS extends z.ZodType, US extends z.ZodType> {
   listSpec: ListSpec;
   repository: CrudRepository<T, z.output<CS>, z.output<US>>;
-  createSchema: CS;
+  /** Omit when the resource registers its own POST route (e.g. a multipart upload). */
+  createSchema?: CS;
   updateSchema: US;
   writableFields: readonly string[];
   label: string;
@@ -66,10 +68,12 @@ export function createCrudRouter<T extends { id: number }, CS extends z.ZodType,
   });
 
   // `req.user` is always set here: these routes are mounted behind requireAuth.
-  router.post('/', async (req, res) => {
-    const data = createSchema.parse(requireObjectBody(req.body));
-    res.status(201).json(await repository.create(data, { user: req.user! }));
-  });
+  if (createSchema) {
+    router.post('/', async (req, res) => {
+      const data = createSchema.parse(requireObjectBody(req.body));
+      res.status(201).json(await repository.create!(data, { user: req.user! }));
+    });
+  }
 
   router.put('/:id', async (req, res) => {
     const current = load(req.params.id);

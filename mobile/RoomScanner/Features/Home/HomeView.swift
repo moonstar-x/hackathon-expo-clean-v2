@@ -3,6 +3,7 @@ import SwiftUI
 
 /// The list of scanned locations and the New Scan button (§7.2).
 struct HomeView: View {
+    @Environment(\.sessionStore) private var session
     @Environment(\.persistence) private var persistence
 
     @FetchRequest(sortDescriptors: [NSSortDescriptor(keyPath: \Location.createdAt, ascending: false)],
@@ -25,6 +26,7 @@ struct HomeView: View {
     struct LocationReference: Identifiable, Equatable {
         var id: UUID
         var name: String
+        var uploaded: Bool
     }
 
     var body: some View {
@@ -43,6 +45,7 @@ struct HomeView: View {
         .sheet(isPresented: $isSettingsPresented) {
             SettingsView()
         }
+        .onChange(of: isCapturePresented) { _, value in session?.isCapturing = value }
         .fullScreenCover(isPresented: $isCapturePresented, onDismiss: openSavedLocation) {
             CaptureFlowView(repository: persistence.repository) { savedLocationID in
                 detailToOpenAfterCapture = savedLocationID
@@ -57,8 +60,8 @@ struct HomeView: View {
         ) { reference in
             Button(.commonDelete, role: .destructive) { delete(reference) }
             Button(.commonCancel, role: .cancel) {}
-        } message: { _ in
-            Text(.commonCannotUndo)
+        } message: { reference in
+            if reference.uploaded { Text(.syncDeleteUploaded) } else { Text(.commonCannotUndo) }
         }
         .alert(Text(.commonRenameScan),
                isPresented: Binding(get: { pendingRename != nil }, set: { if !$0 { pendingRename = nil } }),
@@ -196,7 +199,7 @@ struct HomeView: View {
     }
 
     private func reference(for location: Location) -> LocationReference? {
-        location.id.map { LocationReference(id: $0, name: location.displayName) }
+        location.id.map { LocationReference(id: $0, name: location.displayName, uploaded: location.syncStatus == .uploaded) }
     }
 
     private func beginRename(_ location: Location) {

@@ -11,6 +11,18 @@ enum LocationStatus: String, Sendable {
 /// SwiftUI rows don't crash when they read a deleted or faulted object. Use the safe accessors below.
 @objc(Location)
 final class Location: NSManagedObject {
+    @NSManaged var syncStatusRaw: String?
+    @NSManaged var ownerUserID: Int64
+    @NSManaged var ownerEmail: String?
+    @NSManaged var remoteID: Int64
+    @NSManaged var uploadedAt: Date?
+    @NSManaged var lastUploadError: String?
+    @NSManaged var uploadAttempts: Int16
+    @NSManaged var lastUploadAttemptAt: Date?
+    var syncStatus: SyncStatus {
+        get { SyncStatus(rawValue: syncStatusRaw ?? "") ?? .localOnly }
+        set { syncStatusRaw = newValue.rawValue }
+    }
     @NSManaged var id: UUID?
     @NSManaged var name: String?
     @NSManaged var createdAt: Date?

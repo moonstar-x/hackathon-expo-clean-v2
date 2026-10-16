@@ -10,6 +10,7 @@ import { errorHandler } from './middleware/errorHandler.ts';
 import { notFoundHandler } from './middleware/notFound.ts';
 import { authRouter } from './modules/auth/router.ts';
 import { categoriesRouter } from './modules/categories/router.ts';
+import { measurementsRouter } from './modules/measurements/router.ts';
 import { productsRouter } from './modules/products/router.ts';
 import { statsRouter } from './modules/stats/router.ts';
 import { stockMovementsRouter } from './modules/stockMovements/router.ts';
@@ -45,13 +46,14 @@ export function createLogger(config: Config): Logger {
 /** Builds the Express app. Does not listen, so tests can drive it with supertest. */
 export function createApp({ db, config, logger = createLogger(config) }: AppDeps & { logger?: Logger }) {
   const app = express();
+  app.set('trust proxy', config.trustProxy);
   app.disable('x-powered-by');
 
   app.use(helmet());
   app.use(
     cors({
       origin: [...config.corsOrigins],
-      exposedHeaders: ['Content-Range'],
+      exposedHeaders: ['Content-Range', 'Content-Disposition', 'Location'],
       // ra-data-simple-rest sends `Range: <resource>=<start>-<end>` on every getList.
       // It is not a CORS-safelisted header, so the preflight must allow it.
       allowedHeaders: ['Content-Type', 'Authorization', 'Range'],
@@ -76,6 +78,7 @@ export function createApp({ db, config, logger = createLogger(config) }: AppDeps
 
   const api = express.Router();
   api.use(requireAuth(deps));
+  api.use('/measurements', measurementsRouter(deps));
   api.use('/categories', categoriesRouter(deps));
   api.use('/suppliers', suppliersRouter(deps));
   api.use('/products', productsRouter(deps));

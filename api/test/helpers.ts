@@ -14,6 +14,7 @@ export const ORIGIN = 'http://admin.test';
 
 export const testEnv = Object.freeze({
   NODE_ENV: 'test',
+  PUBLIC_URL: 'https://api.test',
   DATABASE_PATH: ':memory:',
   CORS_ORIGIN: ORIGIN,
   JWT_SECRET: 'test-secret-that-is-definitely-longer-than-32-chars',

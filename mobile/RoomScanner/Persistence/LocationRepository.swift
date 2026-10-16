@@ -59,7 +59,11 @@ protocol LocationRepository: Sendable {
     #endif
 }
 
-final class CoreDataLocationRepository: LocationRepository, @unchecked Sendable {
+final class CoreDataLocationRepository: LocationRepository, UploadStore, @unchecked Sendable {
+    private let ownerLock = NSLock()
+    private var currentOwner: Session.User?
+    func setCurrentOwner(_ user: Session.User?) { ownerLock.withLock { currentOwner = user } }
+    private var owner: Session.User? { ownerLock.withLock { currentOwner } }
     private let container: NSPersistentContainer
 
     init(container: NSPersistentContainer) {
@@ -69,8 +73,11 @@ final class CoreDataLocationRepository: LocationRepository, @unchecked Sendable 
     // MARK: Drafts and rooms
 
     func createDraft(name: String, createdAt: Date = .now) async throws -> UUID {
-        try await write { context in
+        let owner = owner
+        return try await write { context in
             let location = Location(context: context)
+            location.ownerUserID = owner?.id ?? 0
+            location.ownerEmail = owner?.email
             let id = UUID()
             location.id = id
             location.name = name
@@ -133,6 +140,7 @@ final class CoreDataLocationRepository: LocationRepository, @unchecked Sendable 
 
     func finalize(locationID: UUID, geometry: ScanGeometry, structureJSON: Data?,
                   thumbnail: Data?) async throws {
+        let owner = owner
         try await write { context in
             let location = try Self.location(locationID, in: context)
             let payload = location.payload ?? LocationPayload(context: context)
@@ -149,9 +157,14 @@ final class CoreDataLocationRepository: LocationRepository, @unchecked Sendable 
             location.roomCount = Int16(clamping: geometry.rooms.count)
             location.totalFloorArea = Double(LocationMetrics.totalFloorArea(of: geometry))
             location.thumbnailPNG = thumbnail
+            if location.status == .draft {
+                if location.ownerUserID == 0 { location.ownerUserID = owner?.id ?? 0; location.ownerEmail = owner?.email }
+                if location.ownerUserID != 0 { location.syncStatus = .pending }
+            }
             location.status = .complete
             location.updatedAt = .now
         }
+        NotificationCenter.default.post(name: .locationReadyForUpload, object: nil)
     }
 
     func loadGeometry(locationID: UUID) async throws -> ScanGeometry? {
@@ -173,6 +186,67 @@ final class CoreDataLocationRepository: LocationRepository, @unchecked Sendable 
                                   capturedRoomJSON: room.capturedRoomJSON)
             }
             return StoredRawData(structureJSON: location.payload?.structureJSON, rooms: rooms)
+        }
+    }
+
+    // MARK: Sync snapshots and state transitions
+
+    func uploadSnapshot(locationID: UUID) async throws -> UploadSnapshot? {
+        let context = container.newBackgroundContext()
+        return await context.perform {
+            guard let location = try? Self.location(locationID, in: context), location.status == .complete,
+                  let json = location.payload?.geometryJSON else { return nil }
+            let raw = StoredRawData(structureJSON: location.payload?.structureJSON, rooms: location.sortedRooms.compactMap { room in
+                guard let id = room.id else { return nil }
+                return StoredRoom(id: id, index: Int(room.index), name: room.displayName, capturedRoomJSON: room.capturedRoomJSON)
+            })
+            return UploadSnapshot(id: locationID, name: location.displayName, createdAt: location.createdAt ?? .now,
+                                  geometryJSON: json, thumbnailPNG: location.thumbnailPNG, raw: raw)
+        }
+    }
+
+    func readyUploadIDs(userID: Int64, now: Date) async throws -> [UUID] {
+        let context = container.newBackgroundContext()
+        return try await context.perform {
+            let request = Location.fetchRequest()
+            request.predicate = NSPredicate(format: "statusRaw == 'complete' AND syncStatusRaw == 'pending' AND ownerUserID == %lld", userID)
+            request.sortDescriptors = [NSSortDescriptor(key: "createdAt", ascending: true)]
+            return try context.fetch(request).filter { location in
+                guard location.uploadAttempts > 0, let last = location.lastUploadAttemptAt else { return true }
+                let delay = min(30 * pow(2, Double(min(location.uploadAttempts - 1, 10))), 1800)
+                return now.timeIntervalSince(last) >= delay
+            }.compactMap(\.id)
+        }
+    }
+
+    func markSync(locationID: UUID, status: SyncStatus, remoteID: Int64? = nil, error: String? = nil, countAttempt: Bool = false) async throws {
+        try await write { context in
+            guard let location = try? Self.location(locationID, in: context) else { return }
+            location.syncStatus = status; location.lastUploadError = error
+            if status == .uploading { location.lastUploadAttemptAt = .now }
+            if countAttempt { location.uploadAttempts = min(location.uploadAttempts, Int16.max - 1) + 1 }
+            if status == .uploaded {
+                location.remoteID = remoteID ?? 0; location.uploadedAt = .now; location.uploadAttempts = 0
+            }
+        }
+    }
+
+    func retryUpload(locationID: UUID, user: Session.User) async throws {
+        try await write { context in
+            guard let location = try? Self.location(locationID, in: context), location.status == .complete,
+                  location.syncStatus != .uploaded, location.syncStatus != .uploading,
+                  location.ownerUserID == 0 || location.ownerUserID == user.id else { return }
+            location.ownerUserID = user.id; location.ownerEmail = user.email
+            location.syncStatus = .pending; location.uploadAttempts = 0
+            location.lastUploadError = nil; location.lastUploadAttemptAt = nil
+        }
+        NotificationCenter.default.post(name: .locationReadyForUpload, object: nil)
+    }
+
+    func resetUploading() async throws {
+        try await write { context in
+            let request = Location.fetchRequest(); request.predicate = NSPredicate(format: "syncStatusRaw == 'uploading'")
+            for location in try context.fetch(request) { location.syncStatus = .pending }
         }
     }
 
@@ -221,16 +295,21 @@ final class CoreDataLocationRepository: LocationRepository, @unchecked Sendable 
 
     #if DEBUG
     func insertSample(_ geometry: ScanGeometry, name: String, thumbnail: Data?) async throws -> UUID {
-        try await write { context in
-            Self.insertSample(geometry, name: name, thumbnail: thumbnail, in: context)
+        let owner = owner
+        let id = try await write { context in
+            Self.insertSample(geometry, name: name, thumbnail: thumbnail, owner: owner, in: context)
         }
+        NotificationCenter.default.post(name: .locationReadyForUpload, object: nil)
+        return id
     }
 
     /// Inserts a complete location built from sample geometry. Also used synchronously by previews.
     @discardableResult
     static func insertSample(_ geometry: ScanGeometry, name: String, thumbnail: Data?,
-                             createdAt: Date = .now, in context: NSManagedObjectContext) -> UUID {
+                             createdAt: Date = .now, owner: Session.User? = nil, in context: NSManagedObjectContext) -> UUID {
         let location = Location(context: context)
+        location.ownerUserID = owner?.id ?? 0; location.ownerEmail = owner?.email
+        location.syncStatus = owner == nil ? .localOnly : .pending
         let id = UUID()
         location.id = id
         location.name = name
