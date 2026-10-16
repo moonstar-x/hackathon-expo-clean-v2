@@ -48,6 +48,7 @@ protocol LocationRepository: Sendable {
     func loadGeometry(locationID: UUID) async throws -> ScanGeometry?
     func loadRawData(locationID: UUID) async throws -> StoredRawData
     func rename(locationID: UUID, to name: String) async throws
+    func setType(locationID: UUID, to type: LocationType?) async throws
     func delete(locationID: UUID) async throws
     func deleteAll() async throws
     /// Launch cleanup (§10.2): removes drafts that have no rooms. Returns the number removed.
@@ -172,6 +173,14 @@ final class CoreDataLocationRepository: LocationRepository, @unchecked Sendable 
         try await write { context in
             let location = try Self.location(locationID, in: context)
             location.name = name
+            location.updatedAt = .now
+        }
+    }
+
+    func setType(locationID: UUID, to type: LocationType?) async throws {
+        try await write { context in
+            let location = try Self.location(locationID, in: context)
+            location.type = type
             location.updatedAt = .now
         }
     }

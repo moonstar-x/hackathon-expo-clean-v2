@@ -1,8 +1,9 @@
 import SwiftUI
 
-/// Names the location while merging and finalizing run in the background (§7.6).
+/// Names the location and picks its type while merging and finalizing run in the background (§7.6).
 struct SaveLocationSheet: View {
     @Binding var name: String
+    @Binding var type: LocationType?
     var roomNames: [String]
     var totalArea: Float
     var isAreaApproximate: Bool
@@ -19,6 +20,19 @@ struct SaveLocationSheet: View {
                 Section(.commonName) {
                     TextField(String(localized: .saveLocationNamePlaceholder), text: $name)
                         .submitLabel(.done)
+                }
+                Section {
+                    Picker(String(localized: .saveLocationType), selection: $type) {
+                        Text(.saveLocationTypeUnspecified).tag(LocationType?.none)
+                        ForEach(LocationTypeCategory.allCases) { category in
+                            Section(category.displayName) {
+                                ForEach(category.types) { type in
+                                    Text(type.displayName).tag(Optional(type))
+                                }
+                            }
+                        }
+                    }
+                    .pickerStyle(.menu)
                 }
                 Section(.commonSummary) {
                     LabeledContent(String(localized: .commonRooms), value: "\(roomNames.count)")
@@ -68,7 +82,7 @@ struct SaveLocationSheet: View {
 
 #Preview {
     Color.gray.sheet(isPresented: .constant(true)) {
-        SaveLocationSheet(name: .constant("Departamento"), roomNames: ["Sala", "Dormitorio"],
+        SaveLocationSheet(name: .constant("Departamento"), type: .constant(.classroom), roomNames: ["Sala", "Dormitorio"],
                           totalArea: 34, isAreaApproximate: false, state: .running,
                           onSave: {}, onRetry: {})
     }

@@ -157,6 +157,7 @@ struct CaptureFlowView: View {
     private var saveSheet: some View {
         SaveLocationSheet(
             name: $model.locationName,
+            type: $model.locationType,
             roomNames: model.completedRooms.map(\.name),
             totalArea: model.completedArea,
             isAreaApproximate: model.completedGeometries.contains(where: \.isFloorApproximate),

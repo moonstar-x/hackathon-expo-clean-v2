@@ -947,6 +947,699 @@
         }
       }
     },
+    "locationType.auditorium" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auditorio"
+          }
+        }
+      }
+    },
+    "locationType.balcony" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Balcón"
+          }
+        }
+      }
+    },
+    "locationType.bathroom" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Baño"
+          }
+        }
+      }
+    },
+    "locationType.bedroom" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dormitorio"
+          }
+        }
+      }
+    },
+    "locationType.breakRoom" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sala de descanso"
+          }
+        }
+      }
+    },
+    "locationType.cafeteria" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cafetería"
+          }
+        }
+      }
+    },
+    "locationType.category.commonAreas" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Áreas comunes"
+          }
+        }
+      }
+    },
+    "locationType.category.education" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Educación"
+          }
+        }
+      }
+    },
+    "locationType.category.healthcare" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salud"
+          }
+        }
+      }
+    },
+    "locationType.category.hospitality" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hotelería y comercio"
+          }
+        }
+      }
+    },
+    "locationType.category.industrial" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Industria y servicios"
+          }
+        }
+      }
+    },
+    "locationType.category.office" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oficinas"
+          }
+        }
+      }
+    },
+    "locationType.category.other" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otros"
+          }
+        }
+      }
+    },
+    "locationType.category.residential" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vivienda"
+          }
+        }
+      }
+    },
+    "locationType.classroom" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aula"
+          }
+        }
+      }
+    },
+    "locationType.clinicalLaboratory" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laboratorio clínico"
+          }
+        }
+      }
+    },
+    "locationType.commercialKitchen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cocina industrial"
+          }
+        }
+      }
+    },
+    "locationType.copyRoom" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sala de copiado"
+          }
+        }
+      }
+    },
+    "locationType.daycare" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guardería"
+          }
+        }
+      }
+    },
+    "locationType.diningRoom" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comedor"
+          }
+        }
+      }
+    },
+    "locationType.elevator" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elevador"
+          }
+        }
+      }
+    },
+    "locationType.emergencyRoom" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sala de urgencias"
+          }
+        }
+      }
+    },
+    "locationType.entrance" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entrada"
+          }
+        }
+      }
+    },
+    "locationType.eventHall" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salón de eventos"
+          }
+        }
+      }
+    },
+    "locationType.examRoom" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Consultorio"
+          }
+        }
+      }
+    },
+    "locationType.garage" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Garaje"
+          }
+        }
+      }
+    },
+    "locationType.gymnasium" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gimnasio"
+          }
+        }
+      }
+    },
+    "locationType.hallway" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pasillo"
+          }
+        }
+      }
+    },
+    "locationType.hotelRoom" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Habitación de hotel"
+          }
+        }
+      }
+    },
+    "locationType.imagingRoom" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sala de imagenología"
+          }
+        }
+      }
+    },
+    "locationType.intensiveCareUnit" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unidad de cuidados intensivos"
+          }
+        }
+      }
+    },
+    "locationType.janitorCloset" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cuarto de limpieza"
+          }
+        }
+      }
+    },
+    "locationType.kitchen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cocina"
+          }
+        }
+      }
+    },
+    "locationType.laundryRoom" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lavandería"
+          }
+        }
+      }
+    },
+    "locationType.library" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Biblioteca"
+          }
+        }
+      }
+    },
+    "locationType.livingRoom" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sala de estar"
+          }
+        }
+      }
+    },
+    "locationType.loadingDock" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Andén de carga"
+          }
+        }
+      }
+    },
+    "locationType.lobby" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vestíbulo"
+          }
+        }
+      }
+    },
+    "locationType.lockerRoom" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vestidor"
+          }
+        }
+      }
+    },
+    "locationType.mechanicalRoom" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cuarto de máquinas"
+          }
+        }
+      }
+    },
+    "locationType.meetingRoom" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sala de reuniones"
+          }
+        }
+      }
+    },
+    "locationType.nursingStation" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estación de enfermería"
+          }
+        }
+      }
+    },
+    "locationType.office" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oficina"
+          }
+        }
+      }
+    },
+    "locationType.openOffice" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oficina abierta"
+          }
+        }
+      }
+    },
+    "locationType.operatingRoom" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quirófano"
+          }
+        }
+      }
+    },
+    "locationType.other" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otro"
+          }
+        }
+      }
+    },
+    "locationType.parking" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estacionamiento"
+          }
+        }
+      }
+    },
+    "locationType.patientRoom" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Habitación de paciente"
+          }
+        }
+      }
+    },
+    "locationType.pharmacy" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Farmacia"
+          }
+        }
+      }
+    },
+    "locationType.productionArea" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Área de producción"
+          }
+        }
+      }
+    },
+    "locationType.reception" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recepción"
+          }
+        }
+      }
+    },
+    "locationType.recoveryRoom" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sala de recuperación"
+          }
+        }
+      }
+    },
+    "locationType.restaurant" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restaurante"
+          }
+        }
+      }
+    },
+    "locationType.retailStore" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tienda"
+          }
+        }
+      }
+    },
+    "locationType.schoolLaboratory" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laboratorio escolar"
+          }
+        }
+      }
+    },
+    "locationType.serverRoom" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cuarto de servidores"
+          }
+        }
+      }
+    },
+    "locationType.showroom" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sala de exhibición"
+          }
+        }
+      }
+    },
+    "locationType.stairwell" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escalera"
+          }
+        }
+      }
+    },
+    "locationType.sterilizationRoom" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Central de esterilización"
+          }
+        }
+      }
+    },
+    "locationType.storageRoom" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cuarto de almacenamiento"
+          }
+        }
+      }
+    },
+    "locationType.teachersLounge" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sala de profesores"
+          }
+        }
+      }
+    },
+    "locationType.waitingRoom" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sala de espera"
+          }
+        }
+      }
+    },
+    "locationType.warehouse" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Almacén"
+          }
+        }
+      }
+    },
     "measurements.approximatelyPrefix" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1581,6 +2274,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Área total"
+          }
+        }
+      }
+    },
+    "saveLocation.type" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tipo de lugar"
+          }
+        }
+      }
+    },
+    "saveLocation.typeUnspecified" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin especificar"
           }
         }
       }

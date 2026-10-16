@@ -75,6 +75,8 @@ final class CaptureViewModel {
     var reviewName = ""
     /// The editable location name on the Save sheet (SAVE-1).
     var locationName = ""
+    /// The location type picked on the Save sheet. nil is "Sin especificar".
+    var locationType: LocationType?
 
     @ObservationIgnored private let repository: any LocationRepository
     @ObservationIgnored private var _controller: CaptureSessionController?
@@ -206,7 +208,7 @@ final class CaptureViewModel {
         }
     }
 
-    /// Save: persists the name. Finalizing already marked the location complete.
+    /// Save: persists the name and type. Finalizing already marked the location complete.
     /// Returns the saved location's id.
     func save() async -> UUID? {
         guard finalizeState == .finished, let locationID else { return nil }
@@ -215,10 +217,11 @@ final class CaptureViewModel {
             if !name.isEmpty {
                 try await repository.rename(locationID: locationID, to: name)
             }
+            try await repository.setType(locationID: locationID, to: locationType)
             phase = .done
             return locationID
         } catch {
-            Log.persistence.error("Saving the name failed: \(error)")
+            Log.persistence.error("Saving the name and type failed: \(error)")
             persistenceFailure = PersistenceFailure(message: error.localizedDescription) { [weak self] in
                 _ = await self?.save()
             }

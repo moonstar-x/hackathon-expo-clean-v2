@@ -63,6 +63,25 @@ struct LocationRepositoryTests {
         #expect(raw.structureJSON == nil)
     }
 
+    @Test func setAndClearLocationType() async throws {
+        let (id, _) = try await makeDraftWithTwoRooms()
+        let context = persistence.container.newBackgroundContext()
+        let storedType = {
+            try context.performAndWait {
+                let request = Location.fetchRequest()
+                request.predicate = NSPredicate(format: "id == %@", id as CVarArg)
+                return try context.fetch(request).first?.typeRaw
+            }
+        }
+        #expect(try storedType() == nil, "New locations have no type")
+
+        try await repository.setType(locationID: id, to: .operatingRoom)
+        #expect(try storedType() == "operatingRoom")
+
+        try await repository.setType(locationID: id, to: nil)
+        #expect(try storedType() == nil)
+    }
+
     @Test func renameLocationAndRoom() async throws {
         let (id, geometry) = try await makeDraftWithTwoRooms()
         try await repository.rename(locationID: id, to: "Apartment")
