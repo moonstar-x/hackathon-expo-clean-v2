@@ -20,8 +20,6 @@ final class Location: NSManagedObject {
     /// m²
     @NSManaged var totalFloorArea: Double
     @NSManaged var thumbnailPNG: Data?
-    /// `LocationType` raw value. nil when the user didn't pick a type.
-    @NSManaged var typeRaw: String?
     @NSManaged var rooms: Set<Room>?
     @NSManaged var payload: LocationPayload?
 
@@ -32,12 +30,6 @@ final class Location: NSManagedObject {
     var status: LocationStatus {
         get { LocationStatus(rawValue: statusRaw ?? "") ?? .draft }
         set { statusRaw = newValue.rawValue }
-    }
-
-    /// nil when no type was picked, or the stored value is unknown.
-    var type: LocationType? {
-        get { typeRaw.flatMap(LocationType.init(rawValue:)) }
-        set { typeRaw = newValue?.rawValue }
     }
 
     var displayName: String { name ?? "" }

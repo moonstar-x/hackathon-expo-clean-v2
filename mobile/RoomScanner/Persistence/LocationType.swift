@@ -1,6 +1,6 @@
 import Foundation
 
-/// What kind of space a location is, chosen on the Save sheet. Stored in `Location.typeRaw`.
+/// What kind of space a scanned room is, chosen on the room review sheet. Stored in `Room.typeRaw`.
 ///
 /// Raw values are persisted, so don't rename them. Add new cases to a category's `types`.
 enum LocationType: String, CaseIterable, Identifiable, Sendable {
@@ -23,6 +23,18 @@ enum LocationType: String, CaseIterable, Identifiable, Sendable {
     case other
 
     var id: String { rawValue }
+
+    /// The type preselected for a room RoomPlan classified. nil when RoomPlan didn't classify it.
+    init?(detected: RoomType?) {
+        switch detected {
+        case .bedroom: self = .bedroom
+        case .bathroom: self = .bathroom
+        case .kitchen: self = .kitchen
+        case .livingRoom: self = .livingRoom
+        case .diningRoom: self = .diningRoom
+        case nil: return nil
+        }
+    }
 
     var displayName: String {
         switch self {

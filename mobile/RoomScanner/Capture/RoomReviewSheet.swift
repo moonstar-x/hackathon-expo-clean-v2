@@ -3,6 +3,7 @@ import SwiftUI
 /// Shown after RoomPlan processes a room, or when a room fails (§7.5, §11).
 struct RoomReviewSheet: View {
     @Binding var name: String
+    @Binding var type: LocationType?
     var roomNumber: Int
     /// The processed room. nil when the room failed.
     var room: RoomGeometry?
@@ -45,6 +46,8 @@ struct RoomReviewSheet: View {
                 .font(.title3)
                 .submitLabel(.done)
 
+            typePicker
+
             if trackingWasInterrupted {
                 interruptionWarning
             }
@@ -76,6 +79,23 @@ struct RoomReviewSheet: View {
                 Button(.commonRescanRoom, systemImage: "arrow.counterclockwise", action: onRescan)
                     .frame(minHeight: 44)
             }
+        }
+    }
+
+    private var typePicker: some View {
+        LabeledContent(String(localized: .reviewLocationType)) {
+            Picker(String(localized: .reviewLocationType), selection: $type) {
+                Text(.reviewLocationTypeUnspecified).tag(LocationType?.none)
+                ForEach(LocationTypeCategory.allCases) { category in
+                    Section(category.displayName) {
+                        ForEach(category.types) { type in
+                            Text(type.displayName).tag(Optional(type))
+                        }
+                    }
+                }
+            }
+            .pickerStyle(.menu)
+            .labelsHidden()
         }
     }
 
@@ -133,7 +153,7 @@ struct RoomReviewSheet: View {
 
 #Preview("Review") {
     Color.gray.sheet(isPresented: .constant(true)) {
-        RoomReviewSheet(name: .constant("Sala"), roomNumber: 1,
+        RoomReviewSheet(name: .constant("Sala"), type: .constant(.livingRoom), roomNumber: 1,
                         room: SampleGeometry.twoRoomApartment().rooms[0], issue: nil,
                         completedRoomCount: 1, trackingWasInterrupted: true,
                         onScanNext: {}, onFinish: {}, onRescan: {}, onDiscard: {})
@@ -142,7 +162,7 @@ struct RoomReviewSheet: View {
 
 #Preview("Failure") {
     Color.gray.sheet(isPresented: .constant(true)) {
-        RoomReviewSheet(name: .constant(""), roomNumber: 2, room: nil,
+        RoomReviewSheet(name: .constant(""), type: .constant(nil), roomNumber: 2, room: nil,
                         issue: CaptureIssue(message: "Falló el seguimiento del entorno.", isSceneTooLarge: false),
                         completedRoomCount: 1, trackingWasInterrupted: false,
                         onScanNext: {}, onFinish: {}, onRescan: {}, onDiscard: {})

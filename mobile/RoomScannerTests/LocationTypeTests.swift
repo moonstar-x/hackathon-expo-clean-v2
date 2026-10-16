@@ -9,6 +9,15 @@ struct LocationTypeTests {
         #expect(Set(grouped) == Set(LocationType.allCases))
     }
 
+    @Test func preselectsTheDetectedRoomType() {
+        #expect(LocationType(detected: .bathroom) == .bathroom)
+        #expect(LocationType(detected: .livingRoom) == .livingRoom)
+        #expect(LocationType(detected: nil) == nil)
+        for detected in RoomType.allCases {
+            #expect(LocationType(detected: detected)?.rawValue == detected.rawValue)
+        }
+    }
+
     @Test func namesResolveToSpanish() {
         #expect(LocationType.operatingRoom.displayName == "Quirófano")
         #expect(LocationType.hallway.displayName == "Pasillo")

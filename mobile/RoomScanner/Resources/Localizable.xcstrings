@@ -2135,6 +2135,28 @@
         }
       }
     },
+    "review.locationType" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tipo de lugar"
+          }
+        }
+      }
+    },
+    "review.locationTypeUnspecified" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin especificar"
+          }
+        }
+      }
+    },
     "review.roomNamePlaceholder" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2274,28 +2296,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Área total"
-          }
-        }
-      }
-    },
-    "saveLocation.type" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tipo de lugar"
-          }
-        }
-      }
-    },
-    "saveLocation.typeUnspecified" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sin especificar"
           }
         }
       }
