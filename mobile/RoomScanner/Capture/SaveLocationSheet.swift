@@ -16,13 +16,13 @@ struct SaveLocationSheet: View {
         let formatter = UnitFormatter(unitPreference)
         NavigationStack {
             Form {
-                Section("Name") {
-                    TextField("Location name", text: $name)
+                Section("common.name") {
+                    TextField("saveLocation.namePlaceholder", text: $name)
                         .submitLabel(.done)
                 }
-                Section("Summary") {
-                    LabeledContent("Rooms", value: "\(roomNames.count)")
-                    LabeledContent("Total area", value: formatter.area(totalArea, approximate: isAreaApproximate))
+                Section("common.summary") {
+                    LabeledContent("common.rooms", value: "\(roomNames.count)")
+                    LabeledContent("saveLocation.totalArea", value: formatter.area(totalArea, approximate: isAreaApproximate))
                     ForEach(Array(roomNames.enumerated()), id: \.offset) { _, roomName in
                         Text(roomName)
                     }
@@ -31,13 +31,13 @@ struct SaveLocationSheet: View {
                     Section {
                         Label(message, systemImage: "exclamationmark.triangle.fill")
                             .foregroundStyle(.orange)
-                        Button("Retry", action: onRetry)
+                        Button("common.retry", action: onRetry)
                     } header: {
-                        Text("Couldn't save scan")
+                        Text("common.saveFailedTitle")
                     }
                 }
             }
-            .navigationTitle("Save Location")
+            .navigationTitle("saveLocation.title")
             .navigationBarTitleDisplayMode(.inline)
             .safeAreaInset(edge: .bottom) {
                 Button(action: onSave) {
@@ -45,10 +45,10 @@ struct SaveLocationSheet: View {
                         if state == .running {
                             HStack(spacing: 8) {
                                 ProgressView()
-                                Text("Building floor plan…")
+                                Text("common.buildingFloorPlan")
                             }
                         } else {
-                            Text("Save")
+                            Text("common.save")
                         }
                     }
                     .font(.headline)
@@ -68,7 +68,7 @@ struct SaveLocationSheet: View {
 
 #Preview {
     Color.gray.sheet(isPresented: .constant(true)) {
-        SaveLocationSheet(name: .constant("Apartment"), roomNames: ["Living Room", "Bedroom"],
+        SaveLocationSheet(name: .constant("Departamento"), roomNames: ["Sala", "Dormitorio"],
                           totalArea: 34, isAreaApproximate: false, state: .running,
                           onSave: {}, onRetry: {})
     }

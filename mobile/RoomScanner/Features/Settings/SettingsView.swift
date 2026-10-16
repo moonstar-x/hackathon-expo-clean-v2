@@ -9,28 +9,28 @@ struct SettingsView: View {
         NavigationStack {
             Form {
                 Section {
-                    Picker("Units", selection: $unitPreference) {
+                    Picker("settings.units", selection: $unitPreference) {
                         ForEach(UnitSystem.allCases) { system in
                             Text(system.displayName).tag(system)
                         }
                     }
                 } footer: {
                     if unitPreference == .automatic {
-                        Text("Automatic uses your region's measurement system.")
+                        Text("settings.units.automaticFooter")
                     }
                 }
 
-                Section("About") {
-                    LabeledContent("Version", value: versionText)
-                    Text("Scans are stored only on this device.")
+                Section("settings.about") {
+                    LabeledContent("settings.version", value: versionText)
+                    Text("settings.storedOnDevice")
                         .foregroundStyle(.secondary)
                 }
             }
-            .navigationTitle("Settings")
+            .navigationTitle("home.settings")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { dismiss() }
+                    Button("common.done") { dismiss() }
                 }
             }
         }

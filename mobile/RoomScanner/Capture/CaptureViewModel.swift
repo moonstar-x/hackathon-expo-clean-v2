@@ -25,7 +25,7 @@ final class CaptureViewModel {
     }
 
     enum CancelPrompt: Identifiable {
-        /// No rooms are completed: "Discard scan?"
+        /// No rooms are completed: "¿Descartar el escaneo?"
         case discardOnly
         /// Offer Save N rooms, Discard scan or Keep scanning.
         case saveOrDiscard(Int)
@@ -50,7 +50,7 @@ final class CaptureViewModel {
         var name: String
     }
 
-    /// A failed Core Data write that can be retried (§11, "Couldn't save scan").
+    /// A failed Core Data write that can be retried (§11, "No se pudo guardar el escaneo").
     struct PersistenceFailure: Identifiable {
         let id = UUID()
         var message: String
@@ -346,7 +346,7 @@ final class CaptureViewModel {
             // Make sure the draft and all rooms are written before finalizing.
             await persistenceQueue?.value
             guard let locationID else {
-                finalizeState = .failed(String(localized: "The scan couldn't be saved."))
+                finalizeState = .failed(String(localized: "capture.error.saveFailed"))
                 return
             }
             do {

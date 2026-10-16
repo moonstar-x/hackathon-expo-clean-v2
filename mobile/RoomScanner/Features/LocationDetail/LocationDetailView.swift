@@ -1,7 +1,7 @@
 import CoreData
 import SwiftUI
 
-/// A saved location: header, Plan | 3D | Measurements, rename, delete and share (§7.7).
+/// A saved location: header, Plano | 3D | Medidas, rename, delete and share (§7.7).
 struct LocationDetailView: View {
     let locationID: UUID
 
@@ -23,8 +23,8 @@ struct LocationDetailView: View {
             LocationDetailContent(location: location, rooms: Array(rooms),
                                   repository: persistence.repository)
         } else {
-            ContentUnavailableView("Scan Not Found", systemImage: "questionmark.folder",
-                                   description: Text("This scan may have been deleted."))
+            ContentUnavailableView("detail.notFound.title", systemImage: "questionmark.folder",
+                                   description: Text("detail.notFound.message"))
         }
     }
 }
@@ -55,21 +55,21 @@ private struct LocationDetailContent: View {
             .task(id: location.status) {
                 await model.load(status: location.status)
             }
-            .alert("Rename Scan", isPresented: $isRenamePresented) {
-                TextField("Name", text: $renameText)
-                Button("Save") { Task { await model.rename(to: renameText) } }
-                Button("Cancel", role: .cancel) {}
+            .alert("common.renameScan", isPresented: $isRenamePresented) {
+                TextField("common.name", text: $renameText)
+                Button("common.save") { Task { await model.rename(to: renameText) } }
+                Button("common.cancel", role: .cancel) {}
             }
-            .confirmationDialog(String(localized: "Delete '\(location.displayName)'?"),
+            .confirmationDialog(String(localized: "common.deleteNamedConfirm \(location.displayName)"),
                                 isPresented: $isDeleteConfirmationPresented, titleVisibility: .visible) {
-                Button("Delete", role: .destructive) { delete() }
-                Button("Cancel", role: .cancel) {}
+                Button("common.delete", role: .destructive) { delete() }
+                Button("common.cancel", role: .cancel) {}
             } message: {
-                Text("This can't be undone.")
+                Text("common.cannotUndo")
             }
-            .alert("Something Went Wrong",
+            .alert("common.somethingWentWrong",
                    isPresented: Binding(get: { model.errorMessage != nil }, set: { if !$0 { model.errorMessage = nil } })) {
-                Button("OK", role: .cancel) {}
+                Button("common.ok", role: .cancel) {}
             } message: {
                 Text(model.errorMessage ?? "")
             }
@@ -86,7 +86,7 @@ private struct LocationDetailContent: View {
         case .loading:
             ProgressView()
         case .working:
-            ProgressView("Building floor plan…")
+            ProgressView("common.buildingFloorPlan")
         case .draft:
             draftView
         case .unreadable:
@@ -102,14 +102,14 @@ private struct LocationDetailContent: View {
         VStack(spacing: 0) {
             VStack(spacing: 10) {
                 header(geometry)
-                Picker("View", selection: $model.selectedTab) {
+                Picker("detail.tabPicker", selection: $model.selectedTab) {
                     ForEach(DetailTab.allCases) { tab in
                         Text(tab.title).tag(tab)
                     }
                 }
                 .pickerStyle(.segmented)
                 if geometry.merged == nil, geometry.rooms.count > 1 {
-                    Label("Rooms couldn't be merged, so they're shown as captured.", systemImage: "info.circle")
+                    Label("detail.notMerged", systemImage: "info.circle")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -137,11 +137,11 @@ private struct LocationDetailContent: View {
         let area = formatter.area(LocationMetrics.totalFloorArea(of: geometry),
                                   approximate: LocationMetrics.isAreaApproximate(geometry))
         let date = (location.createdAt ?? .now).formatted(date: .abbreviated, time: .omitted)
-        return Text("\(area) · \(Counted.rooms(geometry.rooms.count)) · \(date)")
+        return Text("detail.header \(area) \(Counted.rooms(geometry.rooms.count)) \(date)")
             .font(.subheadline)
             .foregroundStyle(.secondary)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .accessibilityLabel(Text("\(formatter.spokenArea(LocationMetrics.totalFloorArea(of: geometry))), \(Counted.rooms(geometry.rooms.count)), scanned \(date)"))
+            .accessibilityLabel(Text("detail.header.a11y \(formatter.spokenArea(LocationMetrics.totalFloorArea(of: geometry))) \(Counted.rooms(geometry.rooms.count)) \(date)"))
     }
 
     // MARK: Draft (§7.7.5)
@@ -149,21 +149,21 @@ private struct LocationDetailContent: View {
     private var draftView: some View {
         let count = rooms.count
         return ContentUnavailableView {
-            Label("This scan wasn't finished", systemImage: "exclamationmark.triangle")
+            Label("detail.draft.title", systemImage: "exclamationmark.triangle")
         } description: {
             if model.canRebuild {
-                Text("\(Counted.rooms(count)) scanned.")
+                Text("detail.draft.scanned \(Counted.rooms(count))")
             } else {
-                Text("\(Counted.rooms(count)) scanned, but the room data is missing, so the scan can't be finished.")
+                Text("detail.draft.missingData \(Counted.rooms(count))")
             }
         } actions: {
             if model.canRebuild {
-                Button("Finish with \(Counted.rooms(count))") {
+                Button("common.finishWithRooms \(Counted.rooms(count))") {
                     Task { await model.rebuild(reuseStructure: false) }
                 }
                 .buttonStyle(.borderedProminent)
             }
-            Button("Delete", role: .destructive) { isDeleteConfirmationPresented = true }
+            Button("common.delete", role: .destructive) { isDeleteConfirmationPresented = true }
         }
     }
 
@@ -171,16 +171,16 @@ private struct LocationDetailContent: View {
 
     private var unreadableView: some View {
         ContentUnavailableView {
-            Label("Couldn't open this scan", systemImage: "exclamationmark.triangle")
+            Label("detail.corrupt.title", systemImage: "exclamationmark.triangle")
         } description: {
             if model.canRebuild {
-                Text("The floor plan data is missing or was saved by a newer version of the app. You can rebuild it from the raw scan data.")
+                Text("detail.corrupt.rebuildable")
             } else {
-                Text("The floor plan data is missing or was saved by a newer version of the app.")
+                Text("detail.corrupt.message")
             }
         } actions: {
             if model.canRebuild {
-                Button("Rebuild") {
+                Button("detail.corrupt.rebuild") {
                     Task { await model.rebuild(reuseStructure: true) }
                 }
                 .buttonStyle(.borderedProminent)
@@ -205,15 +205,15 @@ private struct LocationDetailContent: View {
                     renameText = location.displayName
                     isRenamePresented = true
                 } label: {
-                    Label("Rename", systemImage: "pencil")
+                    Label("common.rename", systemImage: "pencil")
                 }
                 Button(role: .destructive) {
                     isDeleteConfirmationPresented = true
                 } label: {
-                    Label("Delete", systemImage: "trash")
+                    Label("common.delete", systemImage: "trash")
                 }
             } label: {
-                Label("More", systemImage: "ellipsis.circle")
+                Label("detail.moreMenu", systemImage: "ellipsis.circle")
             }
         }
     }

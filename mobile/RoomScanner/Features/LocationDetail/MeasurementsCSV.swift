@@ -9,7 +9,7 @@ enum MeasurementsCSV {
     static func make(geometry: ScanGeometry, roomNames: [String]) -> String {
         var lines = [header]
         for (roomIndex, room) in geometry.rooms.enumerated() {
-            let name = roomIndex < roomNames.count ? roomNames[roomIndex] : "Room \(roomIndex + 1)"
+            let name = roomIndex < roomNames.count ? roomNames[roomIndex] : String(localized: "roomType.unknown \(roomIndex + 1)")
             lines.append(row(name, "floor", 1, area: RoomMetrics.floorArea(of: room)))
             for (kind, surfaces) in [("wall", room.walls), ("door", room.doors),
                                      ("window", room.windows), ("opening", room.openings)] {

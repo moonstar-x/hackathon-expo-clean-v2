@@ -21,7 +21,7 @@
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>NSCameraUsageDescription</key>
-	<string>RoomScanner uses the camera and LiDAR scanner to measure rooms and build floor plans. Scans stay on your device.</string>
+	<string>RoomScanner usa la cámara y el escáner LiDAR para medir habitaciones y crear planos. Los escaneos se quedan en tu dispositivo.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

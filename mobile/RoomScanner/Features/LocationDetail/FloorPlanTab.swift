@@ -25,7 +25,7 @@ struct FloorPlanTab: View {
                 .contentShape(Rectangle())
                 .gesture(magnifyGesture.simultaneously(with: panGesture))
                 .gesture(tapGestures(size: proxy.size, zoom: currentZoom, pan: currentPan))
-                .accessibilityAction(named: "Fit to screen", fitToScreen)
+                .accessibilityAction(named: "plan.fitToScreen", fitToScreen)
         }
         .overlay(alignment: .top) {
             if let room = selectedRoom {
@@ -37,10 +37,10 @@ struct FloorPlanTab: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
-                    Toggle("Dimensions", systemImage: "ruler", isOn: $options.showDimensions)
-                    Toggle("Furniture", systemImage: "sofa", isOn: $options.showFurniture)
+                    Toggle("plan.options.dimensions", systemImage: "ruler", isOn: $options.showDimensions)
+                    Toggle("common.furniture", systemImage: "sofa", isOn: $options.showFurniture)
                 } label: {
-                    Label("Display Options", systemImage: "slider.horizontal.3")
+                    Label("plan.options.menu", systemImage: "slider.horizontal.3")
                 }
             }
         }
@@ -107,9 +107,9 @@ struct FloorPlanTab: View {
         return VStack(alignment: .leading, spacing: 4) {
             Text(roomNames[room.id] ?? defaultName)
                 .font(.headline)
-            Text("Area: \(formatter.area(RoomMetrics.floorArea(of: room), approximate: room.isFloorApproximate))")
-            Text("Perimeter: \(formatter.length(RoomMetrics.perimeter(of: room)))")
-            Text("Ceiling height: \(RoomMetrics.ceilingHeight(of: room).map { formatter.length($0) } ?? "—")")
+            Text("plan.callout.area \(formatter.area(RoomMetrics.floorArea(of: room), approximate: room.isFloorApproximate))")
+            Text("plan.callout.perimeter \(formatter.length(RoomMetrics.perimeter(of: room)))")
+            Text("plan.callout.ceilingHeight \(RoomMetrics.ceilingHeight(of: room).map { formatter.length($0) } ?? "—")")
         }
         .font(.subheadline)
         .padding(12)

@@ -40,6 +40,6 @@ final class Location: NSManagedObject {
 
     /// `"Scan " + createdAt.formatted(date: .abbreviated, time: .shortened)` (§5.1).
     static func defaultName(for date: Date) -> String {
-        String(localized: "Scan \(date.formatted(date: .abbreviated, time: .shortened))")
+        String(localized: "location.defaultName \(date.formatted(date: .abbreviated, time: .shortened))")
     }
 }

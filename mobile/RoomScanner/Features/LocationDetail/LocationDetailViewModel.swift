@@ -8,9 +8,9 @@ enum DetailTab: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .plan: String(localized: "Plan")
-        case .model: String(localized: "3D")
-        case .measurements: String(localized: "Measurements")
+        case .plan: String(localized: "detail.tab.plan")
+        case .model: String(localized: "detail.tab.model")
+        case .measurements: String(localized: "common.measurements")
         }
     }
 }

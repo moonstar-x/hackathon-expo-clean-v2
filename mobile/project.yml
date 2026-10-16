@@ -4,7 +4,7 @@ options:
   deploymentTarget:
     iOS: "17.0"
   createIntermediateGroups: true
-  developmentLanguage: en
+  developmentLanguage: es
 settings:
   base:
     SWIFT_VERSION: "5.0"
@@ -33,7 +33,7 @@ targets:
         CFBundleDisplayName: RoomScanner
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
-        NSCameraUsageDescription: "RoomScanner uses the camera and LiDAR scanner to measure rooms and build floor plans. Scans stay on your device."
+        NSCameraUsageDescription: "RoomScanner usa la cámara y el escáner LiDAR para medir habitaciones y crear planos. Los escaneos se quedan en tu dispositivo."
         UILaunchScreen: {}
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         UIApplicationSceneManifest:

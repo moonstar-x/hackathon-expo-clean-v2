@@ -69,10 +69,10 @@ struct RoomMetricsTests {
 struct RoomNamingTests {
     @Test func defaultNamesFollowDetectedTypes() {
         let names = RoomNaming.defaultNames(for: [.livingRoom, .bedroom, nil, .bedroom, .bedroom])
-        #expect(names == ["Living Room", "Bedroom", "Room 3", "Bedroom 2", "Bedroom 3"])
+        #expect(names == ["Sala", "Dormitorio", "Habitación 3", "Dormitorio 2", "Dormitorio 3"])
     }
 
     @Test func unknownTypeUsesIndex() {
-        #expect(RoomNaming.defaultName(for: nil, index: 0, previousTypes: [nil]) == "Room 1")
+        #expect(RoomNaming.defaultName(for: nil, index: 0, previousTypes: [nil]) == "Habitación 1")
     }
 }

@@ -45,10 +45,10 @@ struct UnitFormattingTests {
     }
 
     @Test func spokenValues() {
-        #expect(metric.spokenLength(3.42) == "3.42 meters")
-        #expect(imperial.spokenLength(3.4167) == "11 feet 2 and a half inches")
-        #expect(metric.spokenArea(12.345) == "12.3 square meters")
-        #expect(imperial.spokenArea(10.0) == "108 square feet")
+        #expect(metric.spokenLength(3.42) == "3.42 metros")
+        #expect(imperial.spokenLength(3.4167) == "11 pies 2 pulgadas y media")
+        #expect(metric.spokenArea(12.345) == "12.3 metros cuadrados")
+        #expect(imperial.spokenArea(10.0) == "108 pies cuadrados")
     }
 
     @Test func usesLocaleDecimalSeparator() {

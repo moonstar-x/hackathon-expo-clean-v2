@@ -18,11 +18,11 @@ struct ModelTab: View {
                     Button {
                         resetToken += 1
                     } label: {
-                        Label("Reset View", systemImage: "arrow.counterclockwise")
+                        Label("model.resetView", systemImage: "arrow.counterclockwise")
                     }
                     Divider().frame(height: 24)
                     Toggle(isOn: $showsFurniture) {
-                        Label("Furniture", systemImage: "sofa")
+                        Label("common.furniture", systemImage: "sofa")
                     }
                     .toggleStyle(.button)
                 }
@@ -38,7 +38,7 @@ struct ModelTab: View {
     private var accessibilityLabel: String {
         let formatter = UnitFormatter(unitPreference)
         let area = formatter.spokenArea(LocationMetrics.totalFloorArea(of: geometry))
-        return String(localized: "3D model, \(Counted.rooms(geometry.rooms.count)), \(area)")
+        return String(localized: "model.a11y \(Counted.rooms(geometry.rooms.count)) \(area)")
     }
 }
 

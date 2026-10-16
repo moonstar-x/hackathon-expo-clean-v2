@@ -37,10 +37,10 @@ struct RoomReviewSheet: View {
     private func review(_ room: RoomGeometry) -> some View {
         let formatter = UnitFormatter(unitPreference)
         return VStack(alignment: .leading, spacing: 16) {
-            Text("Room \(roomNumber) Scanned")
+            Text("review.title \(roomNumber)")
                 .font(.title2.bold())
 
-            TextField("Room name", text: $name)
+            TextField("review.roomNamePlaceholder", text: $name)
                 .textFieldStyle(.roundedBorder)
                 .font(.title3)
                 .submitLabel(.done)
@@ -50,30 +50,30 @@ struct RoomReviewSheet: View {
             }
 
             Grid(alignment: .leading, horizontalSpacing: 16, verticalSpacing: 6) {
-                metric("Floor area", formatter.area(RoomMetrics.floorArea(of: room), approximate: room.isFloorApproximate))
-                metric("Perimeter", formatter.length(RoomMetrics.perimeter(of: room)))
-                metric("Ceiling height", RoomMetrics.ceilingHeight(of: room).map { formatter.length($0) } ?? "—")
-                metric("Walls", "\(room.walls.count)")
-                metric("Doors", "\(room.doors.count)")
-                metric("Windows", "\(room.windows.count)")
-                metric("Objects", "\(room.objects.count)")
+                metric("common.floorArea", formatter.area(RoomMetrics.floorArea(of: room), approximate: room.isFloorApproximate))
+                metric("common.perimeter", formatter.length(RoomMetrics.perimeter(of: room)))
+                metric("common.ceilingHeight", RoomMetrics.ceilingHeight(of: room).map { formatter.length($0) } ?? "—")
+                metric("common.walls", "\(room.walls.count)")
+                metric("common.doors", "\(room.doors.count)")
+                metric("common.windows", "\(room.windows.count)")
+                metric("common.objects", "\(room.objects.count)")
             }
 
             VStack(spacing: 10) {
                 Button(action: onScanNext) {
-                    Label("Scan Next Room", systemImage: "arrow.right.circle.fill")
+                    Label("review.scanNextRoom", systemImage: "arrow.right.circle.fill")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
 
                 Button(action: onFinish) {
-                    Text("Finish").frame(maxWidth: .infinity)
+                    Text("review.finish").frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.bordered)
                 .controlSize(.large)
 
-                Button("Rescan This Room", systemImage: "arrow.counterclockwise", action: onRescan)
+                Button("common.rescanRoom", systemImage: "arrow.counterclockwise", action: onRescan)
                     .frame(minHeight: 44)
             }
         }
@@ -88,7 +88,7 @@ struct RoomReviewSheet: View {
     }
 
     private var interruptionWarning: some View {
-        Label("Tracking was interrupted. Rooms scanned after this may not line up. Consider finishing now.",
+        Label("review.trackingInterrupted",
               systemImage: "exclamationmark.triangle.fill")
             .font(.footnote)
             .foregroundStyle(.orange)
@@ -100,17 +100,17 @@ struct RoomReviewSheet: View {
 
     private func failure(_ issue: CaptureIssue) -> some View {
         VStack(alignment: .leading, spacing: 16) {
-            Label("Room \(roomNumber) Couldn't Be Scanned", systemImage: "exclamationmark.triangle.fill")
+            Label("review.failure.title \(roomNumber)", systemImage: "exclamationmark.triangle.fill")
                 .font(.title3.bold())
                 .foregroundStyle(.orange)
             Text(issue.message)
             if issue.isSceneTooLarge {
-                Text("The scanned area got too large. Try finishing each room sooner.")
+                Text("review.failure.sceneTooLarge")
                     .foregroundStyle(.secondary)
             }
             VStack(spacing: 10) {
                 Button(action: onRescan) {
-                    Label("Rescan This Room", systemImage: "arrow.counterclockwise")
+                    Label("common.rescanRoom", systemImage: "arrow.counterclockwise")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
@@ -118,13 +118,13 @@ struct RoomReviewSheet: View {
 
                 if completedRoomCount > 0 {
                     Button(action: onFinish) {
-                        Text("Finish with \(Counted.rooms(completedRoomCount))").frame(maxWidth: .infinity)
+                        Text("common.finishWithRooms \(Counted.rooms(completedRoomCount))").frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.bordered)
                     .controlSize(.large)
                 }
 
-                Button("Discard", role: .destructive, action: onDiscard)
+                Button("review.discard", role: .destructive, action: onDiscard)
                     .frame(minHeight: 44)
             }
         }
@@ -133,7 +133,7 @@ struct RoomReviewSheet: View {
 
 #Preview("Review") {
     Color.gray.sheet(isPresented: .constant(true)) {
-        RoomReviewSheet(name: .constant("Living Room"), roomNumber: 1,
+        RoomReviewSheet(name: .constant("Sala"), roomNumber: 1,
                         room: SampleGeometry.twoRoomApartment().rooms[0], issue: nil,
                         completedRoomCount: 1, trackingWasInterrupted: true,
                         onScanNext: {}, onFinish: {}, onRescan: {}, onDiscard: {})
@@ -143,7 +143,7 @@ struct RoomReviewSheet: View {
 #Preview("Failure") {
     Color.gray.sheet(isPresented: .constant(true)) {
         RoomReviewSheet(name: .constant(""), roomNumber: 2, room: nil,
-                        issue: CaptureIssue(message: "World tracking failed.", isSceneTooLarge: false),
+                        issue: CaptureIssue(message: "Falló el seguimiento del entorno.", isSceneTooLarge: false),
                         completedRoomCount: 1, trackingWasInterrupted: false,
                         onScanNext: {}, onFinish: {}, onRescan: {}, onDiscard: {})
     }

@@ -45,7 +45,7 @@ struct SceneKitView: UIViewRepresentable {
         model.scene.rootNode.childNode(withName: SceneBuilder.objectsNodeName, recursively: true)?
             .isHidden = !showObjects
         view.accessibilityLabel = accessibilityLabel
-        view.accessibilityHint = String(localized: "See the Measurements tab for details.")
+        view.accessibilityHint = String(localized: "common.seeMeasurementsHint")
     }
 
     /// Replaces the point of view with a fresh copy of the initial camera. There's no animation,
@@ -64,5 +64,5 @@ struct SceneKitView: UIViewRepresentable {
 
 #Preview {
     SceneKitView(model: SceneBuilder.build(SampleGeometry.twoRoomApartment(), showObjects: true),
-                 showObjects: true, resetToken: 0, accessibilityLabel: "3D model")
+                 showObjects: true, resetToken: 0, accessibilityLabel: "Modelo 3D")
 }

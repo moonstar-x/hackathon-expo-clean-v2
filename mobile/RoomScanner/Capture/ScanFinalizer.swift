@@ -6,7 +6,7 @@ enum FinalizeError: Error, LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .noRoomData: String(localized: "This scan has no room data to build from.")
+        case .noRoomData: String(localized: "capture.error.noRoomData")
         }
     }
 }

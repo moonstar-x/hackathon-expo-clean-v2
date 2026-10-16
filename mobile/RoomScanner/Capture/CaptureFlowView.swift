@@ -65,7 +65,7 @@ struct CaptureFlowView: View {
             )
 
             if model.phase == .processing {
-                ProgressView("Processing room…")
+                ProgressView("capture.processingRoom")
                     .padding()
                     .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
             }
@@ -87,17 +87,17 @@ struct CaptureFlowView: View {
                             presenting: model.cancelPrompt) { prompt in
             switch prompt {
             case .discardOnly:
-                Button("Discard Scan", role: .destructive) { discard() }
-                Button("Keep Scanning", role: .cancel) {}
+                Button("capture.discardScan", role: .destructive) { discard() }
+                Button("capture.keepScanning", role: .cancel) {}
             case .saveOrDiscard(let count):
-                Button("Save \(Counted.rooms(count))") { model.finish() }
-                Button("Discard Scan", role: .destructive) { discard() }
-                Button("Keep Scanning", role: .cancel) {}
+                Button("capture.saveRooms \(Counted.rooms(count))") { model.finish() }
+                Button("capture.discardScan", role: .destructive) { discard() }
+                Button("capture.keepScanning", role: .cancel) {}
             }
         }
-        .alert("Couldn't save scan", isPresented: persistenceFailureBinding, presenting: model.persistenceFailure) { failure in
-            Button("Retry") { Task { await failure.retry() } }
-            Button("Cancel", role: .cancel) {}
+        .alert("common.saveFailedTitle", isPresented: persistenceFailureBinding, presenting: model.persistenceFailure) { failure in
+            Button("common.retry") { Task { await failure.retry() } }
+            Button("common.cancel", role: .cancel) {}
         } message: { failure in
             Text(failure.message)
         }
@@ -121,11 +121,11 @@ struct CaptureFlowView: View {
             Image(systemName: "figure.walk.motion")
                 .font(.largeTitle)
                 .accessibilityHidden(true)
-            Text("Walk through a doorway into the next room, then tap Start.")
+            Text("capture.nextRoom.instructions")
                 .font(.headline)
                 .multilineTextAlignment(.center)
             Button(action: model.startNextRoom) {
-                Text("Start")
+                Text("capture.nextRoom.start")
                     .font(.headline)
                     .frame(maxWidth: .infinity)
             }
@@ -170,8 +170,8 @@ struct CaptureFlowView: View {
 
     private var cancelTitle: String {
         switch model.cancelPrompt {
-        case .discardOnly, nil: String(localized: "Discard scan?")
-        case .saveOrDiscard: String(localized: "End this scan?")
+        case .discardOnly, nil: String(localized: "capture.cancel.discardTitle")
+        case .saveOrDiscard: String(localized: "capture.cancel.endTitle")
         }
     }
 

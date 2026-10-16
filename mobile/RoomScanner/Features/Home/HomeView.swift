@@ -30,7 +30,7 @@ struct HomeView: View {
     var body: some View {
         NavigationStack(path: $path) {
             list
-                .navigationTitle("Scans")
+                .navigationTitle("home.title")
                 .navigationDestination(for: UUID.self) { id in
                     LocationDetailView(locationID: id)
                 }
@@ -55,27 +55,27 @@ struct HomeView: View {
             titleVisibility: .visible,
             presenting: pendingDeletion
         ) { reference in
-            Button("Delete", role: .destructive) { delete(reference) }
-            Button("Cancel", role: .cancel) {}
+            Button("common.delete", role: .destructive) { delete(reference) }
+            Button("common.cancel", role: .cancel) {}
         } message: { _ in
-            Text("This can't be undone.")
+            Text("common.cannotUndo")
         }
-        .alert("Rename Scan",
+        .alert("common.renameScan",
                isPresented: Binding(get: { pendingRename != nil }, set: { if !$0 { pendingRename = nil } }),
                presenting: pendingRename) { reference in
-            TextField("Name", text: $renameText)
-            Button("Save") { rename(reference, to: renameText) }
-            Button("Cancel", role: .cancel) {}
+            TextField("common.name", text: $renameText)
+            Button("common.save") { rename(reference, to: renameText) }
+            Button("common.cancel", role: .cancel) {}
         }
-        .alert("Camera Access Needed", isPresented: $isCameraDeniedAlertPresented) {
-            Button("Open Settings") { CameraPermission.openSettings() }
-            Button("Cancel", role: .cancel) {}
+        .alert("home.cameraDenied.title", isPresented: $isCameraDeniedAlertPresented) {
+            Button("home.cameraDenied.openSettings") { CameraPermission.openSettings() }
+            Button("common.cancel", role: .cancel) {}
         } message: {
-            Text("RoomScanner needs the camera to scan rooms. Turn on camera access in Settings.")
+            Text("home.cameraDenied.message")
         }
-        .alert("Something Went Wrong",
+        .alert("common.somethingWentWrong",
                isPresented: Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) {
-            Button("OK", role: .cancel) {}
+            Button("common.ok", role: .cancel) {}
         } message: {
             Text(errorMessage ?? "")
         }
@@ -94,7 +94,7 @@ struct HomeView: View {
                         Button {
                             pendingDeletion = reference(for: location)
                         } label: {
-                            Label("Delete", systemImage: "trash")
+                            Label("common.delete", systemImage: "trash")
                         }
                         .tint(.red)
                     }
@@ -102,12 +102,12 @@ struct HomeView: View {
                         Button {
                             beginRename(location)
                         } label: {
-                            Label("Rename", systemImage: "pencil")
+                            Label("common.rename", systemImage: "pencil")
                         }
                         Button(role: .destructive) {
                             pendingDeletion = reference(for: location)
                         } label: {
-                            Label("Delete", systemImage: "trash")
+                            Label("common.delete", systemImage: "trash")
                         }
                     }
                 }
@@ -116,9 +116,9 @@ struct HomeView: View {
         .overlay {
             if locations.isEmpty {
                 ContentUnavailableView {
-                    Label("No scans yet", systemImage: "square.dashed")
+                    Label("home.empty.title", systemImage: "square.dashed")
                 } description: {
-                    Text("Scan your first room to create a floor plan.")
+                    Text("home.empty.message")
                 }
             }
         }
@@ -127,7 +127,7 @@ struct HomeView: View {
     private var newScanBar: some View {
         VStack(spacing: 8) {
             Button(action: startScan) {
-                Label("New Scan", systemImage: "plus.circle.fill")
+                Label("home.newScan", systemImage: "plus.circle.fill")
                     .font(.headline)
                     .frame(maxWidth: .infinity)
             }
@@ -136,7 +136,7 @@ struct HomeView: View {
             .disabled(!canScan)
 
             if !canScan {
-                Text("Scanning requires an iPhone with a LiDAR scanner. You can still view saved scans.")
+                Text("home.lidarRequired")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
@@ -153,21 +153,21 @@ struct HomeView: View {
             Button {
                 isSettingsPresented = true
             } label: {
-                Label("Settings", systemImage: "gearshape")
+                Label("home.settings", systemImage: "gearshape")
             }
         }
         #if DEBUG
         ToolbarItem(placement: .topBarLeading) {
             Menu {
-                Button("Add sample location", systemImage: "plus.square.on.square") {
-                    addSample(SampleGeometry.twoRoomApartment(), name: "Apartment")
+                Button("home.debug.addSample", systemImage: "plus.square.on.square") {
+                    addSample(SampleGeometry.twoRoomApartment(), name: "Departamento")
                 }
-                Button("Add rotated L-shaped room", systemImage: "rotate.right") {
-                    addSample(SampleGeometry.rotated(SampleGeometry.lShapedRoom(), by: .pi / 7), name: "Studio")
+                Button("home.debug.addRotatedRoom", systemImage: "rotate.right") {
+                    addSample(SampleGeometry.rotated(SampleGeometry.lShapedRoom(), by: .pi / 7), name: "Estudio")
                 }
-                Button("Delete all", systemImage: "trash", role: .destructive, action: deleteAll)
+                Button("home.debug.deleteAll", systemImage: "trash", role: .destructive, action: deleteAll)
             } label: {
-                Label("Debug", systemImage: "ladybug")
+                Label("home.debug.menu", systemImage: "ladybug")
             }
         }
         #endif
@@ -192,7 +192,7 @@ struct HomeView: View {
 
     private var deletionTitle: String {
         guard let pendingDeletion else { return "" }
-        return String(localized: "Delete '\(pendingDeletion.name)'?")
+        return String(localized: "common.deleteNamedConfirm \(pendingDeletion.name)")
     }
 
     private func reference(for location: Location) -> LocationReference? {
@@ -247,10 +247,10 @@ struct HomeView: View {
             do {
                 let studio = SampleGeometry.rotated(SampleGeometry.lShapedRoom(), by: .pi / 7)
                 _ = try await persistence.repository.insertSample(
-                    studio, name: "Studio", thumbnail: FloorPlanImageRenderer.thumbnailPNG(for: studio))
+                    studio, name: "Estudio", thumbnail: FloorPlanImageRenderer.thumbnailPNG(for: studio))
                 let apartment = SampleGeometry.twoRoomApartment()
                 newest = try await persistence.repository.insertSample(
-                    apartment, name: "Apartment", thumbnail: FloorPlanImageRenderer.thumbnailPNG(for: apartment))
+                    apartment, name: "Departamento", thumbnail: FloorPlanImageRenderer.thumbnailPNG(for: apartment))
             } catch {
                 Log.ui.error("Seeding samples failed: \(error)")
             }

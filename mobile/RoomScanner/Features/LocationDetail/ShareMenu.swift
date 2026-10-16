@@ -16,25 +16,25 @@ struct ShareMenu: View {
         Menu {
             ShareLink(item: FloorPlanImageExport(geometry: geometry, roomNames: roomNames,
                                                  unitSystem: unitSystem, fileName: baseFileName),
-                      preview: SharePreview(String(localized: "\(locationName) Floor Plan"),
+                      preview: SharePreview(String(localized: "share.floorPlan.preview \(locationName)"),
                                             image: Image(systemName: "map"))) {
-                Label("Floor Plan Image (PNG)", systemImage: "photo")
+                Label("share.floorPlan.menuItem", systemImage: "photo")
             }
             ShareLink(item: MeasurementsExport(csv: MeasurementsCSV.make(geometry: geometry, roomNames: orderedNames),
                                                fileName: baseFileName),
-                      preview: SharePreview(String(localized: "\(locationName) Measurements"),
+                      preview: SharePreview(String(localized: "share.measurements.preview \(locationName)"),
                                             image: Image(systemName: "tablecells"))) {
-                Label("Measurements (CSV)", systemImage: "tablecells")
+                Label("share.measurements.menuItem", systemImage: "tablecells")
             }
             if let usdzSource {
                 ShareLink(item: ModelExport(raw: usdzSource, fileName: baseFileName),
-                          preview: SharePreview(String(localized: "\(locationName) 3D Model"),
+                          preview: SharePreview(String(localized: "share.model.preview \(locationName)"),
                                                 image: Image(systemName: "cube"))) {
-                    Label("3D Model (USDZ)", systemImage: "cube")
+                    Label("share.model.menuItem", systemImage: "cube")
                 }
             }
         } label: {
-            Label("Share", systemImage: "square.and.arrow.up")
+            Label("share.menu", systemImage: "square.and.arrow.up")
         }
     }
 
@@ -48,7 +48,7 @@ struct ShareMenu: View {
         let invalid = CharacterSet(charactersIn: "/\\?%*|\"<>:")
         let cleaned = locationName.components(separatedBy: invalid).joined(separator: "-")
             .trimmingCharacters(in: .whitespacesAndNewlines)
-        return cleaned.isEmpty ? "Scan" : cleaned
+        return cleaned.isEmpty ? String(localized: "share.defaultFileName") : cleaned
     }
 }
 
@@ -66,7 +66,7 @@ private func temporaryFile(named name: String, data: Data) throws -> URL {
 private enum ExportError: Error, LocalizedError {
     case renderingFailed
 
-    var errorDescription: String? { String(localized: "The floor plan image couldn't be created.") }
+    var errorDescription: String? { String(localized: "share.error.imageFailed") }
 }
 
 /// The full floor plan at 1600 pt on the longest side, 3× scale, white background.
@@ -83,7 +83,7 @@ struct FloorPlanImageExport: Transferable {
                                                  unitSystem: item.unitSystem)
             }
             guard let data else { throw ExportError.renderingFailed }
-            return SentTransferredFile(try temporaryFile(named: "\(item.fileName) Floor Plan.png", data: data))
+            return SentTransferredFile(try temporaryFile(named: String(localized: "share.floorPlan.fileName \(item.fileName)") + ".png", data: data))
         }
     }
 }
@@ -94,7 +94,7 @@ struct MeasurementsExport: Transferable {
 
     static var transferRepresentation: some TransferRepresentation {
         FileRepresentation(exportedContentType: .commaSeparatedText) { item in
-            SentTransferredFile(try temporaryFile(named: "\(item.fileName) Measurements.csv", data: Data(item.csv.utf8)))
+            SentTransferredFile(try temporaryFile(named: String(localized: "share.measurements.fileName \(item.fileName)") + ".csv", data: Data(item.csv.utf8)))
         }
     }
 }
@@ -113,9 +113,9 @@ struct ModelExport: Transferable {
 
 #Preview {
     NavigationStack {
-        Text("Share")
+        Text("share.menu")
             .toolbar {
-                ShareMenu(geometry: SampleGeometry.twoRoomApartment(), locationName: "Apartment",
+                ShareMenu(geometry: SampleGeometry.twoRoomApartment(), locationName: "Departamento",
                           roomNames: [:], unitSystem: .metric, usdzSource: nil)
             }
     }

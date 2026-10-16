@@ -1,277 +1,1766 @@
 {
-  "sourceLanguage": "en",
-  "strings": {
-    "%@ (%lld)": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "new",
-            "value": "%1$@ (%2$lld)"
+  "sourceLanguage" : "es",
+  "strings" : {
+    "canvas.a11y.full %@ %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plano, %1$@, %2$@"
           }
         }
       }
     },
-    "%@ 3D Model": {},
-    "%@ Floor Plan": {},
-    "%@ Measurements": {},
-    "%@ by %@": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "new",
-            "value": "%1$@ by %2$@"
+    "canvas.a11y.live %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plano en vivo, %@"
           }
         }
       }
     },
-    "%@ meters": {},
-    "%@ scanned, but the room data is missing, so the scan can't be finished.": {},
-    "%@ scanned.": {},
-    "%@ square feet": {},
-    "%@ square meters": {},
-    "%@ wide, %@ deep, %@ high": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "new",
-            "value": "%1$@ wide, %2$@ deep, %3$@ high"
+    "capture.cancel.discardTitle" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Descartar el escaneo?"
           }
         }
       }
     },
-    "%@ · %@ · %@": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "new",
-            "value": "%1$@ · %2$@ · %3$@"
+    "capture.cancel.endTitle" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Terminar este escaneo?"
           }
         }
       }
     },
-    "%@, %@": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "new",
-            "value": "%1$@, %2$@"
+    "capture.discardScan" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descartar escaneo"
           }
         }
       }
     },
-    "%@, %@, scanned %@": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "new",
-            "value": "%1$@, %2$@, scanned %3$@"
+    "capture.error.noRoomData" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este escaneo no tiene datos de habitaciones para construir."
           }
         }
       }
     },
-    "%lld and a half inches": {},
-    "%lld feet %@": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "new",
-            "value": "%1$lld feet %2$@"
+    "capture.error.nothingToExport" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este escaneo no tiene un modelo 3D para exportar."
           }
         }
       }
     },
-    "%lld inches": {},
-    ", open": {},
-    "3D": {},
-    "3D Model (USDZ)": {},
-    "3D model, %@, %@": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "new",
-            "value": "3D model, %1$@, %2$@"
+    "capture.error.saveFailed" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo guardar el escaneo."
           }
         }
       }
     },
-    "About": {},
-    "Add rotated L-shaped room": {},
-    "Add sample location": {},
-    "Area: %@": {},
-    "Automatic": {},
-    "Automatic uses your region's measurement system.": {},
-    "Bathroom": {},
-    "Bathtub": {},
-    "Bed": {},
-    "Bedroom": {},
-    "Building floor plan…": {},
-    "Camera Access Needed": {},
-    "Cancel": {},
-    "Ceiling height": {},
-    "Ceiling height: %@": {},
-    "Chair": {},
-    "Couldn't open this scan": {},
-    "Couldn't save scan": {},
-    "Debug": {},
-    "Delete": {},
-    "Delete '%@'?": {},
-    "Delete all": {},
-    "Dimensions": {},
-    "Dining Room": {},
-    "Discard": {},
-    "Discard Scan": {},
-    "Discard scan?": {},
-    "Dishwasher": {},
-    "Display Options": {},
-    "Done": {},
-    "Door": {},
-    "Doors": {},
-    "End this scan?": {},
-    "Finish": {},
-    "Finish with %@": {},
-    "Fireplace": {},
-    "Fit to screen": {},
-    "Floor Plan Image (PNG)": {},
-    "Floor area": {},
-    "Floor plan, %@, %@": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "new",
-            "value": "Floor plan, %1$@, %2$@"
+    "capture.keepScanning" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seguir escaneando"
           }
         }
       }
     },
-    "Footprint": {},
-    "Furniture": {},
-    "Hide live floor plan": {},
-    "Imperial": {},
-    "Incomplete": {},
-    "Keep Scanning": {},
-    "Keep the doors between rooms open so the rooms can be connected.": {},
-    "Kitchen": {},
-    "Live floor plan, %@": {},
-    "Living Room": {},
-    "Location name": {},
-    "Measurements": {},
-    "Measurements (CSV)": {},
-    "Metric": {},
-    "More": {},
-    "Move slowly and point the camera at walls, corners, doors, and windows.": {},
-    "Name": {},
-    "New Scan": {},
-    "No scans yet": {},
-    "OK": {},
-    "Object": {},
-    "Objects": {},
-    "Open Settings": {},
-    "Opening": {},
-    "Openings": {},
-    "Oven": {},
-    "Perimeter": {},
-    "Perimeter: %@": {},
-    "Plan": {},
-    "Processing room…": {},
-    "Rebuild": {},
-    "Refrigerator": {},
-    "Rename": {},
-    "Rename Room": {},
-    "Rename Scan": {},
-    "Rescan This Room": {},
-    "Reset View": {},
-    "Retry": {},
-    "Room %lld": {},
-    "Room %lld Couldn't Be Scanned": {},
-    "Room %lld Scanned": {},
-    "Room %lld: %@": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "new",
-            "value": "Room %1$lld: %2$@"
+    "capture.nextRoom.instructions" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cruza una puerta hacia la siguiente habitación y toca Comenzar."
           }
         }
       }
     },
-    "Room name": {},
-    "RoomScanner needs the camera to scan rooms. Turn on camera access in Settings.": {},
-    "Rooms": {},
-    "Rooms couldn't be merged, so they're shown as captured.": {},
-    "Rooms up to about 9 × 9 m (30 × 30 ft) work best.": {},
-    "Save": {},
-    "Save %@": {},
-    "Save Location": {},
-    "Scan %@": {},
-    "Scan Next Room": {},
-    "Scan Not Found": {},
-    "Scan one room at a time. When a room is finished, tap **Done**, walk through the doorway to the next room, and tap **Start**.": {},
-    "Scan your first room to create a floor plan.": {},
-    "Scanned": {},
-    "Scanning requires an iPhone with a LiDAR scanner. You can still view saved scans.": {},
-    "Scanning tips": {},
-    "Scans": {},
-    "Scans are stored only on this device.": {},
-    "See the Measurements tab for details.": {},
-    "Settings": {},
-    "Share": {},
-    "Show live floor plan": {},
-    "Sink": {},
-    "Sofa": {},
-    "Something Went Wrong": {},
-    "Stairs": {},
-    "Start": {},
-    "Start Scanning": {},
-    "Storage": {},
-    "Stove": {},
-    "Summary": {},
-    "TV": {},
-    "Table": {},
-    "The floor plan data is missing or was saved by a newer version of the app.": {},
-    "The floor plan data is missing or was saved by a newer version of the app. You can rebuild it from the raw scan data.": {},
-    "The floor plan image couldn't be created.": {},
-    "The scan couldn't be found.": {},
-    "The scan couldn't be saved.": {},
-    "The scanned area got too large. Try finishing each room sooner.": {},
-    "There's no 3D model to export for this scan.": {},
-    "This can't be undone.": {},
-    "This scan has no room data to build from.": {},
-    "This scan may have been deleted.": {},
-    "This scan wasn't finished": {},
-    "Tips for a Good Scan": {},
-    "Toilet": {},
-    "Total area": {},
-    "Total floor area": {},
-    "Total: %@, %@": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "new",
-            "value": "Total: %1$@, %2$@"
+    "capture.nextRoom.start" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comenzar"
           }
         }
       }
     },
-    "Tracking was interrupted. Rooms scanned after this may not line up. Consider finishing now.": {},
-    "Units": {},
-    "Use good lighting. Apple recommends at least 50 lux.": {},
-    "Version": {},
-    "View": {},
-    "Walk through a doorway into the next room, then tap Start.": {},
-    "Wall": {},
-    "Walls": {},
-    "Washer/Dryer": {},
-    "Window": {},
-    "Windows": {},
-    "^[%lld door](inflect: true)": {},
-    "^[%lld object](inflect: true)": {},
-    "^[%lld room](inflect: true)": {},
-    "^[%lld wall](inflect: true)": {},
-    "^[%lld window](inflect: true)": {},
-    "approximately ": {},
-    "incomplete": {},
-    "scanned %@": {},
-    "unknown": {}
+    "capture.processingRoom" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Procesando habitación…"
+          }
+        }
+      }
+    },
+    "capture.saveRooms %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guardar %@"
+          }
+        }
+      }
+    },
+    "common.buildingFloorPlan" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Creando plano…"
+          }
+        }
+      }
+    },
+    "common.cancel" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancelar"
+          }
+        }
+      }
+    },
+    "common.cannotUndo" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta acción no se puede deshacer."
+          }
+        }
+      }
+    },
+    "common.ceilingHeight" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Altura del techo"
+          }
+        }
+      }
+    },
+    "common.delete" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eliminar"
+          }
+        }
+      }
+    },
+    "common.deleteNamedConfirm %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Eliminar “%@”?"
+          }
+        }
+      }
+    },
+    "common.done" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Listo"
+          }
+        }
+      }
+    },
+    "common.doors" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Puertas"
+          }
+        }
+      }
+    },
+    "common.finishWithRooms %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminar con %@"
+          }
+        }
+      }
+    },
+    "common.floorArea" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Área del piso"
+          }
+        }
+      }
+    },
+    "common.furniture" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muebles"
+          }
+        }
+      }
+    },
+    "common.measurements" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Medidas"
+          }
+        }
+      }
+    },
+    "common.name" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nombre"
+          }
+        }
+      }
+    },
+    "common.objects" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Objetos"
+          }
+        }
+      }
+    },
+    "common.ok" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aceptar"
+          }
+        }
+      }
+    },
+    "common.perimeter" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Perímetro"
+          }
+        }
+      }
+    },
+    "common.rename" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Renombrar"
+          }
+        }
+      }
+    },
+    "common.renameScan" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Renombrar escaneo"
+          }
+        }
+      }
+    },
+    "common.rescanRoom" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Volver a escanear esta habitación"
+          }
+        }
+      }
+    },
+    "common.retry" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reintentar"
+          }
+        }
+      }
+    },
+    "common.rooms" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Habitaciones"
+          }
+        }
+      }
+    },
+    "common.save" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guardar"
+          }
+        }
+      }
+    },
+    "common.saveFailedTitle" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo guardar el escaneo"
+          }
+        }
+      }
+    },
+    "common.seeMeasurementsHint" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Consulta la pestaña Medidas para ver los detalles."
+          }
+        }
+      }
+    },
+    "common.somethingWentWrong" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Algo salió mal"
+          }
+        }
+      }
+    },
+    "common.summary" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resumen"
+          }
+        }
+      }
+    },
+    "common.walls" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paredes"
+          }
+        }
+      }
+    },
+    "common.windows" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ventanas"
+          }
+        }
+      }
+    },
+    "count.doors %lld" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "^[%lld puerta](inflect: true)"
+          }
+        }
+      }
+    },
+    "count.objects %lld" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "^[%lld objeto](inflect: true)"
+          }
+        }
+      }
+    },
+    "count.rooms %lld" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "^[%lld habitación](inflect: true)"
+          }
+        }
+      }
+    },
+    "count.walls %lld" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "^[%lld pared](inflect: true)"
+          }
+        }
+      }
+    },
+    "count.windows %lld" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "^[%lld ventana](inflect: true)"
+          }
+        }
+      }
+    },
+    "detail.corrupt.message" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faltan los datos del plano o se guardaron con una versión más reciente de la app."
+          }
+        }
+      }
+    },
+    "detail.corrupt.rebuild" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reconstruir"
+          }
+        }
+      }
+    },
+    "detail.corrupt.rebuildable" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faltan los datos del plano o se guardaron con una versión más reciente de la app. Puedes reconstruirlo a partir de los datos originales del escaneo."
+          }
+        }
+      }
+    },
+    "detail.corrupt.title" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo abrir este escaneo"
+          }
+        }
+      }
+    },
+    "detail.draft.missingData %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escaneado: %@, pero faltan los datos de las habitaciones, así que no se puede terminar el escaneo."
+          }
+        }
+      }
+    },
+    "detail.draft.scanned %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escaneado: %@."
+          }
+        }
+      }
+    },
+    "detail.draft.title" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este escaneo no se terminó"
+          }
+        }
+      }
+    },
+    "detail.header %@ %@ %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$@ · %3$@"
+          }
+        }
+      }
+    },
+    "detail.header.a11y %@ %@ %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, %2$@, escaneado el %3$@"
+          }
+        }
+      }
+    },
+    "detail.moreMenu" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Más"
+          }
+        }
+      }
+    },
+    "detail.notFound.message" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Es posible que este escaneo se haya eliminado."
+          }
+        }
+      }
+    },
+    "detail.notFound.title" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se encontró el escaneo"
+          }
+        }
+      }
+    },
+    "detail.notMerged" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudieron unir las habitaciones, así que se muestran como se capturaron."
+          }
+        }
+      }
+    },
+    "detail.tab.model" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3D"
+          }
+        }
+      }
+    },
+    "detail.tab.plan" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plano"
+          }
+        }
+      }
+    },
+    "detail.tabPicker" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vista"
+          }
+        }
+      }
+    },
+    "error.locationNotFound" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se encontró el escaneo."
+          }
+        }
+      }
+    },
+    "home.cameraDenied.message" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RoomScanner necesita la cámara para escanear habitaciones. Activa el acceso a la cámara en Ajustes."
+          }
+        }
+      }
+    },
+    "home.cameraDenied.openSettings" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir Ajustes"
+          }
+        }
+      }
+    },
+    "home.cameraDenied.title" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se necesita acceso a la cámara"
+          }
+        }
+      }
+    },
+    "home.debug.addRotatedRoom" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agregar habitación en L rotada"
+          }
+        }
+      }
+    },
+    "home.debug.addSample" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agregar lugar de ejemplo"
+          }
+        }
+      }
+    },
+    "home.debug.deleteAll" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eliminar todo"
+          }
+        }
+      }
+    },
+    "home.debug.menu" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Depuración"
+          }
+        }
+      }
+    },
+    "home.empty.message" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escanea tu primera habitación para crear un plano."
+          }
+        }
+      }
+    },
+    "home.empty.title" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aún no hay escaneos"
+          }
+        }
+      }
+    },
+    "home.lidarRequired" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Para escanear se necesita un iPhone con escáner LiDAR. Aún puedes ver los escaneos guardados."
+          }
+        }
+      }
+    },
+    "home.newScan" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nuevo escaneo"
+          }
+        }
+      }
+    },
+    "home.settings" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajustes"
+          }
+        }
+      }
+    },
+    "home.title" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escaneos"
+          }
+        }
+      }
+    },
+    "liveOverlay.hideMiniPlan" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ocultar plano en vivo"
+          }
+        }
+      }
+    },
+    "liveOverlay.roomReadout %lld %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Habitación %1$lld: %2$@"
+          }
+        }
+      }
+    },
+    "liveOverlay.roomTitle %lld" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Habitación %lld"
+          }
+        }
+      }
+    },
+    "liveOverlay.showMiniPlan" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar plano en vivo"
+          }
+        }
+      }
+    },
+    "liveOverlay.tipsButton" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Consejos de escaneo"
+          }
+        }
+      }
+    },
+    "liveOverlay.totalReadout %@ %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Total: %1$@, %2$@"
+          }
+        }
+      }
+    },
+    "location.defaultName %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escaneo %@"
+          }
+        }
+      }
+    },
+    "locationRow.a11y.incomplete" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "incompleto"
+          }
+        }
+      }
+    },
+    "locationRow.a11y.scannedOn %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "escaneado el %@"
+          }
+        }
+      }
+    },
+    "locationRow.incompleteBadge" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incompleto"
+          }
+        }
+      }
+    },
+    "measurements.approximatelyPrefix" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "aproximadamente "
+          }
+        }
+      }
+    },
+    "measurements.door" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Puerta"
+          }
+        }
+      }
+    },
+    "measurements.footprint" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dimensiones generales"
+          }
+        }
+      }
+    },
+    "measurements.groupTitle %@ %lld" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ (%2$lld)"
+          }
+        }
+      }
+    },
+    "measurements.lengthByLength %@ %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ por %2$@"
+          }
+        }
+      }
+    },
+    "measurements.objectSize.a11y %@ %@ %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ de ancho, %2$@ de profundidad, %3$@ de alto"
+          }
+        }
+      }
+    },
+    "measurements.openSuffix" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ", abierta"
+          }
+        }
+      }
+    },
+    "measurements.opening" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abertura"
+          }
+        }
+      }
+    },
+    "measurements.openings" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aberturas"
+          }
+        }
+      }
+    },
+    "measurements.renameRoom" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Renombrar habitación"
+          }
+        }
+      }
+    },
+    "measurements.row.a11y %@ %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, %2$@"
+          }
+        }
+      }
+    },
+    "measurements.scanned" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escaneado"
+          }
+        }
+      }
+    },
+    "measurements.totalFloorArea" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Área total del piso"
+          }
+        }
+      }
+    },
+    "measurements.unknown" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "desconocido"
+          }
+        }
+      }
+    },
+    "measurements.wall" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pared"
+          }
+        }
+      }
+    },
+    "measurements.window" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ventana"
+          }
+        }
+      }
+    },
+    "model.a11y %@ %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modelo 3D, %1$@, %2$@"
+          }
+        }
+      }
+    },
+    "model.resetView" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restablecer vista"
+          }
+        }
+      }
+    },
+    "object.bathtub" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bañera"
+          }
+        }
+      }
+    },
+    "object.bed" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cama"
+          }
+        }
+      }
+    },
+    "object.chair" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Silla"
+          }
+        }
+      }
+    },
+    "object.dishwasher" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lavavajillas"
+          }
+        }
+      }
+    },
+    "object.fireplace" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chimenea"
+          }
+        }
+      }
+    },
+    "object.other" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Objeto"
+          }
+        }
+      }
+    },
+    "object.oven" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Horno"
+          }
+        }
+      }
+    },
+    "object.refrigerator" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refrigerador"
+          }
+        }
+      }
+    },
+    "object.sink" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lavabo"
+          }
+        }
+      }
+    },
+    "object.sofa" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sofá"
+          }
+        }
+      }
+    },
+    "object.stairs" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escaleras"
+          }
+        }
+      }
+    },
+    "object.storage" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Almacenamiento"
+          }
+        }
+      }
+    },
+    "object.stove" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estufa"
+          }
+        }
+      }
+    },
+    "object.table" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mesa"
+          }
+        }
+      }
+    },
+    "object.television" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Televisor"
+          }
+        }
+      }
+    },
+    "object.toilet" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inodoro"
+          }
+        }
+      }
+    },
+    "object.washerDryer" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lavadora/Secadora"
+          }
+        }
+      }
+    },
+    "plan.callout.area %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Área: %@"
+          }
+        }
+      }
+    },
+    "plan.callout.ceilingHeight %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Altura del techo: %@"
+          }
+        }
+      }
+    },
+    "plan.callout.perimeter %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Perímetro: %@"
+          }
+        }
+      }
+    },
+    "plan.fitToScreen" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajustar a la pantalla"
+          }
+        }
+      }
+    },
+    "plan.options.dimensions" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dimensiones"
+          }
+        }
+      }
+    },
+    "plan.options.menu" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opciones de visualización"
+          }
+        }
+      }
+    },
+    "review.discard" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descartar"
+          }
+        }
+      }
+    },
+    "review.failure.sceneTooLarge" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El área escaneada es demasiado grande. Intenta terminar cada habitación antes."
+          }
+        }
+      }
+    },
+    "review.failure.title %lld" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo escanear la habitación %lld"
+          }
+        }
+      }
+    },
+    "review.finish" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminar"
+          }
+        }
+      }
+    },
+    "review.roomNamePlaceholder" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nombre de la habitación"
+          }
+        }
+      }
+    },
+    "review.scanNextRoom" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escanear siguiente habitación"
+          }
+        }
+      }
+    },
+    "review.title %lld" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Habitación %lld escaneada"
+          }
+        }
+      }
+    },
+    "review.trackingInterrupted" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se interrumpió el seguimiento. Las habitaciones que escanees después podrían no alinearse. Considera terminar ahora."
+          }
+        }
+      }
+    },
+    "roomType.bathroom" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Baño"
+          }
+        }
+      }
+    },
+    "roomType.bedroom" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dormitorio"
+          }
+        }
+      }
+    },
+    "roomType.diningRoom" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comedor"
+          }
+        }
+      }
+    },
+    "roomType.kitchen" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cocina"
+          }
+        }
+      }
+    },
+    "roomType.livingRoom" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sala"
+          }
+        }
+      }
+    },
+    "roomType.unknown %lld" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Habitación %lld"
+          }
+        }
+      }
+    },
+    "saveLocation.namePlaceholder" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nombre del lugar"
+          }
+        }
+      }
+    },
+    "saveLocation.title" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guardar lugar"
+          }
+        }
+      }
+    },
+    "saveLocation.totalArea" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Área total"
+          }
+        }
+      }
+    },
+    "scanTips.keepDoorsOpen" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deja abiertas las puertas entre habitaciones para que se puedan conectar."
+          }
+        }
+      }
+    },
+    "scanTips.lighting" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usa buena iluminación. Apple recomienda al menos 50 lux."
+          }
+        }
+      }
+    },
+    "scanTips.moveSlowly" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muévete despacio y apunta la cámara a paredes, esquinas, puertas y ventanas."
+          }
+        }
+      }
+    },
+    "scanTips.oneRoomAtATime" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escanea una habitación a la vez. Cuando termines una, toca **Listo**, cruza la puerta hacia la siguiente habitación y toca **Comenzar**."
+          }
+        }
+      }
+    },
+    "scanTips.roomSize" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Funciona mejor con habitaciones de hasta unos 9 × 9 m (30 × 30 ft)."
+          }
+        }
+      }
+    },
+    "scanTips.startScanning" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comenzar a escanear"
+          }
+        }
+      }
+    },
+    "scanTips.title" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Consejos para un buen escaneo"
+          }
+        }
+      }
+    },
+    "settings.about" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Acerca de"
+          }
+        }
+      }
+    },
+    "settings.storedOnDevice" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los escaneos se guardan solo en este dispositivo."
+          }
+        }
+      }
+    },
+    "settings.units" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unidades"
+          }
+        }
+      }
+    },
+    "settings.units.automaticFooter" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automático usa el sistema de medida de tu región."
+          }
+        }
+      }
+    },
+    "settings.version" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versión"
+          }
+        }
+      }
+    },
+    "share.defaultFileName" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escaneo"
+          }
+        }
+      }
+    },
+    "share.error.imageFailed" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo crear la imagen del plano."
+          }
+        }
+      }
+    },
+    "share.floorPlan.fileName %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plano de %@"
+          }
+        }
+      }
+    },
+    "share.floorPlan.menuItem" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Imagen del plano (PNG)"
+          }
+        }
+      }
+    },
+    "share.floorPlan.preview %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plano de %@"
+          }
+        }
+      }
+    },
+    "share.measurements.fileName %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Medidas de %@"
+          }
+        }
+      }
+    },
+    "share.measurements.menuItem" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Medidas (CSV)"
+          }
+        }
+      }
+    },
+    "share.measurements.preview %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Medidas de %@"
+          }
+        }
+      }
+    },
+    "share.menu" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compartir"
+          }
+        }
+      }
+    },
+    "share.model.menuItem" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modelo 3D (USDZ)"
+          }
+        }
+      }
+    },
+    "share.model.preview %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modelo 3D de %@"
+          }
+        }
+      }
+    },
+    "units.automatic" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automático"
+          }
+        }
+      }
+    },
+    "units.imperial" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Imperial"
+          }
+        }
+      }
+    },
+    "units.metric" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Métrico"
+          }
+        }
+      }
+    },
+    "units.spoken.feetAndInches %lld %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld pies %2$@"
+          }
+        }
+      }
+    },
+    "units.spoken.inches %lld" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld pulgadas"
+          }
+        }
+      }
+    },
+    "units.spoken.inchesAndHalf %lld" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld pulgadas y media"
+          }
+        }
+      }
+    },
+    "units.spoken.meters %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ metros"
+          }
+        }
+      }
+    },
+    "units.spoken.squareFeet %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ pies cuadrados"
+          }
+        }
+      }
+    },
+    "units.spoken.squareMeters %@" : {
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ metros cuadrados"
+          }
+        }
+      }
+    }
   },
-  "version": "1.0"
+  "version" : "1.0"
 }

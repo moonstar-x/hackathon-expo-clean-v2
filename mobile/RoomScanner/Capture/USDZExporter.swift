@@ -7,7 +7,7 @@ enum USDZExporter {
         case nothingToExport
 
         var errorDescription: String? {
-            String(localized: "There's no 3D model to export for this scan.")
+            String(localized: "capture.error.nothingToExport")
         }
     }
 

@@ -15,18 +15,18 @@ struct ScanTipsView: View {
     }
 
     private let tips: [Tip] = [
-        Tip(symbol: "lightbulb.max", text: "Use good lighting. Apple recommends at least 50 lux."),
-        Tip(symbol: "camera.viewfinder", text: "Move slowly and point the camera at walls, corners, doors, and windows."),
-        Tip(symbol: "door.left.hand.open", text: "Keep the doors between rooms open so the rooms can be connected."),
-        Tip(symbol: "figure.walk", text: "Scan one room at a time. When a room is finished, tap **Done**, walk through the doorway to the next room, and tap **Start**."),
-        Tip(symbol: "ruler", text: "Rooms up to about 9 × 9 m (30 × 30 ft) work best."),
+        Tip(symbol: "lightbulb.max", text: "scanTips.lighting"),
+        Tip(symbol: "camera.viewfinder", text: "scanTips.moveSlowly"),
+        Tip(symbol: "door.left.hand.open", text: "scanTips.keepDoorsOpen"),
+        Tip(symbol: "figure.walk", text: "scanTips.oneRoomAtATime"),
+        Tip(symbol: "ruler", text: "scanTips.roomSize"),
     ]
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
-                    Text("Tips for a Good Scan")
+                    Text("scanTips.title")
                         .font(.largeTitle.bold())
                     ForEach(tips) { tip in
                         HStack(alignment: .top, spacing: 16) {
@@ -44,7 +44,7 @@ struct ScanTipsView: View {
             }
             .safeAreaInset(edge: .bottom) {
                 Button(action: onStart) {
-                    Text(mode == .firstRun ? "Start Scanning" : "Done")
+                    Text(mode == .firstRun ? "scanTips.startScanning" : "common.done")
                         .font(.headline)
                         .frame(maxWidth: .infinity)
                 }
@@ -56,7 +56,7 @@ struct ScanTipsView: View {
             .toolbar {
                 if let onCancel {
                     ToolbarItem(placement: .cancellationAction) {
-                        Button("Cancel", action: onCancel)
+                        Button("common.cancel", action: onCancel)
                     }
                 }
             }

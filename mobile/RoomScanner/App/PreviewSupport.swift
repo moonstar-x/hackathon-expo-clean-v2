@@ -12,9 +12,9 @@ enum PreviewData {
     }()
 
     /// The two-room sample apartment.
-    static var apartmentID: UUID { location(named: "Apartment")?.id ?? UUID() }
+    static var apartmentID: UUID { location(named: "Departamento")?.id ?? UUID() }
     /// A draft with two rooms but no raw data.
-    static var draftID: UUID { location(named: "Office")?.id ?? UUID() }
+    static var draftID: UUID { location(named: "Oficina")?.id ?? UUID() }
 
     static func location(named name: String) -> Location? {
         let request = Location.fetchRequest()
@@ -25,18 +25,18 @@ enum PreviewData {
     private static func seed(_ context: NSManagedObjectContext) {
         let apartment = SampleGeometry.twoRoomApartment()
         CoreDataLocationRepository.insertSample(
-            apartment, name: "Apartment",
+            apartment, name: "Departamento",
             thumbnail: FloorPlanImageRenderer.thumbnailPNG(for: apartment), in: context)
 
         let studio = SampleGeometry.rotated(SampleGeometry.lShapedRoom(), by: 0.4)
         CoreDataLocationRepository.insertSample(
-            studio, name: "Studio",
+            studio, name: "Estudio",
             thumbnail: FloorPlanImageRenderer.thumbnailPNG(for: studio),
             createdAt: .now.addingTimeInterval(-86_400 * 3), in: context)
 
         let draft = Location(context: context)
         draft.id = UUID()
-        draft.name = "Office"
+        draft.name = "Oficina"
         draft.createdAt = .now.addingTimeInterval(-86_400 * 7)
         draft.updatedAt = draft.createdAt
         draft.status = .draft
@@ -46,7 +46,7 @@ enum PreviewData {
             let room = Room(context: context)
             room.id = UUID()
             room.index = Int16(index)
-            room.name = "Room \(index + 1)"
+            room.name = String(localized: "roomType.unknown \(index + 1)")
             room.capturedAt = draft.createdAt
             room.location = draft
         }

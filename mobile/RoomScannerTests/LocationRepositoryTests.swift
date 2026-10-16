@@ -115,7 +115,7 @@ struct LocationRepositoryTests {
         #expect(location.roomCount == 2)
         #expect(abs(location.area - 34) < 1e-4)
         let raw = try await repository.loadRawData(locationID: id)
-        #expect(raw.rooms.map(\.name) == ["Living Room", "Bedroom"])
+        #expect(raw.rooms.map(\.name) == ["Sala", "Dormitorio"])
         #expect(!raw.canRebuild, "Samples have no raw RoomPlan data")
     }
 

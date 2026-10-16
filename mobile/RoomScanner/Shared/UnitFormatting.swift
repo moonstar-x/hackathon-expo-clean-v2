@@ -8,9 +8,9 @@ enum UnitSystem: String, CaseIterable, Identifiable, Sendable {
 
     var displayName: String {
         switch self {
-        case .automatic: String(localized: "Automatic")
-        case .metric: String(localized: "Metric")
-        case .imperial: String(localized: "Imperial")
+        case .automatic: String(localized: "units.automatic")
+        case .metric: String(localized: "units.metric")
+        case .imperial: String(localized: "units.imperial")
         }
     }
 
@@ -99,27 +99,27 @@ struct UnitFormatter: Sendable {
 
     // MARK: Spoken (VoiceOver) variants
 
-    /// "3.42 meters" or "11 feet 2 and a half inches".
+    /// "3.42 metros" or "11 pies 2 pulgadas y media".
     func spokenLength(_ meters: Double) -> String {
         switch system {
         case .metric:
-            return String(localized: "\(decimal(meters, digits: 2)) meters")
+            return String(localized: "units.spoken.meters \(decimal(meters, digits: 2))")
         case .imperial:
             let (feet, inches, half) = feetInchesHalves(meters)
-            let inchText = half ? String(localized: "\(inches) and a half inches") : String(localized: "\(inches) inches")
-            return String(localized: "\(feet) feet \(inchText)")
+            let inchText = half ? String(localized: "units.spoken.inchesAndHalf \(inches)") : String(localized: "units.spoken.inches \(inches)")
+            return String(localized: "units.spoken.feetAndInches \(feet) \(inchText)")
         }
     }
 
     func spokenLength(_ meters: Float) -> String { spokenLength(Double(meters)) }
 
-    /// "12.4 square meters" or "133 square feet".
+    /// "12.4 metros cuadrados" or "133 pies cuadrados".
     func spokenArea(_ squareMeters: Double) -> String {
         switch system {
         case .metric:
-            return String(localized: "\(decimal(squareMeters, digits: 1)) square meters")
+            return String(localized: "units.spoken.squareMeters \(decimal(squareMeters, digits: 1))")
         case .imperial:
-            return String(localized: "\(decimal(squareMeters * Self.squareFeetPerSquareMeter, digits: 0)) square feet")
+            return String(localized: "units.spoken.squareFeet \(decimal(squareMeters * Self.squareFeetPerSquareMeter, digits: 0))")
         }
     }
 
