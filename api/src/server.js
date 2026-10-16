@@ -4,6 +4,7 @@ import { API_ROOT, ConfigError, loadConfig } from './config.js';
 import { createApp, createLogger } from './app.js';
 import { openDatabase } from './db/connection.js';
 import { migrate } from './db/migrate.js';
+import { ensureInitialUser } from './modules/users/initialUser.js';
 
 // Real environment variables take precedence over values in api/.env.
 dotenv.config({ path: path.join(API_ROOT, '.env'), quiet: true });
@@ -23,6 +24,8 @@ const logger = createLogger(config);
 const db = openDatabase(config.databasePath);
 const applied = migrate(db);
 if (applied.length) logger.info({ migrations: applied }, 'applied database migrations');
+const initialUser = await ensureInitialUser(db, config);
+if (initialUser) logger.info({ email: initialUser.email }, 'created the initial user from ADMIN_EMAIL / ADMIN_PASSWORD');
 
 const app = createApp({ db, config, logger });
 const server = app.listen(config.port, (err) => {

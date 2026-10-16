@@ -54,6 +54,7 @@ describe('loadConfig', () => {
     expect(() => loadConfig({ ...testEnv, NODE_ENV: 'staging' })).toThrow(/NODE_ENV/);
     expect(() => loadConfig({ ...testEnv, ADMIN_EMAIL: 'not-an-email' })).toThrow(/ADMIN_EMAIL/);
     expect(() => loadConfig({ ...testEnv, ADMIN_PASSWORD: 'short' })).toThrow(/ADMIN_PASSWORD/);
+    expect(() => loadConfig({ ...testEnv, ADMIN_PASSWORD: 'x'.repeat(129) })).toThrow(/ADMIN_PASSWORD/);
     expect(() => loadConfig({ ...testEnv, JWT_EXPIRES_IN: 'soon' })).toThrow(/JWT_EXPIRES_IN/);
     expect(() => loadConfig({ ...testEnv, LOG_LEVEL: 'loud' })).toThrow(/LOG_LEVEL/);
     expect(() => loadConfig({ ...testEnv, CORS_ORIGIN: 'not a url' })).toThrow(/CORS_ORIGIN/);

@@ -4,7 +4,9 @@ export interface StoredAuth {
   token: string;
   /** ISO timestamp when the token expires. */
   expiresAt: string;
+  userId: number;
   email: string;
+  name: string | null;
 }
 
 // Every localStorage access is guarded: it can throw in private mode, when
@@ -15,14 +17,17 @@ export function readAuth(): StoredAuth | null {
     const raw = localStorage.getItem(AUTH_STORAGE_KEY);
     if (!raw) return null;
     const parsed: unknown = JSON.parse(raw);
+    // Sessions saved before user accounts existed have no userId; treat them as logged out.
     if (
       parsed &&
       typeof parsed === 'object' &&
       typeof (parsed as StoredAuth).token === 'string' &&
       typeof (parsed as StoredAuth).expiresAt === 'string' &&
+      typeof (parsed as StoredAuth).userId === 'number' &&
       typeof (parsed as StoredAuth).email === 'string'
     ) {
-      return parsed as StoredAuth;
+      const auth = parsed as StoredAuth;
+      return { ...auth, name: typeof auth.name === 'string' ? auth.name : null };
     }
     return null;
   } catch {
@@ -36,6 +41,12 @@ export function writeAuth(auth: StoredAuth): void {
   } catch {
     // Storage unavailable: the session will only last until the next reload.
   }
+}
+
+/** Keeps the stored identity in sync after the logged-in user edits their own account. */
+export function updateStoredUser(user: { email: string; name: string | null }): void {
+  const auth = readAuth();
+  if (auth) writeAuth({ ...auth, email: user.email, name: user.name });
 }
 
 export function clearAuth(): void {

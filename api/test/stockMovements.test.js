@@ -123,8 +123,9 @@ describe('stock movements', () => {
 
     const all = await api.get('/api/stock-movements');
     expect(all.headers['content-range']).toBe('stock-movements 0-2/3');
-    const ids = all.body.map((m) => m.id);
-    expect(ids).toEqual([...ids].sort((a, b) => b - a));
+    // Movements created in the same millisecond tie on createdAt (then sort by id ASC), so compare timestamps.
+    const times = all.body.map((m) => m.createdAt);
+    expect(times).toEqual([...times].sort().reverse());
 
     const forProduct = await api.list('/api/stock-movements', { filter: { productId: product.id } });
     expect(forProduct.body).toHaveLength(2);

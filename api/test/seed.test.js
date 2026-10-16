@@ -53,9 +53,9 @@ describe('seed', () => {
 describe('migrations', () => {
   it('records applied versions and skips them next time', () => {
     const db = openDatabase(':memory:');
-    expect(migrate(db)).toEqual(['001_init']);
+    expect(migrate(db)).toEqual(['001_init', '002_users']);
     expect(migrate(db)).toEqual([]);
-    expect(db.prepare('SELECT version FROM schema_migrations').pluck().all()).toEqual(['001_init']);
+    expect(db.prepare('SELECT version FROM schema_migrations ORDER BY version').pluck().all()).toEqual(['001_init', '002_users']);
   });
 
   it('enables foreign keys', () => {

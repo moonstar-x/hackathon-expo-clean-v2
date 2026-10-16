@@ -35,6 +35,8 @@ const fields = {
   createdBy: 'Registrado por',
   createdAt_gte: 'Desde la fecha',
   createdAt_lte: 'Hasta la fecha',
+  password: 'Contraseña',
+  lastLoginAt: 'Último acceso',
 };
 
 /** All built-in react-admin messages, including accessible labels and error states. */
@@ -227,5 +229,6 @@ export const spanishMessages = {
     'stock-movements': { name: 'Movimiento de inventario |||| Movimientos de inventario', fields },
     categories: { name: 'Categoría |||| Categorías', fields },
     suppliers: { name: 'Proveedor |||| Proveedores', fields },
+    users: { name: 'Usuario |||| Usuarios', fields },
   },
 } satisfies TranslationMessages;

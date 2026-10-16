@@ -1,6 +1,7 @@
 import CategoryIcon from '@mui/icons-material/Category';
 import Inventory2Icon from '@mui/icons-material/Inventory2';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import PeopleIcon from '@mui/icons-material/People';
 import SwapVertIcon from '@mui/icons-material/SwapVert';
 import { esES } from '@mui/material/locale';
 import { createTheme } from '@mui/material/styles';
@@ -16,7 +17,8 @@ import { CategoryCreate, CategoryEdit, CategoryList } from './resources/categori
 import { ProductCreate, ProductEdit, ProductList, ProductShow } from './resources/products';
 import { StockMovementCreate, StockMovementList, StockMovementShow } from './resources/stockMovements';
 import { SupplierCreate, SupplierEdit, SupplierList } from './resources/suppliers';
-import type { Product } from './types';
+import { UserCreate, UserEdit, UserList } from './resources/users';
+import type { Product, User } from './types';
 
 const localizedComponents = { components: { RaDateField: { defaultProps: { locales: APP_LOCALE } } } };
 const lightTheme = createTheme(defaultLightTheme, esES, localizedComponents);
@@ -72,6 +74,14 @@ export default function App({ config }: { config: AppConfig }) {
         create={SupplierCreate}
         edit={SupplierEdit}
         recordRepresentation="name"
+      />
+      <Resource
+        name="users"
+        icon={PeopleIcon}
+        list={UserList}
+        create={UserCreate}
+        edit={UserEdit}
+        recordRepresentation={(record: User) => record.name || record.email}
       />
     </Admin>
   );

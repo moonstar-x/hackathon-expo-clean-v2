@@ -18,6 +18,9 @@ const messages: Record<string, string> = {
   'Unit cannot be changed after stock movements exist': 'No se puede cambiar la unidad de un producto con movimientos de inventario.',
   'A category with this name already exists': 'Ya existe una categoría con este nombre.',
   'A supplier with this name already exists': 'Ya existe un proveedor con este nombre.',
+  'A user with this email already exists': 'Ya existe un usuario con este correo electrónico.',
+  'You cannot delete your own account': 'No puedes eliminar tu propia cuenta.',
+  'You cannot deactivate your own account': 'No puedes desactivar tu propia cuenta.',
   'Required': 'Obligatorio',
   'Must be a string': 'Debe ser texto.',
   'Must be a number': 'Debe ser un número.',
@@ -53,8 +56,8 @@ export function translateApiMessage(message: unknown, fallback = 'No se pudo com
   if (typeof message !== 'string') return fallback;
   if (Object.hasOwn(messages, message)) return messages[message];
 
-  let match = /^Must be at most (\d+) characters$/.exec(message);
-  if (match) return `Debe tener como máximo ${match[1]} caracteres.`;
+  let match = /^Must be at (most|least) (\d+) characters$/.exec(message);
+  if (match) return `Debe tener ${match[1] === 'most' ? 'como máximo' : 'al menos'} ${match[2]} caracteres.`;
   match = /^Must be (greater than|at least|at most) (\d+(?:\.\d+)?)$/.exec(message);
   if (match) {
     const comparison = { 'greater than': 'mayor que', 'at least': 'al menos', 'at most': 'como máximo' }[match[1]];
@@ -62,9 +65,15 @@ export function translateApiMessage(message: unknown, fallback = 'No se pudo com
   }
   match = /^Must have at most (\d+) decimal places$/.exec(message);
   if (match) return `Debe tener como máximo ${match[1]} decimales.`;
-  match = /^(Category|Supplier|Product|Stock movement) (\d+) (does not exist|not found)$/.exec(message);
+  match = /^(Category|Supplier|Product|Stock movement|User) (\d+) (does not exist|not found)$/.exec(message);
   if (match) {
-    const resource = { Category: 'La categoría', Supplier: 'El proveedor', Product: 'El producto', 'Stock movement': 'El movimiento' }[match[1]];
+    const resource = {
+      Category: 'La categoría',
+      Supplier: 'El proveedor',
+      Product: 'El producto',
+      'Stock movement': 'El movimiento',
+      User: 'El usuario',
+    }[match[1]];
     return `${resource} con ID ${match[2]} no existe.`;
   }
   match = /^(Category|Supplier) "(.+)" is used by (\d+) product\(s\)$/.exec(message);

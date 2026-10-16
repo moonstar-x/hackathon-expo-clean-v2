@@ -12,6 +12,7 @@ import { productsRouter } from './modules/products/router.js';
 import { statsRouter } from './modules/stats/router.js';
 import { stockMovementsRouter } from './modules/stockMovements/router.js';
 import { suppliersRouter } from './modules/suppliers/router.js';
+import { usersRouter } from './modules/users/router.js';
 
 /** Paths never written to logs: credentials and tokens. */
 export const LOG_REDACT_PATHS = [
@@ -69,12 +70,13 @@ export function createApp({ db, config, logger = createLogger(config) }) {
   app.use('/api/auth', authRouter(deps));
 
   const api = express.Router();
-  api.use(requireAuth(config));
+  api.use(requireAuth(deps));
   api.use('/categories', categoriesRouter(deps));
   api.use('/suppliers', suppliersRouter(deps));
   api.use('/products', productsRouter(deps));
   api.use('/stock-movements', stockMovementsRouter(deps));
   api.use('/stats', statsRouter(deps));
+  api.use('/users', usersRouter(deps));
   app.use('/api', api);
 
   app.use(notFoundHandler);

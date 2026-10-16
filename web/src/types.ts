@@ -1,4 +1,4 @@
-// Mirrors SPEC-002 §5. Duplicated on purpose: the admin shares no code with the API.
+// Mirrors SPEC-002 §5 and SPEC-003. Duplicated on purpose: the admin shares no code with the API.
 
 export const UNITS = ['unit', 'box', 'pack', 'roll', 'pair', 'L', 'mL', 'gal', 'kg', 'g'] as const;
 export type Unit = (typeof UNITS)[number];
@@ -61,6 +61,16 @@ export interface StockMovement {
   reference: string | null;
   createdBy: string;
   createdAt: string;
+}
+
+export interface User {
+  id: number;
+  email: string;
+  name: string | null;
+  active: boolean;
+  lastLoginAt: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Stats {
