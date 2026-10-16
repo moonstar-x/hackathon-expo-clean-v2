@@ -38,10 +38,11 @@ enum RepositoryError: Error, LocalizedError {
 /// persistence layer has no RoomPlan dependency and can be tested without a device.
 protocol LocationRepository: Sendable {
     func createDraft(name: String, createdAt: Date) async throws -> UUID
-    func appendRoom(locationID: UUID, roomID: UUID, index: Int, name: String,
+    func appendRoom(locationID: UUID, roomID: UUID, index: Int, name: String, type: LocationType?,
                     capturedRoomJSON: Data?, floorArea: Double, capturedAt: Date) async throws
     func deleteRoom(roomID: UUID) async throws
     func renameRoom(roomID: UUID, to name: String) async throws
+    func setRoomType(roomID: UUID, to type: LocationType?) async throws
     func finalize(locationID: UUID, geometry: ScanGeometry, structureJSON: Data?,
                   thumbnail: Data?) async throws
     /// nil when the location has no geometry yet (a draft). Throws when the data can't be decoded.
@@ -83,7 +84,7 @@ final class CoreDataLocationRepository: LocationRepository, @unchecked Sendable 
         }
     }
 
-    func appendRoom(locationID: UUID, roomID: UUID, index: Int, name: String,
+    func appendRoom(locationID: UUID, roomID: UUID, index: Int, name: String, type: LocationType?,
                     capturedRoomJSON: Data?, floorArea: Double, capturedAt: Date = .now) async throws {
         try await write { context in
             let location = try Self.location(locationID, in: context)
@@ -91,6 +92,7 @@ final class CoreDataLocationRepository: LocationRepository, @unchecked Sendable 
             room.id = roomID
             room.index = Int16(clamping: index)
             room.name = name
+            room.type = type
             room.capturedAt = capturedAt
             room.floorArea = floorArea
             room.capturedRoomJSON = capturedRoomJSON
@@ -115,6 +117,14 @@ final class CoreDataLocationRepository: LocationRepository, @unchecked Sendable 
         try await write { context in
             guard let room = try Self.room(roomID, in: context) else { return }
             room.name = name
+            room.location?.updatedAt = .now
+        }
+    }
+
+    func setRoomType(roomID: UUID, to type: LocationType?) async throws {
+        try await write { context in
+            guard let room = try Self.room(roomID, in: context) else { return }
+            room.type = type
             room.location?.updatedAt = .now
         }
     }

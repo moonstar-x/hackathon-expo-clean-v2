@@ -4,14 +4,14 @@ A small ERP-style inventory for a cleaning company: which products it has, how m
 
 | Folder | What | Stack | Docs |
 |---|---|---|---|
-| [`api/`](api/) | REST backend: categories, suppliers, products, append-only stock movement ledger, stats, users | Node.js 24, Express 5, SQLite, zod, JWT | [api/README.md](api/README.md) |
+| [`api/`](api/) | REST backend: categories, suppliers, products, append-only stock movement ledger, stats, users | Node.js 24, TypeScript, Express 5, SQLite, zod, JWT | [api/README.md](api/README.md) |
 | [`web/`](web/) | Admin UI: catalog management, stock movements, low-stock dashboard, user management | react-admin 5, Vite, TypeScript | [web/README.md](web/README.md) |
 
 The two services are **independent**. Each has its own `package.json`, lockfile, `.env` and README, and they share no code. There is no root `package.json` and no workspaces. They communicate only over HTTP, so each one installs, runs, tests and deploys on its own.
 
 ## Run locally
 
-Requires Node.js 24 (22 or later works).
+Requires Node.js 24 (22.18 or later works).
 
 ```bash
 # Terminal 1: API on http://localhost:4000

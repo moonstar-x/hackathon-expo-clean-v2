@@ -142,6 +142,7 @@ struct CaptureFlowView: View {
     private var reviewSheet: some View {
         RoomReviewSheet(
             name: $model.reviewName,
+            type: $model.reviewType,
             roomNumber: model.roomNumber,
             room: model.currentIssue == nil ? model.completedRooms.last?.geometry : nil,
             issue: model.currentIssue,

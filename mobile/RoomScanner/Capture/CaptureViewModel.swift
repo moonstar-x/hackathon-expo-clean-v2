@@ -48,6 +48,7 @@ final class CaptureViewModel {
         var room: CapturedRoom
         var geometry: RoomGeometry
         var name: String
+        var type: LocationType?
     }
 
     /// A failed Core Data write that can be retried (§11, "No se pudo guardar el escaneo").
@@ -73,6 +74,8 @@ final class CaptureViewModel {
     var persistenceFailure: PersistenceFailure?
     /// The editable name of the room under review (REV-1).
     var reviewName = ""
+    /// The type picked for the room under review. nil is "Sin especificar".
+    var reviewType: LocationType?
     /// The editable location name on the Save sheet (SAVE-1).
     var locationName = ""
 
@@ -154,9 +157,9 @@ final class CaptureViewModel {
         controller.finishRoom()
     }
 
-    /// Scan Next Room: commits the name and shows the "walk to the next room" interstitial.
+    /// Scan Next Room: commits the name and type and shows the "walk to the next room" interstitial.
     func scanNextRoom() {
-        commitReviewName()
+        commitReview()
         phase = .waitingForNextRoom
     }
 
@@ -181,7 +184,7 @@ final class CaptureViewModel {
     /// Finish, or Save N rooms from Cancel: ends the session and opens the Save sheet.
     func finish() {
         guard !completedRooms.isEmpty else { return }
-        if phase == .reviewing { commitReviewName() }
+        if phase == .reviewing { commitReview() }
         controller.endSession()
         liveRoom = nil
         locationName = Location.defaultName(for: draftCreatedAt)
@@ -268,9 +271,11 @@ final class CaptureViewModel {
         if completedRooms.isEmpty, locationID == nil {
             draftCreatedAt = .now
         }
-        completedRooms.append(CompletedRoom(id: id, room: room, geometry: geometry, name: name))
+        let type = LocationType(detected: geometry.detectedType)
+        completedRooms.append(CompletedRoom(id: id, room: room, geometry: geometry, name: name, type: type))
         liveRoom = nil
         reviewName = name
+        reviewType = type
         phase = .reviewing
 
         // §10.2: the draft is created when the first room completes, and every room is written right away.
@@ -279,7 +284,7 @@ final class CaptureViewModel {
             guard let self else { return }
             let json = try await Task.detached { try RoomPlanCoding.encode(room) }.value
             let locationID = try await self.ensureDraft(repository)
-            try await repository.appendRoom(locationID: locationID, roomID: id, index: index, name: name,
+            try await repository.appendRoom(locationID: locationID, roomID: id, index: index, name: name, type: type,
                                             capturedRoomJSON: json, floorArea: floorArea, capturedAt: .now)
         }
     }
@@ -327,14 +332,23 @@ final class CaptureViewModel {
         _controller?.endSession()
     }
 
-    private func commitReviewName() {
+    /// Writes the name and type edited on the review sheet, if they changed.
+    private func commitReview() {
         guard let index = completedRooms.indices.last else { return }
-        let name = reviewName.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !name.isEmpty, name != completedRooms[index].name else { return }
-        completedRooms[index].name = name
         let id = completedRooms[index].id
-        enqueuePersistence { repository in
-            try await repository.renameRoom(roomID: id, to: name)
+        let name = reviewName.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !name.isEmpty, name != completedRooms[index].name {
+            completedRooms[index].name = name
+            enqueuePersistence { repository in
+                try await repository.renameRoom(roomID: id, to: name)
+            }
+        }
+        let type = reviewType
+        if type != completedRooms[index].type {
+            completedRooms[index].type = type
+            enqueuePersistence { repository in
+                try await repository.setRoomType(roomID: id, to: type)
+            }
         }
     }
 
