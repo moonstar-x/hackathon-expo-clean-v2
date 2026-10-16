@@ -40,6 +40,7 @@ export function createLogger(config) {
  */
 export function createApp({ db, config, logger = createLogger(config) }) {
   const app = express();
+  app.set('trust proxy', config.trustProxy);
   app.disable('x-powered-by');
 
   app.use(helmet());
