@@ -1,4 +1,5 @@
 import cors from 'cors';
+import { measurementsRouter } from './modules/measurements/router.js';
 import express from 'express';
 import helmet from 'helmet';
 import pino from 'pino';
@@ -47,7 +48,7 @@ export function createApp({ db, config, logger = createLogger(config) }) {
   app.use(
     cors({
       origin: [...config.corsOrigins],
-      exposedHeaders: ['Content-Range'],
+      exposedHeaders: ['Content-Range', 'Content-Disposition', 'Location'],
       // ra-data-simple-rest sends `Range: <resource>=<start>-<end>` on every getList.
       // It is not a CORS-safelisted header, so the preflight must allow it.
       allowedHeaders: ['Content-Type', 'Authorization', 'Range'],
@@ -72,6 +73,7 @@ export function createApp({ db, config, logger = createLogger(config) }) {
 
   const api = express.Router();
   api.use(requireAuth(deps));
+  api.use('/measurements', measurementsRouter(deps));
   api.use('/categories', categoriesRouter(deps));
   api.use('/suppliers', suppliersRouter(deps));
   api.use('/products', productsRouter(deps));

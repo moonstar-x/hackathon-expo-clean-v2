@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs';
+import { createMeasurementsRepository } from '../modules/measurements/repository.js';
+import { validateUpload } from '../modules/measurements/schemas.js';
 import { createCategoriesRepository } from '../modules/categories/repository.js';
 import { createProductsRepository } from '../modules/products/repository.js';
 import { createStockMovementsRepository } from '../modules/stockMovements/repository.js';
@@ -86,6 +89,7 @@ const MOVEMENTS = [
  * @returns {{ seeded: boolean, categories?: number, suppliers?: number, products?: number, movements?: number }}
  */
 export function seed(db, { createdBy }) {
+  seedMeasurement(db, createdBy);
   if (db.prepare('SELECT COUNT(*) FROM products').pluck().get() > 0) return { seeded: false };
 
   const categories = createCategoriesRepository(db);
@@ -136,4 +140,14 @@ export function seed(db, { createdBy }) {
       movements: db.prepare('SELECT COUNT(*) FROM stock_movements').pluck().get(),
     };
   })();
+}
+
+/** Independent from inventory seeding, so an existing installation also gets a sample. */
+function seedMeasurement(db, email) {
+  if (db.prepare('SELECT COUNT(*) FROM measurements').pluck().get()) return;
+  const directory = new URL('./fixtures/sample-measurement/', import.meta.url);
+  const files = Object.fromEntries([['geometry', 'geometry.json'], ['floorPlan', 'floor-plan.png'], ['thumbnail', 'thumbnail.png']].map(([kind, name]) => [kind, [{ buffer: readFileSync(new URL(name, directory)) }]]));
+  const metadata = validateUpload(JSON.parse(readFileSync(new URL('metadata.json', directory), 'utf8')), files);
+  const user = db.prepare('SELECT id, email FROM users WHERE email = ? COLLATE NOCASE').get(email) ?? { id: null, email };
+  createMeasurementsRepository(db, { publicUrl: 'http://localhost' }).upload(metadata, files, user);
 }

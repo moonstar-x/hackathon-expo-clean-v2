@@ -1,3 +1,4 @@
+import multer from 'multer';
 import { ZodError } from 'zod';
 import { HttpError } from '../lib/errors.js';
 
@@ -13,6 +14,11 @@ export function zodIssuesToErrors(issues) {
 
 function toHttpError(err) {
   if (err instanceof HttpError) return err;
+
+  if (err instanceof multer.MulterError) {
+    const large = ['LIMIT_FILE_SIZE', 'LIMIT_FIELD_VALUE'].includes(err.code);
+    return new HttpError(large ? 413 : 400, large ? 'PAYLOAD_TOO_LARGE' : 'BAD_REQUEST', large ? 'Measurement part is too large' : 'Invalid multipart body', err.field ? { [err.field]: err.message } : undefined);
+  }
 
   if (err instanceof ZodError) {
     const errors = zodIssuesToErrors(err.issues);
