@@ -26,6 +26,7 @@ struct HomeView: View {
     struct LocationReference: Identifiable, Equatable {
         var id: UUID
         var name: String
+        var uploaded: Bool
     }
 
     var body: some View {
@@ -59,8 +60,8 @@ struct HomeView: View {
         ) { reference in
             Button(.commonDelete, role: .destructive) { delete(reference) }
             Button(.commonCancel, role: .cancel) {}
-        } message: { _ in
-            Text(.commonCannotUndo)
+        } message: { reference in
+            if reference.uploaded { Text(.syncDeleteUploaded) } else { Text(.commonCannotUndo) }
         }
         .alert(Text(.commonRenameScan),
                isPresented: Binding(get: { pendingRename != nil }, set: { if !$0 { pendingRename = nil } }),
@@ -198,7 +199,7 @@ struct HomeView: View {
     }
 
     private func reference(for location: Location) -> LocationReference? {
-        location.id.map { LocationReference(id: $0, name: location.displayName) }
+        location.id.map { LocationReference(id: $0, name: location.displayName, uploaded: location.syncStatus == .uploaded) }
     }
 
     private func beginRename(_ location: Location) {

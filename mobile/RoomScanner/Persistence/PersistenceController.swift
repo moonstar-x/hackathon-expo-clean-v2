@@ -27,6 +27,10 @@ final class PersistenceController: @unchecked Sendable {
         if inMemory, let description = container.persistentStoreDescriptions.first {
             description.url = URL(fileURLWithPath: "/dev/null")
         }
+        for description in container.persistentStoreDescriptions {
+            description.shouldMigrateStoreAutomatically = true
+            description.shouldInferMappingModelAutomatically = true
+        }
         container.loadPersistentStores { description, error in
             if let error {
                 Log.persistence.error("Failed to load store at \(description.url?.path ?? "?"): \(error)")

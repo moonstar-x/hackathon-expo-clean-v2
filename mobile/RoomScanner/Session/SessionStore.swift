@@ -22,8 +22,9 @@ final class SessionStore {
          makeClient: @escaping (AppConfiguration) -> any APIClientProtocol = { APIClient(configuration: $0) }) {
         self.storage = storage; self.defaults = defaults; self.makeClient = makeClient
         configurationValue = value ?? "(missing)"
-        configuration = try? AppConfiguration(value: value)
-        client = configuration.map(makeClient)
+        let parsedConfiguration = try? AppConfiguration(value: value)
+        configuration = parsedConfiguration
+        client = parsedConfiguration.map(makeClient)
         lastLoginEmail = defaults.string(forKey: "lastLoginEmail") ?? ""
         restore()
     }

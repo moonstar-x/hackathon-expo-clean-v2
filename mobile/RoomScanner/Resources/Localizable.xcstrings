@@ -1679,7 +1679,7 @@
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Los escaneos se guardan solo en este dispositivo."
+            "value": "Los escaneos se guardan en este dispositivo y se suben al servidor de tu organización."
           }
         }
       }
@@ -2197,6 +2197,193 @@
           "stringUnit": {
             "state": "translated",
             "value": "La URL del servidor no es válida."
+          }
+        }
+      }
+    },
+    "sync.payloadError": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudieron preparar los archivos de esta medición."
+          }
+        }
+      }
+    },
+    "sync.conflict": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otra cuenta ya subió esta medición."
+          }
+        }
+      }
+    },
+    "sync.pending": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pendiente de subir"
+          }
+        }
+      }
+    },
+    "sync.uploading": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subiendo"
+          }
+        }
+      }
+    },
+    "sync.uploaded": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subido"
+          }
+        }
+      }
+    },
+    "sync.uploadedAt": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subido el %(date)@"
+          }
+        }
+      }
+    },
+    "sync.failed": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Error al subir"
+          }
+        }
+      }
+    },
+    "sync.localOnly": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solo en este dispositivo"
+          }
+        }
+      }
+    },
+    "sync.otherAccount": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De otra cuenta"
+          }
+        }
+      }
+    },
+    "sync.ownedBy": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pertenece a %(email)@"
+          }
+        }
+      }
+    },
+    "sync.upload": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subir"
+          }
+        }
+      }
+    },
+    "sync.retry": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reintentar"
+          }
+        }
+      }
+    },
+    "sync.error": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo subir: %(message)@"
+          }
+        }
+      }
+    },
+    "sync.deleteUploaded": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se eliminará de este dispositivo. La copia subida al servidor se conserva."
+          }
+        }
+      }
+    },
+    "settings.sync": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sincronización"
+          }
+        }
+      }
+    },
+    "settings.syncPending": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%(count)lld mediciones sin subir"
+          }
+        }
+      }
+    },
+    "settings.syncNow": {
+      "extractionState": "manual",
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subir ahora"
           }
         }
       }

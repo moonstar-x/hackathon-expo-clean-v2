@@ -45,6 +45,18 @@ struct APIClientTests {
         let session = try await api.login(email: " ana@example.com ", password: "password")
         #expect(session.token == "abc"); #expect(try await api.me(token: session.token).id == 1)
     }
+    @Test(arguments: [200, 201]) func uploadAcceptsCreationAndReplay(_ status: Int) async throws {
+        let api = try client { request in
+            #expect(request.url?.path == "/prefix/api/measurements")
+            #expect(request.value(forHTTPHeaderField: "Authorization") == "Bearer abc")
+            #expect(request.value(forHTTPHeaderField: "Content-Type") == "multipart/form-data; boundary=RoomScanner-test")
+            return (status, Data(#"{"id":12}"#.utf8))
+        }
+        let file = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try Data("body".utf8).write(to: file)
+        defer { try? FileManager.default.removeItem(at: file) }
+        #expect(try await api.upload(file: file, boundary: "RoomScanner-test", token: "abc") == 12)
+    }
     @Test func mapsErrors() async throws {
         let forbidden = try client { _ in (422, Data(#"{"code":"VALIDATION_ERROR","message":"Bad input"}"#.utf8)) }
         await #expect(throws: APIError.server(status: 422, code: "VALIDATION_ERROR", message: "Bad input")) { try await forbidden.me(token: "abc") }

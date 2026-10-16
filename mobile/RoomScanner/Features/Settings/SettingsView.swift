@@ -1,7 +1,10 @@
+import CoreData
 import SwiftUI
 
 /// Unit preference and app information (§7.8).
 struct SettingsView: View {
+    @FetchRequest(sortDescriptors: []) private var locations: FetchedResults<Location>
+    @Environment(\.uploadQueue) private var queue
     @Environment(\.sessionStore) private var session
     @State private var confirmLogout = false
     @State private var serverURL = ""
@@ -19,6 +22,15 @@ struct SettingsView: View {
                             Text(user.email)
                         }
                         Button(.settingsLogout, role: .destructive) { confirmLogout = true }
+                    }
+                    Section(.settingsSync) {
+                        Text(.settingsSyncPending(count: pendingLocations.count))
+                        Button(.settingsSyncNow) {
+                            Task {
+                                for id in pendingLocations.compactMap(\.id) { await queue?.retry(locationID: id) }
+                                queue?.run()
+                            }
+                        }
                     }
                     Section(.settingsServer) {
                         Text(session.configuration?.baseURL.host ?? "")
@@ -59,6 +71,8 @@ struct SettingsView: View {
             .confirmationDialog(String(localized: .settingsLogoutConfirm), isPresented: $confirmLogout, titleVisibility: .visible) {
                 Button(.settingsLogout, role: .destructive) { session?.logout(); dismiss() }
                 Button(.commonCancel, role: .cancel) {}
+            } message: {
+                if !pendingLocations.isEmpty { Text(.settingsLogoutPending(count: pendingLocations.count)) }
             }
             .navigationTitle(.homeSettings)
             .navigationBarTitleDisplayMode(.inline)
@@ -68,6 +82,10 @@ struct SettingsView: View {
                 }
             }
         }
+    }
+
+    private var pendingLocations: [Location] {
+        locations.filter { $0.ownerUserID == session?.session?.user.id && $0.status == .complete && [.pending, .uploading, .failed].contains($0.syncStatus) }
     }
 
     #if DEBUG

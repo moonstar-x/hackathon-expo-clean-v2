@@ -14,9 +14,14 @@ final class APIClient: APIClientProtocol, @unchecked Sendable {
         self.configuration = configuration
         let json = URLSessionConfiguration.default
         json.timeoutIntervalForRequest = 30
+        json.urlCache = nil
+        json.requestCachePolicy = .reloadIgnoringLocalCacheData
+        json.httpCookieStorage = nil
         self.session = session ?? URLSession(configuration: json)
         let upload = URLSessionConfiguration.default
         upload.timeoutIntervalForRequest = 60
+        upload.urlCache = nil
+        upload.httpCookieStorage = nil
         upload.timeoutIntervalForResource = 15 * 60
         uploadSession = session ?? URLSession(configuration: upload)
     }
