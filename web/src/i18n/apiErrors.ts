@@ -1,3 +1,4 @@
+import { REQUEST_FAILED_MESSAGE } from '../constants/http';
 import { formatQuantity } from '../utils/format';
 
 const messages: Record<string, string> = {
@@ -57,46 +58,45 @@ const codeMessages: Record<string, string> = {
   INTERNAL_ERROR: messages['Internal server error'],
 };
 
+const comparisons: Record<string, string> = { 'greater than': 'mayor que', 'at least': 'al menos', 'at most': 'como máximo' };
+
+const resourceNames: Record<string, string> = {
+  Category: 'La categoría',
+  Supplier: 'El proveedor',
+  Product: 'El producto',
+  'Stock movement': 'El movimiento',
+  User: 'El usuario',
+  Measurement: 'La medición',
+};
+
 /** The API contract stays unchanged; notifications and inline field errors are localized here. */
-export function translateApiMessage(message: unknown, fallback = 'No se pudo completar la solicitud.'): string {
+export const translateApiMessage = (message: unknown, fallback: string = REQUEST_FAILED_MESSAGE): string => {
   if (typeof message !== 'string') return fallback;
   if (Object.hasOwn(messages, message)) return messages[message];
 
-  let match = /^Must be at (most|least) (\d+) characters$/.exec(message);
+  let match: RegExpExecArray | null = /^Must be at (most|least) (\d+) characters$/.exec(message);
   if (match) return `Debe tener ${match[1] === 'most' ? 'como máximo' : 'al menos'} ${match[2]} caracteres.`;
   match = /^Must be (greater than|at least|at most) (\d+(?:\.\d+)?)$/.exec(message);
-  if (match) {
-    const comparison = { 'greater than': 'mayor que', 'at least': 'al menos', 'at most': 'como máximo' }[match[1]];
-    return `Debe ser ${comparison} ${formatQuantity(Number(match[2]))}.`;
-  }
+  if (match) return `Debe ser ${comparisons[match[1]]} ${formatQuantity(Number(match[2]))}.`;
   match = /^Must have at most (\d+) decimal places$/.exec(message);
   if (match) return `Debe tener como máximo ${match[1]} decimales.`;
   match = /^(Category|Supplier|Product|Stock movement|User|Measurement) (\d+) (does not exist|not found)$/.exec(message);
-  if (match) {
-    const resource = {
-      Category: 'La categoría',
-      Supplier: 'El proveedor',
-      Product: 'El producto',
-      'Stock movement': 'El movimiento',
-      User: 'El usuario',
-      Measurement: 'La medición',
-    }[match[1]];
-    return `${resource} con ID ${match[2]} no existe.`;
-  }
+  if (match) return `${resourceNames[match[1]]} con ID ${match[2]} no existe.`;
   match = /^(Category|Supplier) "(.+)" is used by (\d+) product\(s\)$/.exec(message);
   if (match) {
-    const resource = match[1] === 'Category' ? 'La categoría' : 'El proveedor';
-    return `${resource} «${match[2]}» se utiliza en ${match[3]} ${match[3] === '1' ? 'producto' : 'productos'}.`;
+    return `${resourceNames[match[1]]} «${match[2]}» se utiliza en ${match[3]} ${match[3] === '1' ? 'producto' : 'productos'}.`;
   }
   match = /^(Category|Supplier) "(.+)" is used by products$/.exec(message);
-  if (match) return `${match[1] === 'Category' ? 'La categoría' : 'El proveedor'} «${match[2]}» está en uso por productos.`;
+  if (match) return `${resourceNames[match[1]]} «${match[2]}» está en uso por productos.`;
   match = /^Insufficient stock: requested ([\d.e+-]+) (\S+), available ([\d.e+-]+) (\S+)$/.exec(message);
   if (match) return `Existencias insuficientes: cantidad solicitada ${formatQuantity(Number(match[1]), match[2])}; disponible ${formatQuantity(Number(match[3]), match[4])}.`;
   if (message.startsWith('Must be one of:')) return 'Selecciona una de las opciones disponibles.';
   return fallback;
-}
+};
 
-export function translateApiError(message: unknown, code?: unknown): string {
-  const fallback = typeof code === 'string' && Object.hasOwn(codeMessages, code) ? codeMessages[code] : undefined;
+/** An API error in Spanish: its message when known, else what its code means, else a generic line. */
+export const translateApiError = (message: unknown, code?: unknown): string => {
+  const fallback: string | undefined =
+    typeof code === 'string' && Object.hasOwn(codeMessages, code) ? codeMessages[code] : undefined;
   return translateApiMessage(message, fallback);
-}
+};

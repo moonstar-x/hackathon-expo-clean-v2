@@ -1,10 +1,14 @@
+import type { ReactElement } from 'react';
 import { Create } from 'react-admin';
-import { ProductForm } from './ProductForm';
+import CreateHeader from '../../components/CreateHeader';
+import ProductForm from '../../components/products/Form/ProductForm';
+import { WIDE_FORM_MAX_WIDTH } from '../../constants/components';
+import { formPageSx } from '../../styles/pages';
 
-export function ProductCreate() {
-  return (
-    <Create redirect="show">
-      <ProductForm mode="create" />
-    </Create>
-  );
-}
+const ProductCreate = (): ReactElement => (
+  <Create redirect="show" actions={<CreateHeader eyebrow="app.menu.inventory" />} sx={formPageSx(WIDE_FORM_MAX_WIDTH)}>
+    <ProductForm mode="create" />
+  </Create>
+);
+
+export default ProductCreate;

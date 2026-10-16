@@ -1,27 +1,19 @@
-import { DeleteButton, Edit, SaveButton, ShowButton, Toolbar, TopToolbar } from 'react-admin';
-import { ProductForm } from './ProductForm';
+import type { ReactElement } from 'react';
+import { Edit, ShowButton } from 'react-admin';
+import EditHeader from '../../components/EditHeader';
+import ProductForm from '../../components/products/Form/ProductForm';
+import { WIDE_FORM_MAX_WIDTH } from '../../constants/components';
+import { formPageSx } from '../../styles/pages';
 
-function ProductEditToolbar() {
-  return (
-    <Toolbar sx={{ justifyContent: 'space-between' }}>
-      <SaveButton />
-      <DeleteButton mutationMode="pessimistic" />
-    </Toolbar>
-  );
-}
+const ProductEdit = (): ReactElement => (
+  <Edit
+    mutationMode="pessimistic"
+    redirect="show"
+    actions={<EditHeader actions={<ShowButton />} />}
+    sx={formPageSx(WIDE_FORM_MAX_WIDTH)}
+  >
+    <ProductForm mode="edit" />
+  </Edit>
+);
 
-export function ProductEdit() {
-  return (
-    <Edit
-      mutationMode="pessimistic"
-      redirect="show"
-      actions={
-        <TopToolbar>
-          <ShowButton />
-        </TopToolbar>
-      }
-    >
-      <ProductForm mode="edit" toolbar={<ProductEditToolbar />} />
-    </Edit>
-  );
-}
+export default ProductEdit;
