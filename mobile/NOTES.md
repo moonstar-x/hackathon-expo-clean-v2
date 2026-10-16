@@ -31,7 +31,7 @@ Deviations from SPEC-001, items skipped or left unverified, and known risks. Upd
 | Scan tips screen (§7.3) | It also has a Cancel button on first run. | It's the first screen of a full-screen cover, so it needs a way out. |
 | Wall label side | Labels go on the side of the wall away from the plan's center. | The spec says only "offset 12 pt perpendicular". |
 | DEBUG extras | "Add rotated L-shaped room" menu item, plus the `-seedSamples`, `-openFirst`, and `-detailTab` launch arguments (see README) | They make the Simulator checks in §16 repeatable. |
-| English UI | Spanish-only UI (`es`) with semantic localization keys (see README, Localization) | Requested after implementation. The CSV export keeps its English column and element names, because it's a data format rather than UI. |
+| English UI | Spanish-only UI (`es`). Strings are manually managed String Catalog keys with Xcode-generated symbols (see README, Localization). | Requested after implementation. The CSV export keeps its English column and element names, because it's a data format rather than UI. |
 | Milestone commits (§14) | Delivered as one commit | All five milestones were built and verified in one pass. Splitting them afterward would have produced commits that don't build on their own. |
 
 ## SDK differences

@@ -45,7 +45,7 @@ struct SceneKitView: UIViewRepresentable {
         model.scene.rootNode.childNode(withName: SceneBuilder.objectsNodeName, recursively: true)?
             .isHidden = !showObjects
         view.accessibilityLabel = accessibilityLabel
-        view.accessibilityHint = String(localized: "common.seeMeasurementsHint")
+        view.accessibilityHint = String(localized: .commonSeeMeasurementsHint)
     }
 
     /// Replaces the point of view with a fresh copy of the initial camera. There's no animation,

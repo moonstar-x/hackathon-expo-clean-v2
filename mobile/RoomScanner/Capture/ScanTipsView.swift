@@ -11,22 +11,22 @@ struct ScanTipsView: View {
     private struct Tip: Identifiable {
         let id = UUID()
         let symbol: String
-        let text: LocalizedStringKey
+        let text: LocalizedStringResource
     }
 
     private let tips: [Tip] = [
-        Tip(symbol: "lightbulb.max", text: "scanTips.lighting"),
-        Tip(symbol: "camera.viewfinder", text: "scanTips.moveSlowly"),
-        Tip(symbol: "door.left.hand.open", text: "scanTips.keepDoorsOpen"),
-        Tip(symbol: "figure.walk", text: "scanTips.oneRoomAtATime"),
-        Tip(symbol: "ruler", text: "scanTips.roomSize"),
+        Tip(symbol: "lightbulb.max", text: .scanTipsLighting),
+        Tip(symbol: "camera.viewfinder", text: .scanTipsMoveSlowly),
+        Tip(symbol: "door.left.hand.open", text: .scanTipsKeepDoorsOpen),
+        Tip(symbol: "figure.walk", text: .scanTipsOneRoomAtATime),
+        Tip(symbol: "ruler", text: .scanTipsRoomSize),
     ]
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
-                    Text("scanTips.title")
+                    Text(.scanTipsTitle)
                         .font(.largeTitle.bold())
                     ForEach(tips) { tip in
                         HStack(alignment: .top, spacing: 16) {
@@ -35,7 +35,7 @@ struct ScanTipsView: View {
                                 .foregroundStyle(.tint)
                                 .frame(width: 36)
                                 .accessibilityHidden(true)
-                            Text(tip.text)
+                            Text(AttributedString(localized: tip.text))
                                 .fixedSize(horizontal: false, vertical: true)
                         }
                     }
@@ -44,7 +44,7 @@ struct ScanTipsView: View {
             }
             .safeAreaInset(edge: .bottom) {
                 Button(action: onStart) {
-                    Text(mode == .firstRun ? "scanTips.startScanning" : "common.done")
+                    Text(mode == .firstRun ? .scanTipsStartScanning : .commonDone)
                         .font(.headline)
                         .frame(maxWidth: .infinity)
                 }
@@ -56,7 +56,7 @@ struct ScanTipsView: View {
             .toolbar {
                 if let onCancel {
                     ToolbarItem(placement: .cancellationAction) {
-                        Button("common.cancel", action: onCancel)
+                        Button(.commonCancel, action: onCancel)
                     }
                 }
             }

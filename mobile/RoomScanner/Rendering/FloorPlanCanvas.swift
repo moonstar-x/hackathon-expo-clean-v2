@@ -55,7 +55,7 @@ struct FloorPlanCanvas: View {
         .background(background)
         .accessibilityElement()
         .accessibilityLabel(accessibilityLabel)
-        .accessibilityHint(style == .full ? String(localized: "common.seeMeasurementsHint") : "")
+        .accessibilityHint(style == .full ? String(localized: .commonSeeMeasurementsHint) : "")
     }
 
     private var formatter: UnitFormatter {
@@ -74,9 +74,9 @@ struct FloorPlanCanvas: View {
         let area = formatter.spokenArea(LocationMetrics.totalFloorArea(of: geometry))
         switch style {
         case .full, .thumbnail:
-            return Text("canvas.a11y.full \(Counted.rooms(count)) \(area)")
+            return Text(.canvasA11YFull(rooms: Counted.rooms(count), area: area))
         case .mini:
-            return Text("canvas.a11y.live \(Counted.rooms(count))")
+            return Text(.canvasA11YLive(rooms: Counted.rooms(count)))
         }
     }
 }

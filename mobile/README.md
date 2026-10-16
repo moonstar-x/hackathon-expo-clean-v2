@@ -80,21 +80,26 @@ xcrun simctl launch booted com.example.RoomScanner -seedSamples -openFirst -deta
 
 ## Localization
 
-The UI is Spanish only (`es` is the development language). The code never contains UI text. It uses semantic keys,
-and the wording lives in `RoomScanner/Resources/Localizable.xcstrings`:
+The UI is Spanish only (`es` is the development language). It follows Apple's String Catalog approach with
+**generated symbols** (Xcode 26). The code never contains UI text: every string is a manually managed key in
+`RoomScanner/Resources/Localizable.xcstrings`, and Xcode generates a type-safe `LocalizedStringResource` for it
+(`STRING_CATALOG_GENERATE_SYMBOLS`).
 
 ```swift
-Text("home.newScan")                                  // "Nuevo escaneo"
-String(localized: "liveOverlay.roomTitle \(number)")  // key "liveOverlay.roomTitle %lld", value "Habitación %lld"
+Text(.homeNewScan)                                    // key "home.newScan" → "Nuevo escaneo"
+Button(.commonCancel, role: .cancel) {}
+String(localized: .liveOverlayRoomTitle(number: n))  // "Habitación %(number)lld"
 ```
 
-- Keys are `area.element[.detail]` in lowerCamel. Shared strings use `common.*` (`common.cancel`, `common.save`, …).
-- Arguments go after the key, separated by spaces. The value holds the wording and can reorder them (`%1$@`, `%2$@`).
-- Counted nouns (`Shared/Inflection.swift`) keep the inflection markup in the value: `^[%lld habitación](inflect: true)`.
+- Keys are `area.element[.detail]` in lowerCamel. Shared strings use `common.*`. Xcode turns `home.newScan` into `.homeNewScan`.
+- Name placeholders in the value (`%(number)lld`, `%(name)@`). The names become the symbol's argument labels.
+- Counted nouns (`Shared/Inflection.swift`) keep the inflection markup in the value: `^[%(count)lld habitación](inflect: true)`.
+- APIs without a `LocalizedStringResource` overload on iOS 17 (`TextField`, `LabeledContent`, alert titles) take
+  `String(localized: .key)` or `Text(.key)`.
 
-To add a string, use a new key in code, build, and run `scripts/sync-strings.sh` (Xcode syncs automatically in the IDE).
-Then give the key its `es` value in the catalog. `scripts/check-strings.sh` fails if any key has no Spanish value, is
-stale, or isn't a semantic key.
+To add a string, open the catalog in Xcode and add a key with its Spanish value (it's manually managed, with
+Generate Swift Symbol on). Then use the symbol in code. A missing or misspelled key is a compile error. Xcode
+updates the catalog when you build in the IDE. After a command-line build, run `scripts/sync-strings.sh`.
 
 ## Project layout
 

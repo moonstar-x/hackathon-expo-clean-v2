@@ -27,7 +27,7 @@ enum RepositoryError: Error, LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .locationNotFound: String(localized: "error.locationNotFound")
+        case .locationNotFound: String(localized: .errorLocationNotFound)
         }
     }
 }

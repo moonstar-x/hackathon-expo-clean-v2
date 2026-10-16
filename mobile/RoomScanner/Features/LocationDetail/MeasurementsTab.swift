@@ -26,12 +26,12 @@ struct MeasurementsTab: View {
             }
         }
         .listStyle(.insetGrouped)
-        .alert("measurements.renameRoom",
+        .alert(Text(.measurementsRenameRoom),
                isPresented: Binding(get: { renamingRoom != nil }, set: { if !$0 { renamingRoom = nil } }),
                presenting: renamingRoom) { target in
-            TextField("common.name", text: $renameText)
-            Button("common.save") { onRenameRoom(target.id, renameText) }
-            Button("common.cancel", role: .cancel) {}
+            TextField(String(localized: .commonName), text: $renameText)
+            Button(.commonSave) { onRenameRoom(target.id, renameText) }
+            Button(.commonCancel, role: .cancel) {}
         }
     }
 
@@ -48,15 +48,15 @@ struct MeasurementsTab: View {
         let total = LocationMetrics.totalFloorArea(of: geometry)
         let approximate = LocationMetrics.isAreaApproximate(geometry)
         let footprint = LocationMetrics.footprint(of: geometry)
-        return Section("common.summary") {
-            row(String(localized: "measurements.totalFloorArea"), formatter.area(total, approximate: approximate),
+        return Section(.commonSummary) {
+            row(String(localized: .measurementsTotalFloorArea), formatter.area(total, approximate: approximate),
                 spoken: formatter.spokenArea(total))
-            row(String(localized: "common.rooms"), "\(geometry.rooms.count)", spoken: "\(geometry.rooms.count)")
+            row(String(localized: .commonRooms), "\(geometry.rooms.count)", spoken: "\(geometry.rooms.count)")
             if let footprint {
-                row(String(localized: "measurements.footprint"), formatter.lengthPair(footprint.width, footprint.length),
-                    spoken: String(localized: "measurements.lengthByLength \(formatter.spokenLength(footprint.width)) \(formatter.spokenLength(footprint.length))"))
+                row(String(localized: .measurementsFootprint), formatter.lengthPair(footprint.width, footprint.length),
+                    spoken: String(localized: .measurementsLengthByLength(first: formatter.spokenLength(footprint.width), second: formatter.spokenLength(footprint.length))))
             }
-            row(String(localized: "measurements.scanned"), scanDate.formatted(date: .abbreviated, time: .shortened),
+            row(String(localized: .measurementsScanned), scanDate.formatted(date: .abbreviated, time: .shortened),
                 spoken: scanDate.formatted(date: .long, time: .shortened))
         }
     }
@@ -68,17 +68,17 @@ struct MeasurementsTab: View {
         let perimeter = RoomMetrics.perimeter(of: room)
         let ceiling = RoomMetrics.ceilingHeight(of: room)
         return Section {
-            row(String(localized: "common.floorArea"), formatter.area(area, approximate: room.isFloorApproximate),
-                spoken: area.map { (room.isFloorApproximate ? String(localized: "measurements.approximatelyPrefix") : "") + formatter.spokenArea($0) }
-                    ?? String(localized: "measurements.unknown"))
-            row(String(localized: "common.perimeter"), formatter.length(perimeter), spoken: formatter.spokenLength(perimeter))
-            row(String(localized: "common.ceilingHeight"), ceiling.map { formatter.length($0) } ?? "—",
-                spoken: ceiling.map { formatter.spokenLength($0) } ?? String(localized: "measurements.unknown"))
+            row(String(localized: .commonFloorArea), formatter.area(area, approximate: room.isFloorApproximate),
+                spoken: area.map { (room.isFloorApproximate ? String(localized: .measurementsApproximatelyPrefix) : "") + formatter.spokenArea($0) }
+                    ?? String(localized: .measurementsUnknown))
+            row(String(localized: .commonPerimeter), formatter.length(perimeter), spoken: formatter.spokenLength(perimeter))
+            row(String(localized: .commonCeilingHeight), ceiling.map { formatter.length($0) } ?? "—",
+                spoken: ceiling.map { formatter.spokenLength($0) } ?? String(localized: .measurementsUnknown))
 
-            surfaceGroup(String(localized: "common.walls"), noun: String(localized: "measurements.wall"), room.walls, formatter: formatter)
-            surfaceGroup(String(localized: "common.doors"), noun: String(localized: "measurements.door"), room.doors, formatter: formatter)
-            surfaceGroup(String(localized: "common.windows"), noun: String(localized: "measurements.window"), room.windows, formatter: formatter)
-            surfaceGroup(String(localized: "measurements.openings"), noun: String(localized: "measurements.opening"), room.openings, formatter: formatter)
+            surfaceGroup(String(localized: .commonWalls), noun: String(localized: .measurementsWall), room.walls, formatter: formatter)
+            surfaceGroup(String(localized: .commonDoors), noun: String(localized: .measurementsDoor), room.doors, formatter: formatter)
+            surfaceGroup(String(localized: .commonWindows), noun: String(localized: .measurementsWindow), room.windows, formatter: formatter)
+            surfaceGroup(String(localized: .measurementsOpenings), noun: String(localized: .measurementsOpening), room.openings, formatter: formatter)
             objectGroup(room.objects, formatter: formatter)
         } header: {
             Text(name)
@@ -87,10 +87,10 @@ struct MeasurementsTab: View {
                         renameText = name
                         renamingRoom = RenameTarget(id: room.id, name: name)
                     } label: {
-                        Label("measurements.renameRoom", systemImage: "pencil")
+                        Label(.measurementsRenameRoom, systemImage: "pencil")
                     }
                 }
-                .accessibilityAction(named: "measurements.renameRoom") {
+                .accessibilityAction(named: .measurementsRenameRoom) {
                     renameText = name
                     renamingRoom = RenameTarget(id: room.id, name: name)
                 }
@@ -101,13 +101,13 @@ struct MeasurementsTab: View {
     @ViewBuilder
     private func surfaceGroup(_ title: String, noun: String, _ surfaces: [SurfaceGeometry],
                               formatter: UnitFormatter) -> some View {
-        DisclosureGroup("measurements.groupTitle \(title) \(surfaces.count)") {
+        DisclosureGroup(.measurementsGroupTitle(title: title, count: surfaces.count)) {
             ForEach(Array(surfaces.enumerated()), id: \.element.id) { index, surface in
                 let label = "\(noun) \(index + 1)"
                 let isOpen = surface.isOpen == true
-                let value = formatter.lengthPair(surface.length, surface.height) + (isOpen ? String(localized: "measurements.openSuffix") : "")
-                let spoken = String(localized: "measurements.lengthByLength \(formatter.spokenLength(surface.length)) \(formatter.spokenLength(surface.height))")
-                    + (isOpen ? String(localized: "measurements.openSuffix") : "")
+                let value = formatter.lengthPair(surface.length, surface.height) + (isOpen ? String(localized: .measurementsOpenSuffix) : "")
+                let spoken = String(localized: .measurementsLengthByLength(first: formatter.spokenLength(surface.length), second: formatter.spokenLength(surface.height)))
+                    + (isOpen ? String(localized: .measurementsOpenSuffix) : "")
                 row(label, value, spoken: spoken)
             }
         }
@@ -116,9 +116,9 @@ struct MeasurementsTab: View {
 
     /// Objects are category, W × D × H.
     private func objectGroup(_ objects: [ObjectGeometry], formatter: UnitFormatter) -> some View {
-        DisclosureGroup("measurements.groupTitle \(String(localized: "common.objects")) \(objects.count)") {
+        DisclosureGroup(.measurementsGroupTitle(title: String(localized: .commonObjects), count: objects.count)) {
             ForEach(objects) { object in
-                let spoken = String(localized: "measurements.objectSize.a11y \(formatter.spokenLength(object.width)) \(formatter.spokenLength(object.depth)) \(formatter.spokenLength(object.height))")
+                let spoken = String(localized: .measurementsObjectSizeA11Y(width: formatter.spokenLength(object.width), depth: formatter.spokenLength(object.depth), height: formatter.spokenLength(object.height)))
                 row(object.category.displayName,
                     formatter.size(width: object.width, depth: object.depth, height: object.height),
                     spoken: spoken)
@@ -141,7 +141,7 @@ struct MeasurementsTab: View {
             }
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("measurements.row.a11y \(title) \(spoken)")
+        .accessibilityLabel(.measurementsRowA11Y(title: title, value: spoken))
     }
 }
 

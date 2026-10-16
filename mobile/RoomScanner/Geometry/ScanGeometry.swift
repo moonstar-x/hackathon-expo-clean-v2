@@ -79,11 +79,11 @@ enum RoomType: String, Codable, CaseIterable, Sendable {
 
     var displayName: String {
         switch self {
-        case .bedroom: String(localized: "roomType.bedroom")
-        case .bathroom: String(localized: "roomType.bathroom")
-        case .kitchen: String(localized: "roomType.kitchen")
-        case .livingRoom: String(localized: "roomType.livingRoom")
-        case .diningRoom: String(localized: "roomType.diningRoom")
+        case .bedroom: String(localized: .roomTypeBedroom)
+        case .bathroom: String(localized: .roomTypeBathroom)
+        case .kitchen: String(localized: .roomTypeKitchen)
+        case .livingRoom: String(localized: .roomTypeLivingRoom)
+        case .diningRoom: String(localized: .roomTypeDiningRoom)
         }
     }
 }
@@ -100,23 +100,23 @@ enum ObjectCategory: String, Codable, CaseIterable, Sendable {
 
     var displayName: String {
         switch self {
-        case .storage: String(localized: "object.storage")
-        case .refrigerator: String(localized: "object.refrigerator")
-        case .stove: String(localized: "object.stove")
-        case .bed: String(localized: "object.bed")
-        case .sink: String(localized: "object.sink")
-        case .washerDryer: String(localized: "object.washerDryer")
-        case .toilet: String(localized: "object.toilet")
-        case .bathtub: String(localized: "object.bathtub")
-        case .oven: String(localized: "object.oven")
-        case .dishwasher: String(localized: "object.dishwasher")
-        case .table: String(localized: "object.table")
-        case .sofa: String(localized: "object.sofa")
-        case .chair: String(localized: "object.chair")
-        case .fireplace: String(localized: "object.fireplace")
-        case .television: String(localized: "object.television")
-        case .stairs: String(localized: "object.stairs")
-        case .other: String(localized: "object.other")
+        case .storage: String(localized: .objectStorage)
+        case .refrigerator: String(localized: .objectRefrigerator)
+        case .stove: String(localized: .objectStove)
+        case .bed: String(localized: .objectBed)
+        case .sink: String(localized: .objectSink)
+        case .washerDryer: String(localized: .objectWasherDryer)
+        case .toilet: String(localized: .objectToilet)
+        case .bathtub: String(localized: .objectBathtub)
+        case .oven: String(localized: .objectOven)
+        case .dishwasher: String(localized: .objectDishwasher)
+        case .table: String(localized: .objectTable)
+        case .sofa: String(localized: .objectSofa)
+        case .chair: String(localized: .objectChair)
+        case .fireplace: String(localized: .objectFireplace)
+        case .television: String(localized: .objectTelevision)
+        case .stairs: String(localized: .objectStairs)
+        case .other: String(localized: .objectOther)
         }
     }
 

@@ -8,9 +8,9 @@ enum UnitSystem: String, CaseIterable, Identifiable, Sendable {
 
     var displayName: String {
         switch self {
-        case .automatic: String(localized: "units.automatic")
-        case .metric: String(localized: "units.metric")
-        case .imperial: String(localized: "units.imperial")
+        case .automatic: String(localized: .unitsAutomatic)
+        case .metric: String(localized: .unitsMetric)
+        case .imperial: String(localized: .unitsImperial)
         }
     }
 
@@ -103,11 +103,11 @@ struct UnitFormatter: Sendable {
     func spokenLength(_ meters: Double) -> String {
         switch system {
         case .metric:
-            return String(localized: "units.spoken.meters \(decimal(meters, digits: 2))")
+            return String(localized: .unitsSpokenMeters(value: decimal(meters, digits: 2)))
         case .imperial:
             let (feet, inches, half) = feetInchesHalves(meters)
-            let inchText = half ? String(localized: "units.spoken.inchesAndHalf \(inches)") : String(localized: "units.spoken.inches \(inches)")
-            return String(localized: "units.spoken.feetAndInches \(feet) \(inchText)")
+            let inchText = half ? String(localized: .unitsSpokenInchesAndHalf(inches: inches)) : String(localized: .unitsSpokenInches(inches: inches))
+            return String(localized: .unitsSpokenFeetAndInches(feet: feet, inches: inchText))
         }
     }
 
@@ -117,9 +117,9 @@ struct UnitFormatter: Sendable {
     func spokenArea(_ squareMeters: Double) -> String {
         switch system {
         case .metric:
-            return String(localized: "units.spoken.squareMeters \(decimal(squareMeters, digits: 1))")
+            return String(localized: .unitsSpokenSquareMeters(value: decimal(squareMeters, digits: 1)))
         case .imperial:
-            return String(localized: "units.spoken.squareFeet \(decimal(squareMeters * Self.squareFeetPerSquareMeter, digits: 0))")
+            return String(localized: .unitsSpokenSquareFeet(value: decimal(squareMeters * Self.squareFeetPerSquareMeter, digits: 0)))
         }
     }
 

@@ -7,7 +7,7 @@ enum USDZExporter {
         case nothingToExport
 
         var errorDescription: String? {
-            String(localized: "capture.error.nothingToExport")
+            String(localized: .captureErrorNothingToExport)
         }
     }
 

@@ -30,7 +30,7 @@ struct HomeView: View {
     var body: some View {
         NavigationStack(path: $path) {
             list
-                .navigationTitle("home.title")
+                .navigationTitle(.homeTitle)
                 .navigationDestination(for: UUID.self) { id in
                     LocationDetailView(locationID: id)
                 }
@@ -55,27 +55,27 @@ struct HomeView: View {
             titleVisibility: .visible,
             presenting: pendingDeletion
         ) { reference in
-            Button("common.delete", role: .destructive) { delete(reference) }
-            Button("common.cancel", role: .cancel) {}
+            Button(.commonDelete, role: .destructive) { delete(reference) }
+            Button(.commonCancel, role: .cancel) {}
         } message: { _ in
-            Text("common.cannotUndo")
+            Text(.commonCannotUndo)
         }
-        .alert("common.renameScan",
+        .alert(Text(.commonRenameScan),
                isPresented: Binding(get: { pendingRename != nil }, set: { if !$0 { pendingRename = nil } }),
                presenting: pendingRename) { reference in
-            TextField("common.name", text: $renameText)
-            Button("common.save") { rename(reference, to: renameText) }
-            Button("common.cancel", role: .cancel) {}
+            TextField(String(localized: .commonName), text: $renameText)
+            Button(.commonSave) { rename(reference, to: renameText) }
+            Button(.commonCancel, role: .cancel) {}
         }
-        .alert("home.cameraDenied.title", isPresented: $isCameraDeniedAlertPresented) {
-            Button("home.cameraDenied.openSettings") { CameraPermission.openSettings() }
-            Button("common.cancel", role: .cancel) {}
+        .alert(Text(.homeCameraDeniedTitle), isPresented: $isCameraDeniedAlertPresented) {
+            Button(.homeCameraDeniedOpenSettings) { CameraPermission.openSettings() }
+            Button(.commonCancel, role: .cancel) {}
         } message: {
-            Text("home.cameraDenied.message")
+            Text(.homeCameraDeniedMessage)
         }
-        .alert("common.somethingWentWrong",
+        .alert(Text(.commonSomethingWentWrong),
                isPresented: Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) {
-            Button("common.ok", role: .cancel) {}
+            Button(.commonOk, role: .cancel) {}
         } message: {
             Text(errorMessage ?? "")
         }
@@ -94,7 +94,7 @@ struct HomeView: View {
                         Button {
                             pendingDeletion = reference(for: location)
                         } label: {
-                            Label("common.delete", systemImage: "trash")
+                            Label(.commonDelete, systemImage: "trash")
                         }
                         .tint(.red)
                     }
@@ -102,12 +102,12 @@ struct HomeView: View {
                         Button {
                             beginRename(location)
                         } label: {
-                            Label("common.rename", systemImage: "pencil")
+                            Label(.commonRename, systemImage: "pencil")
                         }
                         Button(role: .destructive) {
                             pendingDeletion = reference(for: location)
                         } label: {
-                            Label("common.delete", systemImage: "trash")
+                            Label(.commonDelete, systemImage: "trash")
                         }
                     }
                 }
@@ -116,9 +116,9 @@ struct HomeView: View {
         .overlay {
             if locations.isEmpty {
                 ContentUnavailableView {
-                    Label("home.empty.title", systemImage: "square.dashed")
+                    Label(.homeEmptyTitle, systemImage: "square.dashed")
                 } description: {
-                    Text("home.empty.message")
+                    Text(.homeEmptyMessage)
                 }
             }
         }
@@ -127,7 +127,7 @@ struct HomeView: View {
     private var newScanBar: some View {
         VStack(spacing: 8) {
             Button(action: startScan) {
-                Label("home.newScan", systemImage: "plus.circle.fill")
+                Label(.homeNewScan, systemImage: "plus.circle.fill")
                     .font(.headline)
                     .frame(maxWidth: .infinity)
             }
@@ -136,7 +136,7 @@ struct HomeView: View {
             .disabled(!canScan)
 
             if !canScan {
-                Text("home.lidarRequired")
+                Text(.homeLidarRequired)
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
@@ -153,21 +153,21 @@ struct HomeView: View {
             Button {
                 isSettingsPresented = true
             } label: {
-                Label("home.settings", systemImage: "gearshape")
+                Label(.homeSettings, systemImage: "gearshape")
             }
         }
         #if DEBUG
         ToolbarItem(placement: .topBarLeading) {
             Menu {
-                Button("home.debug.addSample", systemImage: "plus.square.on.square") {
+                Button(.homeDebugAddSample, systemImage: "plus.square.on.square") {
                     addSample(SampleGeometry.twoRoomApartment(), name: "Departamento")
                 }
-                Button("home.debug.addRotatedRoom", systemImage: "rotate.right") {
+                Button(.homeDebugAddRotatedRoom, systemImage: "rotate.right") {
                     addSample(SampleGeometry.rotated(SampleGeometry.lShapedRoom(), by: .pi / 7), name: "Estudio")
                 }
-                Button("home.debug.deleteAll", systemImage: "trash", role: .destructive, action: deleteAll)
+                Button(.homeDebugDeleteAll, systemImage: "trash", role: .destructive, action: deleteAll)
             } label: {
-                Label("home.debug.menu", systemImage: "ladybug")
+                Label(.homeDebugMenu, systemImage: "ladybug")
             }
         }
         #endif
@@ -192,7 +192,7 @@ struct HomeView: View {
 
     private var deletionTitle: String {
         guard let pendingDeletion else { return "" }
-        return String(localized: "common.deleteNamedConfirm \(pendingDeletion.name)")
+        return String(localized: .commonDeleteNamedConfirm(name: pendingDeletion.name))
     }
 
     private func reference(for location: Location) -> LocationReference? {

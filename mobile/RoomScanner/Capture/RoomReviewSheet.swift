@@ -37,10 +37,10 @@ struct RoomReviewSheet: View {
     private func review(_ room: RoomGeometry) -> some View {
         let formatter = UnitFormatter(unitPreference)
         return VStack(alignment: .leading, spacing: 16) {
-            Text("review.title \(roomNumber)")
+            Text(.reviewTitle(number: roomNumber))
                 .font(.title2.bold())
 
-            TextField("review.roomNamePlaceholder", text: $name)
+            TextField(String(localized: .reviewRoomNamePlaceholder), text: $name)
                 .textFieldStyle(.roundedBorder)
                 .font(.title3)
                 .submitLabel(.done)
@@ -50,36 +50,36 @@ struct RoomReviewSheet: View {
             }
 
             Grid(alignment: .leading, horizontalSpacing: 16, verticalSpacing: 6) {
-                metric("common.floorArea", formatter.area(RoomMetrics.floorArea(of: room), approximate: room.isFloorApproximate))
-                metric("common.perimeter", formatter.length(RoomMetrics.perimeter(of: room)))
-                metric("common.ceilingHeight", RoomMetrics.ceilingHeight(of: room).map { formatter.length($0) } ?? "—")
-                metric("common.walls", "\(room.walls.count)")
-                metric("common.doors", "\(room.doors.count)")
-                metric("common.windows", "\(room.windows.count)")
-                metric("common.objects", "\(room.objects.count)")
+                metric(.commonFloorArea, formatter.area(RoomMetrics.floorArea(of: room), approximate: room.isFloorApproximate))
+                metric(.commonPerimeter, formatter.length(RoomMetrics.perimeter(of: room)))
+                metric(.commonCeilingHeight, RoomMetrics.ceilingHeight(of: room).map { formatter.length($0) } ?? "—")
+                metric(.commonWalls, "\(room.walls.count)")
+                metric(.commonDoors, "\(room.doors.count)")
+                metric(.commonWindows, "\(room.windows.count)")
+                metric(.commonObjects, "\(room.objects.count)")
             }
 
             VStack(spacing: 10) {
                 Button(action: onScanNext) {
-                    Label("review.scanNextRoom", systemImage: "arrow.right.circle.fill")
+                    Label(.reviewScanNextRoom, systemImage: "arrow.right.circle.fill")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
 
                 Button(action: onFinish) {
-                    Text("review.finish").frame(maxWidth: .infinity)
+                    Text(.reviewFinish).frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.bordered)
                 .controlSize(.large)
 
-                Button("common.rescanRoom", systemImage: "arrow.counterclockwise", action: onRescan)
+                Button(.commonRescanRoom, systemImage: "arrow.counterclockwise", action: onRescan)
                     .frame(minHeight: 44)
             }
         }
     }
 
-    private func metric(_ title: LocalizedStringKey, _ value: String) -> some View {
+    private func metric(_ title: LocalizedStringResource, _ value: String) -> some View {
         GridRow {
             Text(title).foregroundStyle(.secondary)
             Text(value).monospacedDigit()
@@ -88,7 +88,7 @@ struct RoomReviewSheet: View {
     }
 
     private var interruptionWarning: some View {
-        Label("review.trackingInterrupted",
+        Label(.reviewTrackingInterrupted,
               systemImage: "exclamationmark.triangle.fill")
             .font(.footnote)
             .foregroundStyle(.orange)
@@ -100,17 +100,17 @@ struct RoomReviewSheet: View {
 
     private func failure(_ issue: CaptureIssue) -> some View {
         VStack(alignment: .leading, spacing: 16) {
-            Label("review.failure.title \(roomNumber)", systemImage: "exclamationmark.triangle.fill")
+            Label(.reviewFailureTitle(number: roomNumber), systemImage: "exclamationmark.triangle.fill")
                 .font(.title3.bold())
                 .foregroundStyle(.orange)
             Text(issue.message)
             if issue.isSceneTooLarge {
-                Text("review.failure.sceneTooLarge")
+                Text(.reviewFailureSceneTooLarge)
                     .foregroundStyle(.secondary)
             }
             VStack(spacing: 10) {
                 Button(action: onRescan) {
-                    Label("common.rescanRoom", systemImage: "arrow.counterclockwise")
+                    Label(.commonRescanRoom, systemImage: "arrow.counterclockwise")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
@@ -118,13 +118,13 @@ struct RoomReviewSheet: View {
 
                 if completedRoomCount > 0 {
                     Button(action: onFinish) {
-                        Text("common.finishWithRooms \(Counted.rooms(completedRoomCount))").frame(maxWidth: .infinity)
+                        Text(.commonFinishWithRooms(rooms: Counted.rooms(completedRoomCount))).frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.bordered)
                     .controlSize(.large)
                 }
 
-                Button("review.discard", role: .destructive, action: onDiscard)
+                Button(.reviewDiscard, role: .destructive, action: onDiscard)
                     .frame(minHeight: 44)
             }
         }

@@ -46,11 +46,11 @@ struct LiveOverlayView: View {
     private var topBar: some View {
         HStack {
             Button(action: onCancel) {
-                Label("common.cancel", systemImage: "xmark")
+                Label(.commonCancel, systemImage: "xmark")
             }
             .frame(minWidth: 44, minHeight: 44)
             Spacer()
-            Text("liveOverlay.roomTitle \(readout.roomNumber)")
+            Text(.liveOverlayRoomTitle(number: readout.roomNumber))
                 .font(.headline)
                 .accessibilityAddTraits(.isHeader)
             Spacer()
@@ -58,9 +58,9 @@ struct LiveOverlayView: View {
                 Image(systemName: "questionmark.circle")
             }
             .frame(minWidth: 44, minHeight: 44)
-            .accessibilityLabel("liveOverlay.tipsButton")
+            .accessibilityLabel(.liveOverlayTipsButton)
             Button(action: onDone) {
-                Label("common.done", systemImage: "checkmark")
+                Label(.commonDone, systemImage: "checkmark")
                     .fontWeight(.semibold)
             }
             .frame(minWidth: 44, minHeight: 44)
@@ -97,7 +97,7 @@ struct LiveOverlayView: View {
         }
         .buttonStyle(.plain)
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
-        .accessibilityLabel(isPlanExpanded ? "liveOverlay.hideMiniPlan" : "liveOverlay.showMiniPlan")
+        .accessibilityLabel(isPlanExpanded ? .liveOverlayHideMiniPlan : .liveOverlayShowMiniPlan)
     }
 
     // MARK: Readout (CAP-5)
@@ -107,13 +107,13 @@ struct LiveOverlayView: View {
         let current = [Counted.walls(readout.walls), Counted.doors(readout.doors), Counted.windows(readout.windows)]
             .joined(separator: ", ")
         return VStack(alignment: .leading, spacing: 4) {
-            Text("liveOverlay.roomReadout \(readout.roomNumber) \(current)")
+            Text(.liveOverlayRoomReadout(number: readout.roomNumber, summary: current))
                 .font(.subheadline.weight(.semibold))
             if let liveArea = readout.liveArea {
                 Text(formatter.area(liveArea, approximate: true))
                     .font(.subheadline.monospacedDigit())
             }
-            Text("liveOverlay.totalReadout \(Counted.rooms(readout.completedRooms)) \(formatter.area(readout.completedArea))")
+            Text(.liveOverlayTotalReadout(rooms: Counted.rooms(readout.completedRooms), area: formatter.area(readout.completedArea)))
                 .font(.footnote)
                 .foregroundStyle(.secondary)
         }

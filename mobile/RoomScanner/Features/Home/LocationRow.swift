@@ -16,7 +16,7 @@ struct LocationRow: View {
                         .lineLimit(2)
                     Spacer(minLength: 8)
                     if location.status == .draft {
-                        Text("locationRow.incompleteBadge")
+                        Text(.locationRowIncompleteBadge)
                             .font(.caption.weight(.semibold))
                             .padding(.horizontal, 8)
                             .padding(.vertical, 2)
@@ -67,11 +67,11 @@ struct LocationRow: View {
     private func accessibilityText(_ formatter: UnitFormatter) -> String {
         let date = (location.createdAt ?? .now).formatted(.dateTime.month(.wide).day())
         let rooms = Counted.rooms(Int(location.roomCount))
-        var parts = [location.displayName, String(localized: "locationRow.a11y.scannedOn \(date)"), rooms]
+        var parts = [location.displayName, String(localized: .locationRowA11YScannedOn(date: date)), rooms]
         if location.status == .complete {
             parts.append(formatter.spokenArea(location.totalFloorArea))
         } else {
-            parts.append(String(localized: "locationRow.a11y.incomplete"))
+            parts.append(String(localized: .locationRowA11YIncomplete))
         }
         return parts.joined(separator: ", ")
     }

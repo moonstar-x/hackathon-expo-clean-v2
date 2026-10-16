@@ -16,25 +16,25 @@ struct ShareMenu: View {
         Menu {
             ShareLink(item: FloorPlanImageExport(geometry: geometry, roomNames: roomNames,
                                                  unitSystem: unitSystem, fileName: baseFileName),
-                      preview: SharePreview(String(localized: "share.floorPlan.preview \(locationName)"),
+                      preview: SharePreview(String(localized: .shareFloorPlanPreview(name: locationName)),
                                             image: Image(systemName: "map"))) {
-                Label("share.floorPlan.menuItem", systemImage: "photo")
+                Label(.shareFloorPlanMenuItem, systemImage: "photo")
             }
             ShareLink(item: MeasurementsExport(csv: MeasurementsCSV.make(geometry: geometry, roomNames: orderedNames),
                                                fileName: baseFileName),
-                      preview: SharePreview(String(localized: "share.measurements.preview \(locationName)"),
+                      preview: SharePreview(String(localized: .shareMeasurementsPreview(name: locationName)),
                                             image: Image(systemName: "tablecells"))) {
-                Label("share.measurements.menuItem", systemImage: "tablecells")
+                Label(.shareMeasurementsMenuItem, systemImage: "tablecells")
             }
             if let usdzSource {
                 ShareLink(item: ModelExport(raw: usdzSource, fileName: baseFileName),
-                          preview: SharePreview(String(localized: "share.model.preview \(locationName)"),
+                          preview: SharePreview(String(localized: .shareModelPreview(name: locationName)),
                                                 image: Image(systemName: "cube"))) {
-                    Label("share.model.menuItem", systemImage: "cube")
+                    Label(.shareModelMenuItem, systemImage: "cube")
                 }
             }
         } label: {
-            Label("share.menu", systemImage: "square.and.arrow.up")
+            Label(.shareMenu, systemImage: "square.and.arrow.up")
         }
     }
 
@@ -48,7 +48,7 @@ struct ShareMenu: View {
         let invalid = CharacterSet(charactersIn: "/\\?%*|\"<>:")
         let cleaned = locationName.components(separatedBy: invalid).joined(separator: "-")
             .trimmingCharacters(in: .whitespacesAndNewlines)
-        return cleaned.isEmpty ? String(localized: "share.defaultFileName") : cleaned
+        return cleaned.isEmpty ? String(localized: .shareDefaultFileName) : cleaned
     }
 }
 
@@ -66,7 +66,7 @@ private func temporaryFile(named name: String, data: Data) throws -> URL {
 private enum ExportError: Error, LocalizedError {
     case renderingFailed
 
-    var errorDescription: String? { String(localized: "share.error.imageFailed") }
+    var errorDescription: String? { String(localized: .shareErrorImageFailed) }
 }
 
 /// The full floor plan at 1600 pt on the longest side, 3× scale, white background.
@@ -83,7 +83,7 @@ struct FloorPlanImageExport: Transferable {
                                                  unitSystem: item.unitSystem)
             }
             guard let data else { throw ExportError.renderingFailed }
-            return SentTransferredFile(try temporaryFile(named: String(localized: "share.floorPlan.fileName \(item.fileName)") + ".png", data: data))
+            return SentTransferredFile(try temporaryFile(named: String(localized: .shareFloorPlanFileName(name: item.fileName)) + ".png", data: data))
         }
     }
 }
@@ -94,7 +94,7 @@ struct MeasurementsExport: Transferable {
 
     static var transferRepresentation: some TransferRepresentation {
         FileRepresentation(exportedContentType: .commaSeparatedText) { item in
-            SentTransferredFile(try temporaryFile(named: String(localized: "share.measurements.fileName \(item.fileName)") + ".csv", data: Data(item.csv.utf8)))
+            SentTransferredFile(try temporaryFile(named: String(localized: .shareMeasurementsFileName(name: item.fileName)) + ".csv", data: Data(item.csv.utf8)))
         }
     }
 }
@@ -113,7 +113,7 @@ struct ModelExport: Transferable {
 
 #Preview {
     NavigationStack {
-        Text("share.menu")
+        Text(.shareMenu)
             .toolbar {
                 ShareMenu(geometry: SampleGeometry.twoRoomApartment(), locationName: "Departamento",
                           roomNames: [:], unitSystem: .metric, usdzSource: nil)

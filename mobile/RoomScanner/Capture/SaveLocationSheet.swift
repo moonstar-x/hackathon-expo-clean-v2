@@ -16,13 +16,13 @@ struct SaveLocationSheet: View {
         let formatter = UnitFormatter(unitPreference)
         NavigationStack {
             Form {
-                Section("common.name") {
-                    TextField("saveLocation.namePlaceholder", text: $name)
+                Section(.commonName) {
+                    TextField(String(localized: .saveLocationNamePlaceholder), text: $name)
                         .submitLabel(.done)
                 }
-                Section("common.summary") {
-                    LabeledContent("common.rooms", value: "\(roomNames.count)")
-                    LabeledContent("saveLocation.totalArea", value: formatter.area(totalArea, approximate: isAreaApproximate))
+                Section(.commonSummary) {
+                    LabeledContent(String(localized: .commonRooms), value: "\(roomNames.count)")
+                    LabeledContent(String(localized: .saveLocationTotalArea), value: formatter.area(totalArea, approximate: isAreaApproximate))
                     ForEach(Array(roomNames.enumerated()), id: \.offset) { _, roomName in
                         Text(roomName)
                     }
@@ -31,13 +31,13 @@ struct SaveLocationSheet: View {
                     Section {
                         Label(message, systemImage: "exclamationmark.triangle.fill")
                             .foregroundStyle(.orange)
-                        Button("common.retry", action: onRetry)
+                        Button(.commonRetry, action: onRetry)
                     } header: {
-                        Text("common.saveFailedTitle")
+                        Text(.commonSaveFailedTitle)
                     }
                 }
             }
-            .navigationTitle("saveLocation.title")
+            .navigationTitle(.saveLocationTitle)
             .navigationBarTitleDisplayMode(.inline)
             .safeAreaInset(edge: .bottom) {
                 Button(action: onSave) {
@@ -45,10 +45,10 @@ struct SaveLocationSheet: View {
                         if state == .running {
                             HStack(spacing: 8) {
                                 ProgressView()
-                                Text("common.buildingFloorPlan")
+                                Text(.commonBuildingFloorPlan)
                             }
                         } else {
-                            Text("common.save")
+                            Text(.commonSave)
                         }
                     }
                     .font(.headline)

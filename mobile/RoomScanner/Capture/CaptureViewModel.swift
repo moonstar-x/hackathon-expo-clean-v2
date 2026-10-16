@@ -346,7 +346,7 @@ final class CaptureViewModel {
             // Make sure the draft and all rooms are written before finalizing.
             await persistenceQueue?.value
             guard let locationID else {
-                finalizeState = .failed(String(localized: "capture.error.saveFailed"))
+                finalizeState = .failed(String(localized: .captureErrorSaveFailed))
                 return
             }
             do {

@@ -66,7 +66,7 @@ enum RoomNaming {
     /// The second room of a type gets a suffix (`Dormitorio 2`). Unknown types are `Habitación N`.
     static func defaultName(for type: RoomType?, index: Int, previousTypes: [RoomType?]) -> String {
         guard let type else {
-            return String(localized: "roomType.unknown \(index + 1)")
+            return String(localized: .roomTypeUnknown(number: index + 1))
         }
         let sameTypeBefore = previousTypes.prefix(index).filter { $0 == type }.count
         return sameTypeBefore == 0 ? type.displayName : "\(type.displayName) \(sameTypeBefore + 1)"

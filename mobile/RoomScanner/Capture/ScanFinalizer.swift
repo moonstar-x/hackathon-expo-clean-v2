@@ -6,7 +6,7 @@ enum FinalizeError: Error, LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .noRoomData: String(localized: "capture.error.noRoomData")
+        case .noRoomData: String(localized: .captureErrorNoRoomData)
         }
     }
 }

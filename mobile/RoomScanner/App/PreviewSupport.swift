@@ -46,7 +46,7 @@ enum PreviewData {
             let room = Room(context: context)
             room.id = UUID()
             room.index = Int16(index)
-            room.name = String(localized: "roomType.unknown \(index + 1)")
+            room.name = String(localized: .roomTypeUnknown(number: index + 1))
             room.capturedAt = draft.createdAt
             room.location = draft
         }
