@@ -1,0 +1,7 @@
+// Code signing team for every target.
+// To sign with a different team, create Config/Signing.local.xcconfig (gitignored) containing
+// `DEVELOPMENT_TEAM = <your team ID>`. It's included last, so it overrides the value below.
+
+DEVELOPMENT_TEAM = W3X5T2A2DA
+
+#include? "Signing.local.xcconfig"
