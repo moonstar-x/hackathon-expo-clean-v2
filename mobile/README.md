@@ -50,8 +50,9 @@ repository (with an in-memory store).
 
 ## Running on a device
 
-1. Open `RoomScanner.xcodeproj`. Under **Signing & Capabilities**, choose your team, or set
-   `DEVELOPMENT_TEAM` in `project.yml` and run `xcodegen generate` again.
+1. Signing uses team `W3X5T2A2DA`, set in `Config/Signing.xcconfig`. To sign with your own team, create
+   `Config/Signing.local.xcconfig` (gitignored) containing `DEVELOPMENT_TEAM = <your team ID>`. Don't pick the
+   team in Xcode's Signing & Capabilities tab: `xcodegen generate` overwrites it.
 2. If the bundle ID `com.clean.code.RoomScanner` is taken, change `PRODUCT_BUNDLE_IDENTIFIER`.
 3. Select your LiDAR iPhone and run.
 

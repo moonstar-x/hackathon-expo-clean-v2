@@ -5,12 +5,14 @@ options:
     iOS: "17.0"
   createIntermediateGroups: true
   developmentLanguage: es
+configFiles:
+  Debug: Config/Signing.xcconfig
+  Release: Config/Signing.xcconfig
 settings:
   base:
     SWIFT_VERSION: "5.0"
     SWIFT_STRICT_CONCURRENCY: targeted
     CODE_SIGN_STYLE: Automatic
-    DEVELOPMENT_TEAM: ""            # set locally for device builds
     MARKETING_VERSION: "1.0"
     CURRENT_PROJECT_VERSION: "1"
     LOCALIZATION_PREFERS_STRING_CATALOGS: YES
