@@ -6,8 +6,8 @@ options:
   createIntermediateGroups: true
   developmentLanguage: es
 configFiles:
-  Debug: Config/Signing.xcconfig
-  Release: Config/Signing.xcconfig
+  Debug: Config/App.xcconfig
+  Release: Config/App.xcconfig
 settings:
   base:
     SWIFT_VERSION: "5.0"
@@ -36,7 +36,11 @@ targets:
         CFBundleDisplayName: RoomScanner
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
-        NSCameraUsageDescription: "RoomScanner usa la cámara y el escáner LiDAR para medir habitaciones y crear planos. Los escaneos se quedan en tu dispositivo."
+        NSCameraUsageDescription: "RoomScanner usa la cámara y el escáner LiDAR para medir habitaciones y crear planos. Las mediciones se suben al servidor de tu organización."
+        APIBaseURL: "$(API_BASE_URL)"
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: true
+        NSLocalNetworkUsageDescription: "RoomScanner se conecta a un servidor de tu red local para iniciar sesión y subir mediciones."
         UILaunchScreen: {}
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         UIApplicationSceneManifest:

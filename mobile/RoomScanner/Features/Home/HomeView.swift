@@ -3,6 +3,7 @@ import SwiftUI
 
 /// The list of scanned locations and the New Scan button (§7.2).
 struct HomeView: View {
+    @Environment(\.sessionStore) private var session
     @Environment(\.persistence) private var persistence
 
     @FetchRequest(sortDescriptors: [NSSortDescriptor(keyPath: \Location.createdAt, ascending: false)],
@@ -43,6 +44,7 @@ struct HomeView: View {
         .sheet(isPresented: $isSettingsPresented) {
             SettingsView()
         }
+        .onChange(of: isCapturePresented) { _, value in session?.isCapturing = value }
         .fullScreenCover(isPresented: $isCapturePresented, onDismiss: openSavedLocation) {
             CaptureFlowView(repository: persistence.repository) { savedLocationID in
                 detailToOpenAfterCapture = savedLocationID
