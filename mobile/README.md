@@ -112,7 +112,7 @@ To regenerate all artifacts with real app-rendered PNGs:
 
 1. In Xcode's scheme Test environment, set `ROOMSCANNER_EXPORT_FIXTURE=1` and run `ContractFixtureTests.exportFixtureWhenRequested` on the Simulator.
 2. Read the `ROOMSCANNER_FIXTURE_EXPORT: <directory>` path from the test log. It contains geometry, matching upload metadata, floor-plan PNG and thumbnail. This opt-in export doesn't overwrite committed fixtures.
-3. Copy `two-room-apartment.geometry.json` to `RoomScannerTests/Fixtures/`, `../api/test/fixtures/`, and `../web/src/measurements/__fixtures__/`. Copy that same file as `../api/src/db/fixtures/sample-measurement/geometry.json`.
+3. Copy `two-room-apartment.geometry.json` to `RoomScannerTests/Fixtures/`, `../api/test/fixtures/`, and `../web/tests/fixtures/`. Copy that same file as `../api/src/db/fixtures/sample-measurement/geometry.json`.
 4. Copy `metadata.json` to `../api/test/fixtures/` and `../api/src/db/fixtures/sample-measurement/`. Copy `floor-plan.png` and `thumbnail.png` to the latter directory. Remove the Test environment flag, then rerun all contract tests.
 
 ## Localization

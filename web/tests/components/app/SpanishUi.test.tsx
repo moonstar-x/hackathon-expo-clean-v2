@@ -3,11 +3,11 @@ import { createRoot, type Root } from 'react-dom/client';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, expect, it, vi } from 'vitest';
 import App from '../../../src/App';
-import fixture from '../../../src/measurements/__fixtures__/two-room-apartment.geometry.json';
 import { AppConfigContext } from '../../../src/AppConfigContext';
 import { writeAuth } from '../../../src/providers/authStorage';
 import type { AppConfig } from '../../../src/types/config';
 import { jsonResponse } from '../../fakeFetch';
+import fixture from '../../fixtures/two-room-apartment.geometry.json';
 
 // Every screen of the admin, rendered whole (App, layout and all) against a fake API, must read in
 // Spanish: each route lists strings that have to be on the page.
@@ -139,11 +139,11 @@ const fakeApi = (input: string | URL | Request): Promise<Response> => {
 };
 
 it.each([
-  ['/measurements', ['Mediciones', 'Apartamento', '34,0 m²', 'Habitaciones']],
-  ['/measurements/1', ['Nombre', 'Notas', 'Guardar']],
-  ['/measurements/1/show', ['Apartamento', 'Plano', '3D', 'Medidas', 'Archivos']],
+  ['/measurements', ['Mediciones', '1 medición', 'Apartamento', '34,0 m²', 'Habitaciones', 'Miniatura']],
+  ['/measurements/1', ['Editar medición', 'Nombre', 'Notas', 'Guardar']],
+  ['/measurements/1/show', ['Escaneada el', 'Superficie total', 'Plano', '3D', 'Medidas', 'Archivos', 'Detalles']],
   ['/measurements/1/show/model', ['Tu navegador no puede mostrar la vista 3D.']],
-  ['/measurements/1/show/measures', ['Resumen', '34,0 m²', 'Sala', 'Dormitorio', 'Paredes']],
+  ['/measurements/1/show/measures', ['Superficie total', '34,0 m²', 'Sala', 'Dormitorio', 'Perímetro', 'Paredes']],
   ['/measurements/1/show/files', ['Plano (PNG)', 'Geometría (JSON)', 'Descargar']],
   ['/login', ['Correo electrónico', 'Contraseña', 'Iniciar sesión']],
   ['/', ['Productos activos', 'Existencias bajas', 'Movimientos recientes', 'Entrada']],

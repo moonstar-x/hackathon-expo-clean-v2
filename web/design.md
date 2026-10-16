@@ -35,6 +35,8 @@ Contrast: navy on white 17.9:1, indigo on white 6.3:1, sky on navy 8.3:1, indigo
 
 These live in `BRAND` (`src/constants/brand.ts`). **No hex value is written anywhere else**: components read the theme palette, and only brand-fixed surfaces (the sign-in page, which is navy in both modes) read `BRAND`.
 
+The one exception is the 3D view of a measurement: its walls, doors, windows, furniture and room tints match the iPhone app's SceneKit scene, not this theme, so a model looks the same on the phone and here. They live in `SCENE_COLORS` and `ROOM_TINTS` (`src/constants/measurements.ts`), with the room legend that names each tint.
+
 ### Logo rules
 
 - Clear space around the logo at least the height of the "c" in the wordmark; a quarter of its width around the icon alone.
@@ -106,7 +108,7 @@ MUI's defaults: `sm` 600, `md` 900, `lg` 1200.
 
 ```
 AppBar  logo · page title (marquee on phones) · clock, theme, refresh · user menu
-Menu    Inicio | INVENTARIO Productos, Movimientos | CATÁLOGO Categorías, Proveedores | ADMINISTRACIÓN Usuarios
+Menu    Inicio, Mediciones | INVENTARIO Productos, Movimientos | CATÁLOGO Categorías, Proveedores | ADMINISTRACIÓN Usuarios
 Page    PageHeader: eyebrow over an h1, optional badge, actions row
         content: a list, a column of cards, or a form card
 ```
@@ -120,6 +122,11 @@ Page    PageHeader: eyebrow over an h1, optional badge, actions row
   - The first card carries a `Ribbon` (stock status, movement type) and a `StatBar` of the record's key numbers.
   - The next card holds the fields: a `Section` grid of `<Labeled>` fields.
   - Related records come last, in their own card, again through a `ResponsiveSwitch`.
+- **Measurement pages** (Mediciones, SPEC-004) follow the same anatomy, with these differences:
+  - The list's eyebrow is "RoomScanner", where measurements come from, since Mediciones sits outside the menu sections. Its rows lead with a thumbnail of the plan (`leftIcon` on phones: `leftAvatar` crops to a circle).
+  - The detail page puts the views before the fields: a summary card (`StatBar` of area, rooms and dimensions, the notes, the unjoined-rooms note), then a card of tabs (Plano, 3D, Medidas, Archivos), then Detalles. Seeing the space is what a measurement is opened for. No ribbon: a measurement has no status to show.
+  - The plan and the model each get a framed stage with their actions above it. The plan sits on white paper in both themes, because the phone draws it for white; the thumbnails are the same paper, small.
+  - `<TabbedShowLayout.Tab>` labels each child through `<Labeled>`, so each tab's content goes in `TabContent label={false}`, and `measurementTabsSx` lets it fill the tab.
 - **Forms**: `<Create>` / `<Edit>` with `actions={<CreateHeader />}` / `actions={<EditHeader />}` and `sx={formPageSx(FORM_MAX_WIDTH)}`.
   - Inside is a `SimpleForm` with `toolbar={<FormToolbar withDelete />}`: Save on the left, a pessimistic Delete that asks first on the right.
   - Long forms split into `Section`s with a `SectionDivider` between them, laid out on MUI `Grid` (two columns from `md`, see `ProductForm`).
@@ -147,7 +154,7 @@ Page    PageHeader: eyebrow over an h1, optional badge, actions row
 | `list/PrimaryRow`, `list/MetaRow` | SimpleList title and detail lines (spans only) | `end?` / `icon?` |
 | `list/ResultsToolbar`, `list/ListTotal` | A list's actions with its result count | `total` (smart_count key), `compact?` |
 | `list/StatBar` | A strip of label-over-value numbers; wraps on phones | `items` |
-| `fields/*` | Quantities with units, money, movement deltas and reasons, status badges | `source` |
+| `fields/*` | Quantities with units, money, movement deltas and reasons, status badges, floor areas | `source` |
 
 Tones (`styles/list.ts`, `toneAccent`) are shared by badges: stock **out** red and **low** orange; movement **IN** green, **OUT** red, **ADJUSTMENT** blue (SPEC-002 §7). Ribbon colors use the palette keys in `constants/components.ts`.
 
@@ -175,6 +182,7 @@ Only columns the API can sort by may sort (`disableSort` the rest; the API answe
 ## 7. Motion and accessibility
 
 - One orchestrated moment: the sign-in logo draws itself. Everything else moves only in response to the user (120–200 ms on hover, focus, open). `prefers-reduced-motion` turns the sign-in animation off.
+- The 3D view moves only under the user's hand, and draws only while something changes. Its camera eases to a stop (damping), which `prefers-reduced-motion` turns off. The furniture toggle and the theme change the scene in place, so the camera stays where it was put.
 - Keyboard: every control has a visible focus ring; the skip link leads past the menu; the user menu and dialogs trap focus as MUI does.
 - Status is never color alone: badges and ribbons carry words, and deltas carry their sign.
 
@@ -191,6 +199,7 @@ src/
 tests/
   lib/            logic, in node (jsdom where a test needs storage)
   components/     screens and components, in jsdom, with renderWithAdmin
+  fixtures/       the geometry contract fixture shared with the API and the app (SPEC-004 §7)
 ```
 
 - One component per file, written as `const Name = (props: NameProps): ReactElement => …` with `export default`.

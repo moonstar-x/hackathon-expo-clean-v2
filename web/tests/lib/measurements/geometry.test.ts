@@ -1,27 +1,57 @@
 import { describe, expect, it } from 'vitest';
-import fixture from '../../../src/measurements/__fixtures__/two-room-apartment.geometry.json';
-import { bounds, objectFootprint, parseGeometry, planSegment, renderSource } from '../../../src/measurements/geometry';
-import { area, categoryName, length, roomType, size } from '../../../src/measurements/format';
-const g = parseGeometry(fixture);
-describe('Swift geometry contract', () => {
-  it('parses the sample and rejects unsupported and malformed shapes', () => {
-    expect(g.rooms).toHaveLength(2); expect(() => parseGeometry({ ...fixture, version: 2 })).toThrow(/versión/);
-    expect(() => parseGeometry({ ...fixture, planRotation: Infinity })).toThrow();
-    expect(() => parseGeometry('invalid')).toThrow();
+import type { ScanGeometry, ScanObject, Surface, Vec2 } from '../../../src/types/geometry';
+import { bounds, GeometryError, objectFootprint, parseGeometry, planSegment, renderSource } from '../../../src/utils/geometry';
+import fixture from '../../fixtures/two-room-apartment.geometry.json';
+
+// The shared contract fixture (SPEC-004 §7): two rooms of 20 and 14 m², joined, 8.5 × 4 m.
+const geometry: ScanGeometry = parseGeometry(fixture);
+
+const reasonOf = (json: unknown): string | undefined => {
+  try {
+    parseGeometry(json);
+    return undefined;
+  } catch (error: unknown) {
+    return error instanceof GeometryError ? error.reason : 'not a GeometryError';
+  }
+};
+
+describe('parseGeometry', () => {
+  it('reads the fixture the iPhone app writes, from JSON text too', (): void => {
+    expect(geometry.rooms).toHaveLength(2);
+    expect(parseGeometry(JSON.stringify(fixture)).rooms).toHaveLength(2);
   });
-  it('uses merged surfaces or falls back to rooms', () => {
-    expect(renderSource(g).walls).toHaveLength(7);
-    expect(renderSource({ ...g, merged: null }).walls).toHaveLength(8);
+
+  it('refuses a newer version as unsupported, and anything malformed as invalid', (): void => {
+    expect(reasonOf({ ...fixture, version: 2 })).toBe('unsupportedVersion');
+    expect(reasonOf({ ...fixture, version: 0 })).toBe('invalid');
+    expect(reasonOf({ ...fixture, planRotation: Infinity })).toBe('invalid');
+    expect(reasonOf({ ...fixture, rooms: [] })).toBe('invalid');
+    expect(reasonOf('not json')).toBe('invalid');
   });
-  it('projects a rotated wall and object footprint in world space', () => {
-    const wall = g.rooms[0].walls[1]; expect(planSegment(wall)).toEqual({ start: [5, 0], end: [5, 4] });
-    const footprint = bounds(objectFootprint(g.rooms[0].objects[0]))!;
-    expect(footprint.max[0] - footprint.min[0]).toBeCloseTo(2.1);
-    expect(footprint.max[1] - footprint.min[1]).toBeCloseTo(0.9);
+
+  it('treats a null optional value like a missing one', (): void => {
+    expect(parseGeometry({ ...fixture, merged: null }).merged).toBeNull();
   });
-  it('formats metric values and categories in Spanish', () => {
-    expect(length(3.42)).toBe('3,42 m'); expect(area(34)).toBe('34,0 m²'); expect(area(null)).toBe('—');
-    expect(size([2.1, 0.9, 0.85])).toBe('2,10 × 0,90 × 0,85 m');
-    expect(roomType('livingRoom')).toBe('Sala'); expect(categoryName('sofa')).toBe('Sofá'); expect(categoryName('unknown')).toBe('Objeto');
+});
+
+describe('renderSource', () => {
+  it('uses the merged surfaces when the phone joined the rooms, each room’s own otherwise', (): void => {
+    expect(renderSource(geometry).walls).toHaveLength(7);
+    expect(renderSource({ ...geometry, merged: null }).walls).toHaveLength(8);
+  });
+});
+
+describe('plan helpers', () => {
+  it('projects a turned wall onto the plan', (): void => {
+    const wall: Surface = geometry.rooms[0].walls[1];
+    expect(planSegment(wall)).toEqual({ start: [5, 0], end: [5, 4] });
+  });
+
+  it('measures an object’s footprint', (): void => {
+    const object: ScanObject = geometry.rooms[0].objects[0];
+    const box: { min: Vec2; max: Vec2 } | null = bounds(objectFootprint(object));
+    expect(box?.max[0] ?? 0).toBeCloseTo((box?.min[0] ?? 0) + 2.1);
+    expect(box?.max[1] ?? 0).toBeCloseTo((box?.min[1] ?? 0) + 0.9);
+    expect(bounds([])).toBeNull();
   });
 });

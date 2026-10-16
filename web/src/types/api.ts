@@ -89,11 +89,17 @@ export interface MeasurementFile {
   size: number;
 }
 
+/** The room types RoomScanner detects. */
+export type RoomType = 'bedroom' | 'bathroom' | 'kitchen' | 'livingRoom' | 'diningRoom';
+
+/** The fields of a room that count its walls, doors, windows, openings and objects. */
+export type RoomCountField = 'wallCount' | 'doorCount' | 'windowCount' | 'openingCount' | 'objectCount';
+
 export interface MeasurementRoom {
   id: string;
   index: number;
   name: string;
-  type: 'bedroom' | 'bathroom' | 'kitchen' | 'livingRoom' | 'diningRoom' | null;
+  type: RoomType | null;
   floorArea: number | null;
   isFloorApproximate: boolean;
   perimeter: number;

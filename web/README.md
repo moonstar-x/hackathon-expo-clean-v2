@@ -70,9 +70,8 @@ src/
   Layout.tsx  theme.ts the CleanCode layout (AppBar + sectioned menu) and theme
   components/          the shared kit, appBar/, menu/, login/, list/, fields/, dashboard/, one folder per resource
   constants/ types/ styles/ hooks/ utils/ i18n/ providers/
-  measurements/        Mediciones (SPEC-004): views, 3D viewer, geometry, authenticated files, shared fixture
   resources/           thin page shells and each resource's ResourceProps
-tests/                 lib/ (logic) and components/ (screens), with renderWithAdmin
+tests/                 lib/ (logic) and components/ (screens), with renderWithAdmin; fixtures/
 public/                icons, manifest.webmanifest and sw.js
 ```
 
@@ -88,12 +87,24 @@ See [design.md §8](design.md#8-code-conventions) for what goes where.
 
 ## Mediciones (SPEC-004)
 
-Mediciones is first in the menu. Its list supports uploader/date/search filters, authenticated thumbnails, metric areas, and confirmed bulk deletion. Edit changes name and notes. Show has Plano (the phone's PNG), 3D (orbit, zoom, reset and furniture toggle), Medidas (summary and expandable room tables), and Archivos (authenticated downloads).
+Mediciones is first in the menu, and its screens are built on the CleanCode kit like the others ([design.md §3](design.md#3-page-anatomy)):
+
+- **List:** a table from `md` and cards below it, each led by the plan's thumbnail. Search (name, notes, uploader's email), Subido por, and the scan date range; newest upload first; bulk delete asks first.
+- **Show:** the scan date over the name, then a summary (total area, rooms, outer dimensions, notes, and a note when the phone couldn't join the rooms), four tabs, and the details of the upload. **Plano** is the phone's PNG on white paper, opening full size in a new tab. **3D** orbits, zooms, resets and toggles the furniture, with a legend naming each room's floor color. **Medidas** has a card per room with its walls, doors, windows, openings and objects in tables that open from the card. **Archivos** downloads each file under the API's name.
+- **Edit:** the name and the notes.
 
 `VITE_API_URL` is the API's `PUBLIC_URL` plus `/api`, including any proxy prefix. Files are fetched through that configured address with the stored bearer token, rather than using the absolute links returned by the server. Images use revocable Blob URLs; immutable file requests are cached by account. A 401 follows the normal logout path.
 
-The 3D viewer loads `three` and `OrbitControls` lazily in a separate bundle. It validates the Swift geometry format, uses column-major transforms and merged render surfaces, and cleans up GPU resources on unmount. A missing WebGL context displays a Spanish fallback. An invalid/newer geometry version does not prevent viewing the PNG or room metrics.
+The 3D viewer loads `three` and `OrbitControls` lazily in a separate bundle. It validates the Swift geometry format, uses column-major transforms and merged render surfaces, and cleans up GPU resources on unmount. It builds the scene once per geometry: the furniture toggle and the light/dark theme change it in place, so the camera stays put, and it draws only while something changes. A missing WebGL context displays a Spanish fallback. An invalid/newer geometry version does not prevent viewing the PNG or room metrics.
 
 ### SPEC-004 notes
 
-All P0 web requirements are implemented and covered by geometry, scene, formatting, file-access and route smoke tests. P2 interactive SVG plan is skipped. Browser automation access was not approved. Interactive WebGL operation and light/dark rendering still need a browser walkthrough with a real GPU; automated jsdom tests cover the fallback.
+All P0 web requirements are implemented and covered by geometry, scene, formatting, file-access, component and route smoke tests. P2 interactive SVG plan is skipped. The screens were walked through in Chrome with a real GPU, in light and dark mode and at phone width: orbit, zoom, reset, the furniture toggle, editing, and the uploader filter. Downloads are covered by tests rather than the walkthrough.
+
+Deviations from §6:
+
+- **Resumen** (WEB-MEAS-1) is the summary card above the tabs, visible from every tab, rather than a second copy inside Medidas.
+- **Subido por** filters by account (the API's `userId` filter) through a search-as-you-type list of users. `createdBy` only matches a whole email, case aside, and misses uploads made before an email change. The date filters read **Escaneada desde / hasta**, since the list has two dates.
+- A room's detected type shows only when its name doesn't already say it ("Sala comedor" gets "Sala"; "Cocina" doesn't get "Cocina" again).
+- On a portrait stage (a phone), the starting camera backs off by the aspect ratio so the whole model fits; elsewhere it is 1.6 × the largest side, as WEB-3D-2 says.
+- The contract fixture lives in `tests/fixtures/`, with the other test code, rather than `src/measurements/__fixtures__/`.
