@@ -1,0 +1,277 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "%@ (%lld)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@ (%2$lld)"
+          }
+        }
+      }
+    },
+    "%@ 3D Model": {},
+    "%@ Floor Plan": {},
+    "%@ Measurements": {},
+    "%@ by %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@ by %2$@"
+          }
+        }
+      }
+    },
+    "%@ meters": {},
+    "%@ scanned, but the room data is missing, so the scan can't be finished.": {},
+    "%@ scanned.": {},
+    "%@ square feet": {},
+    "%@ square meters": {},
+    "%@ wide, %@ deep, %@ high": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@ wide, %2$@ deep, %3$@ high"
+          }
+        }
+      }
+    },
+    "%@ · %@ · %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@ · %2$@ · %3$@"
+          }
+        }
+      }
+    },
+    "%@, %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@, %2$@"
+          }
+        }
+      }
+    },
+    "%@, %@, scanned %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@, %2$@, scanned %3$@"
+          }
+        }
+      }
+    },
+    "%lld and a half inches": {},
+    "%lld feet %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$lld feet %2$@"
+          }
+        }
+      }
+    },
+    "%lld inches": {},
+    ", open": {},
+    "3D": {},
+    "3D Model (USDZ)": {},
+    "3D model, %@, %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "3D model, %1$@, %2$@"
+          }
+        }
+      }
+    },
+    "About": {},
+    "Add rotated L-shaped room": {},
+    "Add sample location": {},
+    "Area: %@": {},
+    "Automatic": {},
+    "Automatic uses your region's measurement system.": {},
+    "Bathroom": {},
+    "Bathtub": {},
+    "Bed": {},
+    "Bedroom": {},
+    "Building floor plan…": {},
+    "Camera Access Needed": {},
+    "Cancel": {},
+    "Ceiling height": {},
+    "Ceiling height: %@": {},
+    "Chair": {},
+    "Couldn't open this scan": {},
+    "Couldn't save scan": {},
+    "Debug": {},
+    "Delete": {},
+    "Delete '%@'?": {},
+    "Delete all": {},
+    "Dimensions": {},
+    "Dining Room": {},
+    "Discard": {},
+    "Discard Scan": {},
+    "Discard scan?": {},
+    "Dishwasher": {},
+    "Display Options": {},
+    "Done": {},
+    "Door": {},
+    "Doors": {},
+    "End this scan?": {},
+    "Finish": {},
+    "Finish with %@": {},
+    "Fireplace": {},
+    "Fit to screen": {},
+    "Floor Plan Image (PNG)": {},
+    "Floor area": {},
+    "Floor plan, %@, %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Floor plan, %1$@, %2$@"
+          }
+        }
+      }
+    },
+    "Footprint": {},
+    "Furniture": {},
+    "Hide live floor plan": {},
+    "Imperial": {},
+    "Incomplete": {},
+    "Keep Scanning": {},
+    "Keep the doors between rooms open so the rooms can be connected.": {},
+    "Kitchen": {},
+    "Live floor plan, %@": {},
+    "Living Room": {},
+    "Location name": {},
+    "Measurements": {},
+    "Measurements (CSV)": {},
+    "Metric": {},
+    "More": {},
+    "Move slowly and point the camera at walls, corners, doors, and windows.": {},
+    "Name": {},
+    "New Scan": {},
+    "No scans yet": {},
+    "OK": {},
+    "Object": {},
+    "Objects": {},
+    "Open Settings": {},
+    "Opening": {},
+    "Openings": {},
+    "Oven": {},
+    "Perimeter": {},
+    "Perimeter: %@": {},
+    "Plan": {},
+    "Processing room…": {},
+    "Rebuild": {},
+    "Refrigerator": {},
+    "Rename": {},
+    "Rename Room": {},
+    "Rename Scan": {},
+    "Rescan This Room": {},
+    "Reset View": {},
+    "Retry": {},
+    "Room %lld": {},
+    "Room %lld Couldn't Be Scanned": {},
+    "Room %lld Scanned": {},
+    "Room %lld: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Room %1$lld: %2$@"
+          }
+        }
+      }
+    },
+    "Room name": {},
+    "RoomScanner needs the camera to scan rooms. Turn on camera access in Settings.": {},
+    "Rooms": {},
+    "Rooms couldn't be merged, so they're shown as captured.": {},
+    "Rooms up to about 9 × 9 m (30 × 30 ft) work best.": {},
+    "Save": {},
+    "Save %@": {},
+    "Save Location": {},
+    "Scan %@": {},
+    "Scan Next Room": {},
+    "Scan Not Found": {},
+    "Scan one room at a time. When a room is finished, tap **Done**, walk through the doorway to the next room, and tap **Start**.": {},
+    "Scan your first room to create a floor plan.": {},
+    "Scanned": {},
+    "Scanning requires an iPhone with a LiDAR scanner. You can still view saved scans.": {},
+    "Scanning tips": {},
+    "Scans": {},
+    "Scans are stored only on this device.": {},
+    "See the Measurements tab for details.": {},
+    "Settings": {},
+    "Share": {},
+    "Show live floor plan": {},
+    "Sink": {},
+    "Sofa": {},
+    "Something Went Wrong": {},
+    "Stairs": {},
+    "Start": {},
+    "Start Scanning": {},
+    "Storage": {},
+    "Stove": {},
+    "Summary": {},
+    "TV": {},
+    "Table": {},
+    "The floor plan data is missing or was saved by a newer version of the app.": {},
+    "The floor plan data is missing or was saved by a newer version of the app. You can rebuild it from the raw scan data.": {},
+    "The floor plan image couldn't be created.": {},
+    "The scan couldn't be found.": {},
+    "The scan couldn't be saved.": {},
+    "The scanned area got too large. Try finishing each room sooner.": {},
+    "There's no 3D model to export for this scan.": {},
+    "This can't be undone.": {},
+    "This scan has no room data to build from.": {},
+    "This scan may have been deleted.": {},
+    "This scan wasn't finished": {},
+    "Tips for a Good Scan": {},
+    "Toilet": {},
+    "Total area": {},
+    "Total floor area": {},
+    "Total: %@, %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Total: %1$@, %2$@"
+          }
+        }
+      }
+    },
+    "Tracking was interrupted. Rooms scanned after this may not line up. Consider finishing now.": {},
+    "Units": {},
+    "Use good lighting. Apple recommends at least 50 lux.": {},
+    "Version": {},
+    "View": {},
+    "Walk through a doorway into the next room, then tap Start.": {},
+    "Wall": {},
+    "Walls": {},
+    "Washer/Dryer": {},
+    "Window": {},
+    "Windows": {},
+    "^[%lld door](inflect: true)": {},
+    "^[%lld object](inflect: true)": {},
+    "^[%lld room](inflect: true)": {},
+    "^[%lld wall](inflect: true)": {},
+    "^[%lld window](inflect: true)": {},
+    "approximately ": {},
+    "incomplete": {},
+    "scanned %@": {},
+    "unknown": {}
+  },
+  "version": "1.0"
+}
