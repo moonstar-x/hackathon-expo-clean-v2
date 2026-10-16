@@ -1,3 +1,5 @@
+import ViewInArIcon from '@mui/icons-material/ViewInAr';
+import { MeasurementList, MeasurementEdit, MeasurementShow } from './measurements/views';
 import CategoryIcon from '@mui/icons-material/Category';
 import Inventory2Icon from '@mui/icons-material/Inventory2';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
@@ -42,6 +44,7 @@ export default function App({ config }: { config: AppConfig }) {
       // wrapped in <Authenticated>, so nothing is fetched before checkAuth passes.
       disableTelemetry
     >
+      <Resource name="measurements" icon={ViewInArIcon} list={MeasurementList} edit={MeasurementEdit} show={MeasurementShow} recordRepresentation="name" />
       <Resource
         name="products"
         icon={Inventory2Icon}
