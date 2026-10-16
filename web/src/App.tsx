@@ -1,32 +1,26 @@
-import CategoryIcon from '@mui/icons-material/Category';
-import Inventory2Icon from '@mui/icons-material/Inventory2';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import PeopleIcon from '@mui/icons-material/People';
-import SwapVertIcon from '@mui/icons-material/SwapVert';
-import { esES } from '@mui/material/locale';
-import { createTheme } from '@mui/material/styles';
-import { useMemo } from 'react';
-import { Admin, defaultDarkTheme, defaultLightTheme, Resource } from 'react-admin';
-import type { AppConfig } from './config';
-import { Dashboard } from './dashboard/Dashboard';
-import { APP_LOCALE } from './i18n/locale';
-import { i18nProvider } from './i18n/provider';
+import { useMemo, type ReactElement } from 'react';
+import { Admin, Resource, type AuthProvider } from 'react-admin';
+import Dashboard from './components/dashboard/Dashboard';
+import LoginPage from './components/login/LoginPage';
+import { i18nProvider } from './i18n';
+import AppLayout from './Layout';
 import { createAuthProvider } from './providers/authProvider';
 import { createDataProvider } from './providers/dataProvider';
-import { CategoryCreate, CategoryEdit, CategoryList } from './resources/categories';
-import { ProductCreate, ProductEdit, ProductList, ProductShow } from './resources/products';
-import { StockMovementCreate, StockMovementList, StockMovementShow } from './resources/stockMovements';
-import { SupplierCreate, SupplierEdit, SupplierList } from './resources/suppliers';
-import { UserCreate, UserEdit, UserList } from './resources/users';
-import type { Product, User } from './types';
+import categories from './resources/categories';
+import products from './resources/products';
+import stockMovements from './resources/stock-movements';
+import suppliers from './resources/suppliers';
+import users from './resources/users';
+import { darkTheme, lightTheme } from './theme';
+import type { AppProps } from './types/config';
+import type { InventoryDataProvider } from './types/providers';
 
-const localizedComponents = { components: { RaDateField: { defaultProps: { locales: APP_LOCALE } } } };
-const lightTheme = createTheme(defaultLightTheme, esES, localizedComponents);
-const darkTheme = createTheme(defaultDarkTheme, esES, localizedComponents);
-
-export default function App({ config }: { config: AppConfig }) {
-  const dataProvider = useMemo(() => createDataProvider(config.apiUrl), [config.apiUrl]);
-  const authProvider = useMemo(() => createAuthProvider(config.apiUrl), [config.apiUrl]);
+const App = ({ config }: AppProps): ReactElement => {
+  const dataProvider: InventoryDataProvider = useMemo(
+    (): InventoryDataProvider => createDataProvider(config.apiUrl),
+    [config.apiUrl],
+  );
+  const authProvider: AuthProvider = useMemo((): AuthProvider => createAuthProvider(config.apiUrl), [config.apiUrl]);
 
   return (
     <Admin
@@ -34,55 +28,24 @@ export default function App({ config }: { config: AppConfig }) {
       dataProvider={dataProvider}
       authProvider={authProvider}
       i18nProvider={i18nProvider}
+      layout={AppLayout}
+      loginPage={LoginPage}
+      dashboard={Dashboard}
       theme={lightTheme}
       darkTheme={darkTheme}
-      dashboard={Dashboard}
+      defaultTheme="light"
       // No `requireAuth`: with React 19 + react-router 7 it loops between LogoutOnMount and
-      // /login when logged out. Resource views check auth themselves, and the dashboard is
-      // wrapped in <Authenticated>, so nothing is fetched before checkAuth passes.
+      // /login when logged out. Resource views check auth themselves, the dashboard is wrapped in
+      // <Authenticated>, and the login page sends a signed-in user home.
       disableTelemetry
     >
-      <Resource
-        name="products"
-        icon={Inventory2Icon}
-        list={ProductList}
-        create={ProductCreate}
-        edit={ProductEdit}
-        show={ProductShow}
-        recordRepresentation={(record: Product) => `${record.sku} — ${record.name}`}
-      />
-      <Resource
-        name="stock-movements"
-        icon={SwapVertIcon}
-        list={StockMovementList}
-        create={StockMovementCreate}
-        show={StockMovementShow}
-        recordRepresentation={(record) => `Movimiento n.º ${record.id}`}
-      />
-      <Resource
-        name="categories"
-        icon={CategoryIcon}
-        list={CategoryList}
-        create={CategoryCreate}
-        edit={CategoryEdit}
-        recordRepresentation="name"
-      />
-      <Resource
-        name="suppliers"
-        icon={LocalShippingIcon}
-        list={SupplierList}
-        create={SupplierCreate}
-        edit={SupplierEdit}
-        recordRepresentation="name"
-      />
-      <Resource
-        name="users"
-        icon={PeopleIcon}
-        list={UserList}
-        create={UserCreate}
-        edit={UserEdit}
-        recordRepresentation={(record: User) => record.name || record.email}
-      />
+      <Resource name="products" {...products} />
+      <Resource name="stock-movements" {...stockMovements} />
+      <Resource name="categories" {...categories} />
+      <Resource name="suppliers" {...suppliers} />
+      <Resource name="users" {...users} />
     </Admin>
   );
-}
+};
+
+export default App;

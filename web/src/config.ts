@@ -1,46 +1,37 @@
-export interface AppConfig {
-  /** API base URL including `/api`, without a trailing slash. */
-  apiUrl: string;
-  appTitle: string;
-  currency: string;
-}
+import type { AppConfig, ConfigResult, EnvSource } from './types/config';
 
-export type ConfigResult = { ok: true; config: AppConfig } | { ok: false; errors: string[] };
-
-export const DEFAULT_APP_TITLE = 'Inventario de limpieza';
-export const DEFAULT_CURRENCY = 'USD';
-
-type EnvSource = Partial<Record<'VITE_API_URL' | 'VITE_APP_TITLE' | 'VITE_CURRENCY', unknown>>;
+export const DEFAULT_APP_TITLE: string = 'Inventario de limpieza';
+export const DEFAULT_CURRENCY: string = 'USD';
 
 const clean = (value: unknown): string | undefined =>
   typeof value === 'string' && value.trim() !== '' ? value.trim() : undefined;
 
-function isHttpUrl(value: string): boolean {
+const isHttpUrl = (value: string): boolean => {
   try {
-    const url = new URL(value);
+    const url: URL = new URL(value);
     return url.protocol === 'http:' || url.protocol === 'https:';
   } catch {
     return false;
   }
-}
+};
 
-function isSupportedCurrency(code: string): boolean {
+const isSupportedCurrency = (code: string): boolean => {
   try {
     new Intl.NumberFormat(undefined, { style: 'currency', currency: code });
     return /^[A-Za-z]{3}$/.test(code);
   } catch {
     return false;
   }
-}
+};
 
 /**
  * Validates the build-time `VITE_*` variables. Vite inlines them when building,
  * so changing them requires a rebuild.
  */
-export function parseConfig(env: EnvSource): ConfigResult {
+export const parseConfig = (env: EnvSource): ConfigResult => {
   const errors: string[] = [];
 
-  let apiUrl = clean(env.VITE_API_URL);
+  let apiUrl: string | undefined = clean(env.VITE_API_URL);
   if (!apiUrl) {
     errors.push('VITE_API_URL no está definida. Indica la URL base de la API con /api, por ejemplo https://api.example.com/api.');
   } else {
@@ -48,16 +39,14 @@ export function parseConfig(env: EnvSource): ConfigResult {
     if (!isHttpUrl(apiUrl)) errors.push(`VITE_API_URL debe ser una URL absoluta http(s); se recibió "${apiUrl}".`);
   }
 
-  const currency = (clean(env.VITE_CURRENCY) ?? DEFAULT_CURRENCY).toUpperCase();
+  const currency: string = (clean(env.VITE_CURRENCY) ?? DEFAULT_CURRENCY).toUpperCase();
   if (!isSupportedCurrency(currency)) {
     errors.push(`VITE_CURRENCY debe ser un código de moneda ISO 4217, como USD o EUR; se recibió "${currency}".`);
   }
 
   if (errors.length > 0 || !apiUrl) return { ok: false, errors };
-  return {
-    ok: true,
-    config: { apiUrl, appTitle: clean(env.VITE_APP_TITLE) ?? DEFAULT_APP_TITLE, currency },
-  };
-}
+  const config: AppConfig = { apiUrl, appTitle: clean(env.VITE_APP_TITLE) ?? DEFAULT_APP_TITLE, currency };
+  return { ok: true, config };
+};
 
 export const configResult: ConfigResult = parseConfig(import.meta.env);
