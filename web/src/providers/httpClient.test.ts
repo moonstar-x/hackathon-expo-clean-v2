@@ -10,7 +10,7 @@ describe('httpClient', () => {
   beforeEach(() => localStorage.clear());
 
   it('sends Authorization: Bearer <token> when logged in', async () => {
-    writeAuth({ token: 'jwt-abc', expiresAt: inOneHour(), email: 'admin@example.com' });
+    writeAuth({ token: 'jwt-abc', expiresAt: inOneHour(), userId: 1, email: 'admin@example.com', name: null });
     const fetchMock = mockFetch(jsonResponse({ ok: true }));
     const { json } = await httpClient('http://api.test/api/products/1');
     expect(json).toEqual({ ok: true });
@@ -52,7 +52,7 @@ describe('dataProvider', () => {
   beforeEach(() => localStorage.clear());
 
   it('getStats calls GET {apiUrl}/stats with the token', async () => {
-    writeAuth({ token: 'jwt-abc', expiresAt: inOneHour(), email: 'admin@example.com' });
+    writeAuth({ token: 'jwt-abc', expiresAt: inOneHour(), userId: 1, email: 'admin@example.com', name: null });
     const stats = {
       products: { total: 1, active: 1, lowStock: 0, outOfStock: 0 },
       stockValue: 10,

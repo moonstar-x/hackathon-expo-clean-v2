@@ -3,8 +3,10 @@ import express from 'express';
 import { rateLimit } from 'express-rate-limit';
 import { z } from 'zod';
 import { invalidCredentials, rateLimited } from '../../lib/errors.js';
+import { hashPassword, verifyPassword } from '../../lib/password.js';
 import { requireObjectBody } from '../../lib/validation.js';
 import { requireAuth, signToken } from '../../middleware/auth.js';
+import { createUsersRepository } from '../users/repository.js';
 
 const LOGIN_WINDOW_MS = 15 * 60 * 1000;
 const LOGIN_MAX_ATTEMPTS = 10;
@@ -14,15 +16,16 @@ const loginSchema = z.object({
   password: z.string({ error: (iss) => (iss.input == null ? 'Required' : 'Must be a string') }).min(1, 'Required'),
 });
 
-const sha256 = (value) => crypto.createHash('sha256').update(value, 'utf8').digest();
+// A real hash of a random password. Unknown emails are checked against it, so they
+// take as long as a wrong password and the response time does not reveal which
+// emails have accounts. Computed once per process.
+let dummyHash;
+const getDummyHash = () => (dummyHash ??= hashPassword(crypto.randomBytes(32).toString('hex')));
 
-/** Constant-time comparison: both sides are hashed first so lengths always match. */
-export function safeEqual(a, b) {
-  return crypto.timingSafeEqual(sha256(a), sha256(b));
-}
-
-export function authRouter({ config }) {
+export function authRouter({ config, db }) {
   const router = express.Router();
+  const users = createUsersRepository(db);
+  getDummyHash();
 
   // Created per app so every test app starts with a fresh limiter.
   const loginLimiter = rateLimit({
@@ -33,20 +36,21 @@ export function authRouter({ config }) {
     handler: (_req, _res, next) => next(rateLimited()),
   });
 
-  router.post('/login', loginLimiter, (req, res) => {
+  router.post('/login', loginLimiter, async (req, res) => {
     const { email, password } = loginSchema.parse(requireObjectBody(req.body));
 
-    // Evaluate both checks so the response time does not reveal which field was wrong.
-    const emailOk = safeEqual(email.toLowerCase(), config.adminEmail.toLowerCase());
-    const passwordOk = safeEqual(password, config.adminPassword);
-    if (!(emailOk && passwordOk)) throw invalidCredentials();
+    const user = users.findCredentials(email);
+    const passwordOk = await verifyPassword(password, user?.passwordHash ?? (await getDummyHash()));
+    // Unknown email, wrong password and deactivated account all get the same answer.
+    if (!user || !passwordOk || !user.active) throw invalidCredentials();
 
-    const { token, expiresAt } = signToken(config.adminEmail, config);
-    res.json({ token, expiresAt, user: { email: config.adminEmail } });
+    users.recordLogin(user.id);
+    const { token, expiresAt } = signToken(user, config);
+    res.json({ token, expiresAt, user: { id: user.id, email: user.email, name: user.name } });
   });
 
-  router.get('/me', requireAuth(config), (req, res) => {
-    res.json({ email: req.user.email });
+  router.get('/me', requireAuth({ config, db }), (req, res) => {
+    res.json(req.user);
   });
 
   return router;

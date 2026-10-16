@@ -1,6 +1,6 @@
 # Cleaning Inventory Admin
 
-React Admin single-page app for the cleaning products inventory ([SPEC-002](../spec/SPEC-002.md)). Staff use it to manage the catalog, record stock movements, and watch low-stock items on a dashboard.
+React Admin single-page app for the cleaning products inventory ([SPEC-002](../spec/SPEC-002.md), user accounts in [SPEC-003](../spec/SPEC-003.md)). Staff use it to manage the catalog, record stock movements, watch low-stock items on a dashboard, and manage who can log in.
 
 Stack: react-admin 5, `ra-data-simple-rest`, MUI 7, React 19, Vite, TypeScript, Vitest.
 
@@ -16,7 +16,7 @@ cp .env.example .env
 npm run dev          # http://localhost:5173 (PORT from .env)
 ```
 
-Log in with the API's `ADMIN_EMAIL` / `ADMIN_PASSWORD` (the "Correo electrónico" field takes the email). The API must allow this app's origin in its `CORS_ORIGIN`.
+The first time, log in with the API's `ADMIN_EMAIL` / `ADMIN_PASSWORD` (the API creates that initial user while it has no users; the "Correo electrónico" field takes the email). Then add everyone else under **Usuarios**. The API must allow this app's origin in its `CORS_ORIGIN`.
 
 The interface is in Spanish, including React Admin/MUI controls, validation and API errors. Dates, numbers and currencies use the `es` locale. Displayed unit names are translated while API identifiers remain unchanged. Existing catalog content is shown as stored. Shared translations live in `src/i18n/`.
 
@@ -50,6 +50,7 @@ If `VITE_API_URL` is missing or not an absolute http(s) URL, the app renders a S
 - **Products:** list with search, category/supplier/active/hazardous filters and a low-stock toggle (active products by default; low-stock rows are tinted). Create (General / Stock / Safety, with initial quantity), edit (quantity read-only) and show. The show page has **Receive stock / Record usage / Adjust count** buttons and a paginated stock history.
 - **Stock movements:** list with product/type/date filters, a create form (labels follow the movement type and the product's current stock is shown), and a read-only show page. Movements cannot be edited or deleted.
 - **Categories** and **Suppliers:** list, create, edit, delete with confirmation.
+- **Users:** list (search, active filter, last login), create (name, email, password, active), edit (leave the password blank to keep it), delete with confirmation. Every logged-in user can manage users; there are no roles yet. Your own row is marked **Tú**: it cannot be deleted or deactivated, and editing your own name or email updates the app bar immediately.
 
 All mutations are pessimistic. Server field errors appear under the matching inputs, and the API's `message` appears in the notification.
 
@@ -60,10 +61,10 @@ src/
   main.tsx             validates config, renders <App> or the config error page
   App.tsx              <Admin> with resources, dashboard and providers
   config.ts            parseConfig(import.meta.env)
-  types.ts             Category, Supplier, Product, StockMovement, Stats (mirrors the API)
+  types.ts             Category, Supplier, Product, StockMovement, User, Stats (mirrors the API)
   providers/           httpClient (bearer token), authProvider, dataProvider (+ getStats)
   dashboard/           Dashboard, StatCard
-  resources/           products, stockMovements, categories, suppliers
+  resources/           products, stockMovements, categories, suppliers, users
   components/          shared fields (quantity, money, delta, chips), validators, movement buttons
   utils/format.ts      quantity, signed delta, currency and date formatting
 ```

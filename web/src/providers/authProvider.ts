@@ -6,7 +6,7 @@ import { NETWORK_ERROR_MESSAGE } from './httpClient';
 interface LoginResponse {
   token: string;
   expiresAt: string;
-  user: { email: string };
+  user: { id: number; email: string; name: string | null };
 }
 
 async function readMessage(response: Response, fallback: string): Promise<string> {
@@ -41,7 +41,13 @@ export function createAuthProvider(apiUrl: string): AuthProvider {
       }
 
       const body = (await response.json()) as LoginResponse;
-      writeAuth({ token: body.token, expiresAt: body.expiresAt, email: body.user.email });
+      writeAuth({
+        token: body.token,
+        expiresAt: body.expiresAt,
+        userId: body.user.id,
+        email: body.user.email,
+        name: body.user.name ?? null,
+      });
     },
 
     async logout() {
@@ -67,7 +73,7 @@ export function createAuthProvider(apiUrl: string): AuthProvider {
     async getIdentity() {
       const auth = readAuth();
       if (!auth) throw new Error('No has iniciado sesión');
-      return { id: auth.email, fullName: auth.email };
+      return { id: auth.userId, fullName: auth.name || auth.email };
     },
 
     async getPermissions() {

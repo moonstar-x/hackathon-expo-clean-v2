@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { jsonResponse, mockFetch } from '../test-utils';
 import { createAuthProvider } from './authProvider';
-import { AUTH_STORAGE_KEY, readAuth, writeAuth } from './authStorage';
+import { AUTH_STORAGE_KEY, readAuth, updateStoredUser, writeAuth } from './authStorage';
 import { NETWORK_ERROR_MESSAGE } from './httpClient';
 
 const API_URL = 'http://api.test/api';
@@ -15,7 +15,9 @@ describe('authProvider', () => {
   describe('login', () => {
     it('posts { email, password } to /auth/login and stores the session', async () => {
       const expiresAt = inOneHour();
-      const fetchMock = mockFetch(jsonResponse({ token: 'jwt-123', expiresAt, user: { email: 'admin@example.com' } }));
+      const fetchMock = mockFetch(
+        jsonResponse({ token: 'jwt-123', expiresAt, user: { id: 7, email: 'admin@example.com', name: 'Ana Pérez' } }),
+      );
 
       await authProvider.login({ username: 'Admin@Example.com', password: 's3cret!!' });
 
@@ -24,7 +26,7 @@ describe('authProvider', () => {
       expect(url).toBe(`${API_URL}/auth/login`);
       expect(init?.method).toBe('POST');
       expect(JSON.parse(String(init?.body))).toEqual({ email: 'Admin@Example.com', password: 's3cret!!' });
-      expect(readAuth()).toEqual({ token: 'jwt-123', expiresAt, email: 'admin@example.com' });
+      expect(readAuth()).toEqual({ token: 'jwt-123', expiresAt, userId: 7, email: 'admin@example.com', name: 'Ana Pérez' });
     });
 
     it("rejects with the API's message on 401 and stores nothing", async () => {
@@ -50,7 +52,7 @@ describe('authProvider', () => {
     });
 
     it('rejects and clears storage when the token is expired', async () => {
-      writeAuth({ token: 't', expiresAt: anHourAgo(), email: 'admin@example.com' });
+      writeAuth({ token: 't', expiresAt: anHourAgo(), userId: 1, email: 'admin@example.com', name: null });
       await expect(authProvider.checkAuth({})).rejects.toThrow('Tu sesión ha caducado. Vuelve a iniciar sesión.');
       expect(readAuth()).toBeNull();
     });
@@ -60,14 +62,20 @@ describe('authProvider', () => {
       await expect(authProvider.checkAuth({})).rejects.toBeDefined();
     });
 
+    it('treats a session saved before user accounts existed as logged out', async () => {
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({ token: 't', expiresAt: inOneHour(), email: 'admin@example.com' }));
+      expect(readAuth()).toBeNull();
+      await expect(authProvider.checkAuth({})).rejects.toBeDefined();
+    });
+
     it('resolves when the token is valid', async () => {
-      writeAuth({ token: 't', expiresAt: inOneHour(), email: 'admin@example.com' });
+      writeAuth({ token: 't', expiresAt: inOneHour(), userId: 1, email: 'admin@example.com', name: null });
       await expect(authProvider.checkAuth({})).resolves.toBeUndefined();
     });
   });
 
   describe('checkError', () => {
-    beforeEach(() => writeAuth({ token: 't', expiresAt: inOneHour(), email: 'admin@example.com' }));
+    beforeEach(() => writeAuth({ token: 't', expiresAt: inOneHour(), userId: 1, email: 'admin@example.com', name: null }));
 
     it('rejects and clears storage on 401', async () => {
       await expect(authProvider.checkError({ status: 401 })).rejects.toBeDefined();
@@ -85,14 +93,24 @@ describe('authProvider', () => {
   });
 
   it('logout clears the stored session', async () => {
-    writeAuth({ token: 't', expiresAt: inOneHour(), email: 'admin@example.com' });
+    writeAuth({ token: 't', expiresAt: inOneHour(), userId: 1, email: 'admin@example.com', name: null });
     await authProvider.logout({});
     expect(localStorage.getItem(AUTH_STORAGE_KEY)).toBeNull();
   });
 
-  it('getIdentity returns the email', async () => {
-    writeAuth({ token: 't', expiresAt: inOneHour(), email: 'admin@example.com' });
-    await expect(authProvider.getIdentity!()).resolves.toEqual({ id: 'admin@example.com', fullName: 'admin@example.com' });
+  it('getIdentity returns the user id and name, falling back to the email', async () => {
+    writeAuth({ token: 't', expiresAt: inOneHour(), userId: 1, email: 'admin@example.com', name: null });
+    await expect(authProvider.getIdentity!()).resolves.toEqual({ id: 1, fullName: 'admin@example.com' });
+
+    writeAuth({ token: 't', expiresAt: inOneHour(), userId: 1, email: 'admin@example.com', name: 'Ana Pérez' });
+    await expect(authProvider.getIdentity!()).resolves.toEqual({ id: 1, fullName: 'Ana Pérez' });
+  });
+
+  it('updateStoredUser refreshes the stored email and name but keeps the token', () => {
+    const expiresAt = inOneHour();
+    writeAuth({ token: 't', expiresAt, userId: 1, email: 'admin@example.com', name: null });
+    updateStoredUser({ email: 'ana@example.com', name: 'Ana Pérez' });
+    expect(readAuth()).toEqual({ token: 't', expiresAt, userId: 1, email: 'ana@example.com', name: 'Ana Pérez' });
   });
 
   it('getPermissions resolves undefined', async () => {

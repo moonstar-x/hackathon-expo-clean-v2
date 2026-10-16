@@ -19,6 +19,11 @@ describe('Spanish translations', () => {
     expect(translateApiMessage('Must be greater than 0')).toBe('Debe ser mayor que 0.');
     expect(translateApiMessage('Category 25 does not exist')).toBe('La categoría con ID 25 no existe.');
     expect(translateApiMessage('Must be one of: IN, OUT, ADJUSTMENT')).toBe('Selecciona una de las opciones disponibles.');
+    expect(translateApiMessage('Must be at least 8 characters')).toBe('Debe tener al menos 8 caracteres.');
+    expect(translateApiMessage('User 4 not found')).toBe('El usuario con ID 4 no existe.');
+    expect(translateApiMessage('A user with this email already exists')).toBe('Ya existe un usuario con este correo electrónico.');
+    expect(translateApiError('You cannot delete your own account', 'CONFLICT')).toBe('No puedes eliminar tu propia cuenta.');
+    expect(translateApiError('You cannot deactivate your own account', 'VALIDATION_ERROR')).toBe('No puedes desactivar tu propia cuenta.');
   });
 
   it('preserves stock quantities and record names in translated errors', () => {

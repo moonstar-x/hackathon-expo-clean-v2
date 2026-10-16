@@ -4,6 +4,7 @@ import { loadConfig } from '../src/config.js';
 import { openDatabase } from '../src/db/connection.js';
 import { migrate } from '../src/db/migrate.js';
 import { roundQuantity } from '../src/lib/numbers.js';
+import { ensureInitialUser } from '../src/modules/users/initialUser.js';
 
 export const ORIGIN = 'http://admin.test';
 
@@ -18,11 +19,18 @@ export const testEnv = Object.freeze({
   LOG_LEVEL: 'silent',
 });
 
-/** A fresh app on a migrated in-memory database. */
-export function makeApp(envOverrides = {}) {
+/**
+ * A cheap scrypt cost for test-only hashes. Verification reads the cost from the
+ * stored hash, so logging in as the initial user stays fast in every test.
+ */
+export const FAST_HASH = Object.freeze({ hashParams: Object.freeze({ N: 2 ** 10, r: 8, p: 1 }) });
+
+/** A fresh app on a migrated in-memory database, with the initial user from ADMIN_EMAIL / ADMIN_PASSWORD. */
+export async function makeApp(envOverrides = {}) {
   const db = openDatabase(':memory:');
   migrate(db);
   const config = loadConfig({ ...testEnv, ...envOverrides });
+  await ensureInitialUser(db, config, FAST_HASH);
   const app = createApp({ db, config });
   return { app, db, config };
 }
@@ -40,19 +48,23 @@ export const listQuery = ({ sort, range, filter } = {}) => ({
   ...(filter ? { filter: JSON.stringify(filter) } : {}),
 });
 
-/** An app plus an authenticated client: `api.get('/api/x')`, `api.post('/api/x', body)`, ... */
-export async function makeClient(envOverrides) {
-  const ctx = makeApp(envOverrides);
-  const token = await login(ctx.app);
+/** A client that sends `token` on every request: `api.get('/api/x')`, `api.post('/api/x', body)`, ... */
+export function clientFor(app, token) {
   const auth = (req) => req.set('Authorization', `Bearer ${token}`);
-  const api = {
-    get: (path, query) => auth(request(ctx.app).get(path).query(query ?? {})),
-    list: (path, params) => auth(request(ctx.app).get(path).query(listQuery(params))),
-    post: (path, body) => auth(request(ctx.app).post(path).send(body)),
-    put: (path, body) => auth(request(ctx.app).put(path).send(body)),
-    delete: (path) => auth(request(ctx.app).delete(path)),
+  return {
+    get: (path, query) => auth(request(app).get(path).query(query ?? {})),
+    list: (path, params) => auth(request(app).get(path).query(listQuery(params))),
+    post: (path, body) => auth(request(app).post(path).send(body)),
+    put: (path, body) => auth(request(app).put(path).send(body)),
+    delete: (path) => auth(request(app).delete(path)),
   };
-  return { ...ctx, token, api };
+}
+
+/** An app plus a client logged in as the initial user. */
+export async function makeClient(envOverrides) {
+  const ctx = await makeApp(envOverrides);
+  const token = await login(ctx.app);
+  return { ...ctx, token, api: clientFor(ctx.app, token) };
 }
 
 /** Creates a category (and optionally a supplier) and returns a valid product body for it. */

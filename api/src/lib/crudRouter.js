@@ -11,7 +11,9 @@ import { mergeForUpdate, parseId, requireObjectBody } from './validation.js';
  *   findById(id) → record | null
  *   create(data, ctx) → record
  *   update(id, data, current, ctx) → record
- *   remove(id, current) → void
+ *   remove(id, current, ctx) → void
+ *
+ * `create`, `update` and `remove` may return a promise. `ctx.user` is the caller.
  *
  * PUT uses merge semantics: the current record's writable fields are
  * overridden by the ones present in the body, and the result is validated as
@@ -37,21 +39,21 @@ export function createCrudRouter({ listSpec, repository, createSchema, updateSch
     res.json(load(req.params.id));
   });
 
-  router.post('/', (req, res) => {
+  router.post('/', async (req, res) => {
     const data = createSchema.parse(requireObjectBody(req.body));
-    res.status(201).json(repository.create(data, { user: req.user }));
+    res.status(201).json(await repository.create(data, { user: req.user }));
   });
 
-  router.put('/:id', (req, res) => {
+  router.put('/:id', async (req, res) => {
     const current = load(req.params.id);
     const body = requireObjectBody(req.body);
     const data = updateSchema.parse(mergeForUpdate(current, body, writableFields));
-    res.json(repository.update(current.id, data, current, { user: req.user }));
+    res.json(await repository.update(current.id, data, current, { user: req.user }));
   });
 
-  router.delete('/:id', (req, res) => {
+  router.delete('/:id', async (req, res) => {
     const current = load(req.params.id);
-    repository.remove(current.id, current);
+    await repository.remove(current.id, current, { user: req.user });
     res.json(current);
   });
 

@@ -53,7 +53,10 @@ const schema = z
       z.string().trim().default('8h').refine(isJwtDuration, 'must be a duration such as 30m, 8h or 7d'),
     ),
     ADMIN_EMAIL: env(z.string({ error: required }).trim().pipe(z.email('must be a valid email'))),
-    ADMIN_PASSWORD: env(z.string({ error: required }).min(8, 'must be at least 8 characters')),
+    // Same limits as any user password (modules/users/schemas.js).
+    ADMIN_PASSWORD: env(
+      z.string({ error: required }).min(8, 'must be at least 8 characters').max(128, 'must be at most 128 characters'),
+    ),
     LOG_LEVEL: env(z.enum(LOG_LEVELS).default('info')),
   })
   .superRefine((cfg, ctx) => {
