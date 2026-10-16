@@ -52,7 +52,7 @@ repository (with an in-memory store).
 
 1. Open `RoomScanner.xcodeproj`. Under **Signing & Capabilities**, choose your team, or set
    `DEVELOPMENT_TEAM` in `project.yml` and run `xcodegen generate` again.
-2. If the bundle ID `com.example.RoomScanner` is taken, change `PRODUCT_BUNDLE_IDENTIFIER`.
+2. If the bundle ID `com.clean.code.RoomScanner` is taken, change `PRODUCT_BUNDLE_IDENTIFIER`.
 3. Select your LiDAR iPhone and run.
 
 ## DEBUG sample data
@@ -75,7 +75,7 @@ DEBUG builds also accept launch arguments, which help with screenshots and quick
 | `-detailTab plan\|model\|measurements` | Selects the detail tab |
 
 ```bash
-xcrun simctl launch booted com.example.RoomScanner -seedSamples -openFirst -detailTab model
+xcrun simctl launch booted com.clean.code.RoomScanner -seedSamples -openFirst -detailTab model
 ```
 
 ## Localization
