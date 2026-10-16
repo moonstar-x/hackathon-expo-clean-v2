@@ -30,7 +30,7 @@ function SupplierForm({ withDelete }: { withDelete?: boolean }) {
       }
     >
       <TextInput source="name" validate={[required(), maxLength(150)]} fullWidth />
-      <TextInput source="contactName" label="Contact name" validate={maxLength(150)} parse={emptyToNull} fullWidth />
+      <TextInput source="contactName" label="Nombre de contacto" validate={maxLength(150)} parse={emptyToNull} fullWidth />
       <TextInput source="email" type="email" validate={[email(), maxLength(254)]} parse={emptyToNull} fullWidth />
       <TextInput source="phone" validate={maxLength(50)} parse={emptyToNull} />
       <TextInput source="notes" multiline minRows={3} validate={maxLength(1000)} parse={emptyToNull} fullWidth />
@@ -43,7 +43,7 @@ export function SupplierList() {
     <List filters={[<SearchInput key="q" source="q" alwaysOn />]} sort={{ field: 'name', order: 'ASC' }}>
       <Datagrid rowClick="edit" bulkActionButtons={<BulkDeleteButton mutationMode="pessimistic" />}>
         <TextField source="name" />
-        <TextField source="contactName" label="Contact" emptyText="—" />
+        <TextField source="contactName" label="Contacto" emptyText="—" />
         <EmailField source="email" emptyText="—" />
         <TextField source="phone" emptyText="—" sortable={false} />
       </Datagrid>

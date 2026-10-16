@@ -2,16 +2,16 @@
 
 export const maxDecimals = (decimals: number) => (value: unknown) => {
   if (typeof value !== 'number' || !Number.isFinite(value)) return undefined;
-  return Number(value.toFixed(decimals)) === value ? undefined : `At most ${decimals} decimal places`;
+  return Number(value.toFixed(decimals)) === value ? undefined : `Como máximo ${decimals} decimales`;
 };
 
 export const httpUrl = (value: unknown) => {
   if (typeof value !== 'string' || value.trim() === '') return undefined;
   try {
     const url = new URL(value.trim());
-    return url.protocol === 'http:' || url.protocol === 'https:' ? undefined : 'Must be an http:// or https:// URL';
+    return url.protocol === 'http:' || url.protocol === 'https:' ? undefined : 'Debe ser una URL http:// o https://';
   } catch {
-    return 'Must be an http:// or https:// URL';
+    return 'Debe ser una URL http:// o https://';
   }
 };
 

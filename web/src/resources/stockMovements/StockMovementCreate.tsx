@@ -25,7 +25,7 @@ const validateQuantity = [required(), minValue(0), maxDecimals(3)];
 
 /** Positive for IN/OUT; the server reports the same rule if this is bypassed. */
 const positiveUnlessAdjustment = (value: unknown, values: { type?: MovementType }) =>
-  values.type !== 'ADJUSTMENT' && typeof value === 'number' && value <= 0 ? 'Must be greater than 0' : undefined;
+  values.type !== 'ADJUSTMENT' && typeof value === 'number' && value <= 0 ? 'Debe ser mayor que 0' : undefined;
 
 function CurrentStock() {
   const productId = useWatch({ name: 'productId' }) as number | undefined;
@@ -34,8 +34,8 @@ function CurrentStock() {
   return (
     <Typography variant="body2" color="text.secondary" sx={{ mt: -1, mb: 2 }}>
       {isPending || !product
-        ? 'Current stock: …'
-        : `Current stock: ${formatQuantity(product.quantity, product.unit)} (reorder level ${formatQuantity(product.reorderLevel, product.unit)})`}
+        ? 'Existencias actuales: …'
+        : `Existencias actuales: ${formatQuantity(product.quantity, product.unit)} (nivel de reposición ${formatQuantity(product.reorderLevel, product.unit)})`}
     </Typography>
   );
 }
@@ -66,12 +66,12 @@ export function StockMovementCreate() {
       queryClient.invalidateQueries({ queryKey: ['stock-movements'] }),
       queryClient.invalidateQueries({ queryKey: ['stats'] }),
     ]);
-    notify('Stock movement recorded', { type: 'success' });
+    notify('Movimiento de inventario registrado', { type: 'success' });
     redirect('show', 'products', movement.productId);
   };
 
   return (
-    <Create<StockMovement> title="Record stock movement" mutationOptions={{ onSuccess }}>
+    <Create<StockMovement> title="Registrar movimiento de inventario" mutationOptions={{ onSuccess }}>
       <SimpleForm sx={{ maxWidth: 600 }} defaultValues={{ type: 'IN' }}>
         <ReferenceInput
           source="productId"
@@ -79,7 +79,7 @@ export function StockMovementCreate() {
           filter={{ active: true }}
           sort={{ field: 'name', order: 'ASC' }}
         >
-          <AutocompleteInput label="Product" validate={required()} fullWidth />
+          <AutocompleteInput label="Producto" validate={required()} fullWidth />
         </ReferenceInput>
         <CurrentStock />
         <RadioButtonGroupInput source="type" choices={MOVEMENT_TYPE_CHOICES} validate={required()} />
@@ -88,14 +88,14 @@ export function StockMovementCreate() {
           source="reason"
           validate={maxLength(255)}
           parse={emptyToNull}
-          helperText="e.g. Monthly restock, Used at Office Tower job"
+          helperText="Ej.: Reposición mensual, consumo en limpieza de oficinas"
           fullWidth
         />
         <TextInput
           source="reference"
           validate={maxLength(100)}
           parse={emptyToNull}
-          helperText="e.g. PO or work-order number"
+          helperText="Ej.: Número de orden de compra o de trabajo"
         />
       </SimpleForm>
     </Create>

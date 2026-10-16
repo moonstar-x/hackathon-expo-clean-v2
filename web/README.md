@@ -16,7 +16,9 @@ cp .env.example .env
 npm run dev          # http://localhost:5173 (PORT from .env)
 ```
 
-Log in with the API's `ADMIN_EMAIL` / `ADMIN_PASSWORD` (the "Username" field takes the email). The API must allow this app's origin in its `CORS_ORIGIN`.
+Log in with the API's `ADMIN_EMAIL` / `ADMIN_PASSWORD` (the "Correo electrónico" field takes the email). The API must allow this app's origin in its `CORS_ORIGIN`.
+
+The interface is in Spanish, including React Admin/MUI controls, validation and API errors. Dates, numbers and currencies use the `es` locale. Displayed unit names are translated while API identifiers remain unchanged. Existing catalog content is shown as stored. Shared translations live in `src/i18n/`.
 
 ## Configuration
 
@@ -25,11 +27,11 @@ Vite only exposes `VITE_*` variables to the browser, and it **inlines them at bu
 | Variable | Required | Default | Meaning |
 |---|---|---|---|
 | `VITE_API_URL` | **yes** | – | API base URL **including `/api`**, e.g. `https://inventory.example.com/api`. A trailing slash is stripped. |
-| `VITE_APP_TITLE` | no | `Cleaning Inventory` | App bar and document title |
+| `VITE_APP_TITLE` | no | `Inventario de limpieza` | App bar and document title |
 | `VITE_CURRENCY` | no | `USD` | ISO 4217 code used to display money |
 | `PORT` | no | `5173` | Dev/preview server port. Read by `vite.config.ts` and never exposed to the browser. |
 
-If `VITE_API_URL` is missing or not an absolute http(s) URL, the app renders a plain "Missing configuration" page instead of a blank screen.
+If `VITE_API_URL` is missing or not an absolute http(s) URL, the app renders a Spanish configuration error page instead of a blank screen.
 
 ## Scripts
 

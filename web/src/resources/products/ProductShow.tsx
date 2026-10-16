@@ -16,7 +16,7 @@ import {
   useRecordContext,
   WithRecord,
 } from 'react-admin';
-import { MoneyField, MovementQuantityField, MovementTypeField, QuantityField, StockStatusField } from '../../components/fields';
+import { MoneyField, MovementQuantityField, MovementReasonField, MovementTypeField, QuantityField, StockStatusField } from '../../components/fields';
 import { MovementButton } from '../../components/MovementButton';
 import type { Product } from '../../types';
 
@@ -43,17 +43,17 @@ export function ProductShow() {
         <TextField source="sku" label="SKU" />
         <TextField source="name" />
         <TextField source="description" emptyText="—" />
-        <ReferenceField source="categoryId" reference="categories" label="Category" />
-        <ReferenceField source="supplierId" reference="suppliers" label="Supplier" emptyText="—" />
-        <QuantityField source="quantity" label="Quantity on hand" />
-        <StockStatusField label="Status" />
-        <QuantityField source="reorderLevel" label="Reorder level" />
-        <MoneyField source="unitCost" label="Unit cost" />
-        <MoneyField source="stockValue" label="Stock value" />
+        <ReferenceField source="categoryId" reference="categories" label="Categoría" />
+        <ReferenceField source="supplierId" reference="suppliers" label="Proveedor" emptyText="—" />
+        <QuantityField source="quantity" label="Existencias actuales" />
+        <StockStatusField label="Estado" />
+        <QuantityField source="reorderLevel" label="Nivel de reposición" />
+        <MoneyField source="unitCost" label="Costo unitario" />
+        <MoneyField source="stockValue" label="Valor del inventario" />
         <TextField source="location" emptyText="—" />
         <BooleanField source="hazardous" />
         <WithRecord
-          label="SDS URL"
+          label="URL de la ficha de seguridad"
           render={(record: Product) =>
             record.sdsUrl ? (
               <UrlField source="sdsUrl" target="_blank" rel="noopener noreferrer" />
@@ -63,13 +63,13 @@ export function ProductShow() {
           }
         />
         <BooleanField source="active" />
-        <DateField source="createdAt" label="Created" showTime />
-        <DateField source="updatedAt" label="Updated" showTime />
+        <DateField source="createdAt" label="Fecha de creación" showTime />
+        <DateField source="updatedAt" label="Última actualización" showTime />
       </SimpleShowLayout>
 
       <Divider />
       <Typography variant="h6" sx={{ px: 2, pt: 2 }}>
-        Stock history
+        Historial de inventario
       </Typography>
       <ReferenceManyField
         reference="stock-movements"
@@ -78,15 +78,15 @@ export function ProductShow() {
         perPage={10}
         pagination={<Pagination rowsPerPageOptions={[10, 25, 50]} />}
       >
-        <Datagrid bulkActionButtons={false} rowClick="show" empty={<Typography sx={{ p: 2 }}>No movements yet.</Typography>}>
-          <DateField source="createdAt" label="Date" showTime />
-          <MovementTypeField label="Type" />
+        <Datagrid bulkActionButtons={false} rowClick="show" empty={<Typography sx={{ p: 2 }}>Todavía no hay movimientos.</Typography>}>
+          <DateField source="createdAt" label="Fecha" showTime />
+          <MovementTypeField label="Tipo" />
           <MovementQuantityField source="quantity" textAlign="right" />
           <MovementQuantityField source="delta" signed textAlign="right" />
-          <MovementQuantityField source="balanceAfter" label="Balance after" textAlign="right" />
-          <TextField source="reason" emptyText="—" />
+          <MovementQuantityField source="balanceAfter" label="Existencias resultantes" textAlign="right" />
+          <MovementReasonField source="reason" />
           <TextField source="reference" emptyText="—" />
-          <TextField source="createdBy" label="By" />
+          <TextField source="createdBy" label="Registrado por" />
         </Datagrid>
       </ReferenceManyField>
     </Show>

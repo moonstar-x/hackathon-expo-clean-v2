@@ -29,13 +29,13 @@ describe('authProvider', () => {
 
     it("rejects with the API's message on 401 and stores nothing", async () => {
       mockFetch(jsonResponse({ code: 'INVALID_CREDENTIALS', message: 'Invalid email or password' }, { status: 401 }));
-      await expect(authProvider.login({ username: 'a@b.c', password: 'nope' })).rejects.toThrow('Invalid email or password');
+      await expect(authProvider.login({ username: 'a@b.c', password: 'nope' })).rejects.toThrow('Correo electrónico o contraseña incorrectos.');
       expect(localStorage.getItem(AUTH_STORAGE_KEY)).toBeNull();
     });
 
     it("rejects with the API's message when rate-limited", async () => {
       mockFetch(jsonResponse({ code: 'RATE_LIMITED', message: 'Too many login attempts' }, { status: 429 }));
-      await expect(authProvider.login({ username: 'a@b.c', password: 'x' })).rejects.toThrow('Too many login attempts');
+      await expect(authProvider.login({ username: 'a@b.c', password: 'x' })).rejects.toThrow('Demasiados intentos de inicio de sesión. Inténtalo más tarde.');
     });
 
     it('rejects with a readable message when the API is unreachable', async () => {
@@ -51,7 +51,7 @@ describe('authProvider', () => {
 
     it('rejects and clears storage when the token is expired', async () => {
       writeAuth({ token: 't', expiresAt: anHourAgo(), email: 'admin@example.com' });
-      await expect(authProvider.checkAuth({})).rejects.toThrow(/expired/);
+      await expect(authProvider.checkAuth({})).rejects.toThrow('Tu sesión ha caducado. Vuelve a iniciar sesión.');
       expect(readAuth()).toBeNull();
     });
 

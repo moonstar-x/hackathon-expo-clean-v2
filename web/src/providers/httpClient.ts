@@ -1,7 +1,8 @@
 import { fetchUtils, HttpError } from 'react-admin';
+import { translateApiError, translateApiMessage } from '../i18n/apiErrors';
 import { readAuth } from './authStorage';
 
-export const NETWORK_ERROR_MESSAGE = 'Cannot reach the inventory API. Check that it is running and try again.';
+export const NETWORK_ERROR_MESSAGE = 'No se puede conectar con el servidor de inventario. Comprueba la conexión e inténtalo de nuevo.';
 
 /**
  * When the API returns field errors, react-admin shows them under the inputs and a
@@ -9,11 +10,16 @@ export const NETWORK_ERROR_MESSAGE = 'Cannot reach the inventory API. Check that
  * the API's top-level `message` instead (e.g. "SKU already exists").
  */
 function withServerMessage(error: HttpError): HttpError {
-  const body = error.body as { message?: unknown; errors?: Record<string, unknown> } | undefined;
-  if (body?.errors && typeof body.errors === 'object' && typeof body.message === 'string') {
-    body.errors = { ...body.errors, root: { serverError: body.message } };
-  }
-  return error;
+  const body = error.body as { code?: unknown; message?: unknown; errors?: Record<string, unknown> } | undefined;
+  const message = translateApiError(body?.message ?? error.message, body?.code);
+  const errors = body?.errors && typeof body.errors === 'object'
+    ? Object.fromEntries(Object.entries(body.errors).map(([field, value]) => [field, translateApiMessage(value, 'Valor no válido.')]))
+    : undefined;
+  return new HttpError(message, error.status, {
+    ...body,
+    message,
+    ...(errors ? { errors: { ...errors, root: { serverError: message } } } : {}),
+  });
 }
 
 /**

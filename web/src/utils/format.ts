@@ -1,9 +1,12 @@
+import { APP_LOCALE } from '../i18n/locale';
+import { unitLabel } from '../i18n/units';
+
 /** U+2212, the typographic minus sign. */
 export const MINUS = '−';
 
 const numberFormatters = new Map<string, Intl.NumberFormat>();
-function quantityFormatter(locale?: string): Intl.NumberFormat {
-  const key = locale ?? '';
+function quantityFormatter(locale = APP_LOCALE): Intl.NumberFormat {
+  const key = locale;
   let formatter = numberFormatters.get(key);
   if (!formatter) {
     formatter = new Intl.NumberFormat(locale, { maximumFractionDigits: 3 });
@@ -21,7 +24,7 @@ export function formatNumber(value: number, locale?: string): string {
 export function formatQuantity(value: number | null | undefined, unit?: string | null, locale?: string): string {
   if (value == null || !Number.isFinite(value)) return '';
   const formatted = formatNumber(value, locale);
-  return unit ? `${formatted} ${unit}` : formatted;
+  return unit ? `${formatted} ${unitLabel(unit, value)}` : formatted;
 }
 
 /** A signed stock change: `+10 L`, `−3 L`, `0 L`. */
@@ -33,14 +36,14 @@ export function formatDelta(value: number | null | undefined, unit?: string | nu
   return magnitude;
 }
 
-/** Money in the configured currency, using the browser locale by default. */
-export function formatCurrency(value: number | null | undefined, currency: string, locale?: string): string {
+/** Money in the configured currency, using Spanish formatting by default. */
+export function formatCurrency(value: number | null | undefined, currency: string, locale = APP_LOCALE): string {
   if (value == null || !Number.isFinite(value)) return '';
   return new Intl.NumberFormat(locale, { style: 'currency', currency }).format(value);
 }
 
-/** A timestamp in the browser locale. */
-export function formatDateTime(iso: string | null | undefined, locale?: string): string {
+/** A timestamp using Spanish formatting by default. */
+export function formatDateTime(iso: string | null | undefined, locale = APP_LOCALE): string {
   if (!iso) return '';
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return '';

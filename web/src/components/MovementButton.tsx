@@ -5,9 +5,9 @@ import { CreateButton } from 'react-admin';
 import type { MovementType } from '../types';
 
 const PRESETS: Record<MovementType, { label: string; icon: React.ReactElement }> = {
-  IN: { label: 'Receive stock', icon: <AddShoppingCartIcon /> },
-  OUT: { label: 'Record usage', icon: <RemoveShoppingCartIcon /> },
-  ADJUSTMENT: { label: 'Adjust count', icon: <FactCheckIcon /> },
+  IN: { label: 'Recibir existencias', icon: <AddShoppingCartIcon /> },
+  OUT: { label: 'Registrar consumo', icon: <RemoveShoppingCartIcon /> },
+  ADJUSTMENT: { label: 'Ajustar cantidad', icon: <FactCheckIcon /> },
 };
 
 /** Opens the movement create form prefilled with the product and movement type. */

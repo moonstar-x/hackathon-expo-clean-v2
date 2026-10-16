@@ -17,6 +17,6 @@ if (configResult.ok) {
     </StrictMode>,
   );
 } else {
-  document.title = 'Configuration error';
+  document.title = 'Error de configuración';
   root.render(<ConfigErrorPage errors={configResult.errors} />);
 }

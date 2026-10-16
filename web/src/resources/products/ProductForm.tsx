@@ -16,11 +16,12 @@ import {
 import type { ReactElement } from 'react';
 import { QuantityField } from '../../components/fields';
 import { emptyToNull, httpUrl, maxDecimals, SKU_PATTERN } from '../../components/validators';
+import { UNIT_LABELS } from '../../i18n/units';
 import { UNITS } from '../../types';
 
-const unitChoices = UNITS.map((unit) => ({ id: unit, name: unit }));
+const unitChoices = UNITS.map((unit) => ({ id: unit, name: UNIT_LABELS[unit] }));
 
-const validateSku = [required(), maxLength(50), regex(SKU_PATTERN, 'Only letters, digits, ".", "_" and "-"')];
+const validateSku = [required(), maxLength(50), regex(SKU_PATTERN, 'Solo letras, números, ".", "_" y "-"')];
 const validateName = [required(), maxLength(150)];
 const validateQuantity = [minValue(0), maxDecimals(3)];
 const validateRequiredQuantity = [required(), ...validateQuantity];
@@ -43,62 +44,62 @@ export function ProductForm({ mode, toolbar }: { mode: 'create' | 'edit'; toolba
         source="sku"
         label="SKU"
         validate={validateSku}
-        helperText="Stored in upper case"
+        helperText="Se guarda en mayúsculas"
         parse={(value: string) => value.toUpperCase()}
       />
       <TextInput source="name" validate={validateName} fullWidth />
       <TextInput source="description" multiline minRows={2} validate={maxLength(1000)} parse={emptyToNull} fullWidth />
       <ReferenceInput source="categoryId" reference="categories" sort={{ field: 'name', order: 'ASC' }}>
-        <AutocompleteInput label="Category" optionText="name" validate={required()} />
+        <AutocompleteInput label="Categoría" optionText="name" validate={required()} />
       </ReferenceInput>
       <ReferenceInput source="supplierId" reference="suppliers" sort={{ field: 'name', order: 'ASC' }}>
-        <AutocompleteInput label="Supplier" optionText="name" parse={emptyToNull} helperText="Optional" />
+        <AutocompleteInput label="Proveedor" optionText="name" parse={emptyToNull} helperText="Opcional" />
       </ReferenceInput>
 
-      <Section title="Stock" />
+      <Section title="Inventario" />
       <SelectInput
         source="unit"
         choices={unitChoices}
         validate={required()}
-        helperText={mode === 'edit' ? 'Cannot be changed once the product has stock movements' : undefined}
+        helperText={mode === 'edit' ? 'No se puede cambiar si el producto tiene movimientos de inventario' : undefined}
       />
       {mode === 'create' ? (
         <NumberInput
           source="initialQuantity"
-          label="Initial quantity"
+          label="Cantidad inicial"
           defaultValue={0}
           min={0}
           validate={validateQuantity}
-          helperText="Recorded as an IN movement with reason “Initial stock”"
+          helperText="Se registra como una entrada con el motivo «Existencias iniciales»"
         />
       ) : (
-        <Labeled label="Quantity on hand">
+        <Labeled label="Existencias actuales">
           <>
             <QuantityField source="quantity" />
             <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-              Change stock by recording a movement
+              Registra un movimiento para modificar las existencias
             </Typography>
           </>
         </Labeled>
       )}
-      <NumberInput source="reorderLevel" label="Reorder level" defaultValue={0} min={0} validate={validateRequiredQuantity} />
-      <NumberInput source="unitCost" label="Unit cost" defaultValue={0} min={0} step={0.01} validate={validateCost} />
+      <NumberInput source="reorderLevel" label="Nivel de reposición" defaultValue={0} min={0} validate={validateRequiredQuantity} />
+      <NumberInput source="unitCost" label="Costo unitario" defaultValue={0} min={0} step={0.01} validate={validateCost} />
       <TextInput
         source="location"
         validate={maxLength(100)}
         parse={emptyToNull}
-        helperText="e.g. Warehouse A / Shelf 3"
+        helperText="Ej.: Almacén A / Estante 3"
       />
-      <BooleanInput source="active" defaultValue={true} helperText="Turn off to archive a discontinued product" />
+      <BooleanInput source="active" defaultValue={true} helperText="Desactiva esta opción para archivar un producto descontinuado" />
 
-      <Section title="Safety" />
-      <BooleanInput source="hazardous" defaultValue={false} helperText="Corrosive or toxic chemical" />
+      <Section title="Seguridad" />
+      <BooleanInput source="hazardous" defaultValue={false} helperText="Producto químico corrosivo o tóxico" />
       <TextInput
         source="sdsUrl"
-        label="SDS URL"
+        label="URL de la ficha de seguridad"
         validate={[maxLength(500), httpUrl]}
         parse={emptyToNull}
-        helperText="Link to the Safety Data Sheet"
+        helperText="Enlace a la ficha de datos de seguridad"
         fullWidth
       />
     </SimpleForm>

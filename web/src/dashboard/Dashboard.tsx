@@ -35,7 +35,7 @@ import { formatCurrency, formatDateTime, formatQuantity } from '../utils/format'
 import { productListLink } from './links';
 import { StatCard } from './StatCard';
 
-const errorMessage = (error: unknown) => (error instanceof Error ? error.message : 'Unknown error');
+const errorMessage = (error: unknown) => (error instanceof Error ? error.message : 'Error desconocido');
 
 // One retry instead of react-query's default three, so an unreachable API shows an error quickly.
 const QUERY_OPTIONS = { retry: 1 } as const;
@@ -49,36 +49,36 @@ function StatCards() {
     ...QUERY_OPTIONS,
   });
 
-  if (error) return <Alert severity="error">Could not load inventory statistics: {errorMessage(error)}</Alert>;
+  if (error) return <Alert severity="error">No se pudieron cargar las estadísticas del inventario: {errorMessage(error)}</Alert>;
 
   const value = (v: string | number | undefined) => (isPending ? <Skeleton width={60} /> : v);
   return (
     <Stack direction="row" useFlexGap sx={{ flexWrap: 'wrap', gap: 2 }}>
       <StatCard
-        title="Active products"
+        title="Productos activos"
         value={value(stats?.products.active)}
-        hint={stats ? `${stats.products.total} in total` : undefined}
+        hint={stats ? `${stats.products.total} en total` : undefined}
         icon={<Inventory2Icon />}
         to={productListLink({ active: true })}
       />
       <StatCard
-        title="Low stock"
+        title="Existencias bajas"
         value={value(stats?.products.lowStock)}
         icon={<WarningAmberIcon />}
         color="warning"
         to={productListLink({ active: true, lowStock: true }, { field: 'quantity', order: 'ASC' })}
       />
       <StatCard
-        title="Out of stock"
+        title="Sin existencias"
         value={value(stats?.products.outOfStock)}
         icon={<ErrorIcon />}
         color="error"
         to={productListLink({ active: true, outOfStock: true })}
       />
       <StatCard
-        title="Stock value"
+        title="Valor del inventario"
         value={value(stats ? formatCurrency(stats.stockValue, currency) : undefined)}
-        hint="Active products"
+        hint="Productos activos"
         icon={<PaidIcon />}
         color="success"
       />
@@ -96,23 +96,23 @@ function LowStockTable() {
   return (
     <Card variant="outlined" sx={{ flex: '1 1 420px', minWidth: 0 }}>
       <CardHeader
-        title="Low stock"
+        title="Existencias bajas"
         slotProps={{ title: { variant: 'h6' } }}
         action={
           <Button component={Link} to={productListLink({ active: true, lowStock: true }, { field: 'quantity', order: 'ASC' })}>
-            View all
+            Ver todos
           </Button>
         }
       />
       {error ? (
         <Alert severity="error" sx={{ m: 2 }}>
-          Could not load low-stock products: {errorMessage(error)}
+          No se pudieron cargar los productos con existencias bajas: {errorMessage(error)}
         </Alert>
       ) : isPending ? (
         <Loading loadingPrimary="" loadingSecondary="" />
       ) : data.length === 0 ? (
         <Typography sx={{ px: 2, pb: 2 }} color="text.secondary">
-          Everything is above its reorder level.
+          Todos los productos superan su nivel de reposición.
         </Typography>
       ) : (
         <Box sx={{ overflowX: 'auto' }}>
@@ -120,8 +120,8 @@ function LowStockTable() {
             <TableHead>
               <TableRow>
                 <TableCell>SKU</TableCell>
-                <TableCell>Name</TableCell>
-                <TableCell align="right">Quantity / reorder level</TableCell>
+                <TableCell>Nombre</TableCell>
+                <TableCell align="right">Cantidad / nivel de reposición</TableCell>
                 <TableCell />
               </TableRow>
             </TableHead>
@@ -136,7 +136,7 @@ function LowStockTable() {
                     {formatQuantity(product.quantity, product.unit)} / {formatQuantity(product.reorderLevel, product.unit)}
                   </TableCell>
                   <TableCell align="right">
-                    <MovementButton productId={product.id} type="IN" label="Receive" />
+                    <MovementButton productId={product.id} type="IN" label="Recibir" />
                   </TableCell>
                 </TableRow>
               ))}
@@ -157,33 +157,33 @@ function RecentMovements() {
   return (
     <Card variant="outlined" sx={{ flex: '1 1 420px', minWidth: 0 }}>
       <CardHeader
-        title="Recent movements"
+        title="Movimientos recientes"
         slotProps={{ title: { variant: 'h6' } }}
         action={
           <Button component={Link} to="/stock-movements">
-            View all
+            Ver todos
           </Button>
         }
       />
       {error ? (
         <Alert severity="error" sx={{ m: 2 }}>
-          Could not load recent movements: {errorMessage(error)}
+          No se pudieron cargar los movimientos recientes: {errorMessage(error)}
         </Alert>
       ) : isPending ? (
         <Loading loadingPrimary="" loadingSecondary="" />
       ) : data.length === 0 ? (
         <Typography sx={{ px: 2, pb: 2 }} color="text.secondary">
-          No movements recorded yet.
+          Todavía no se han registrado movimientos.
         </Typography>
       ) : (
         <Box sx={{ overflowX: 'auto' }}>
           <Table size="small">
             <TableHead>
               <TableRow>
-                <TableCell>Date</TableCell>
-                <TableCell>Product</TableCell>
-                <TableCell>Type</TableCell>
-                <TableCell align="right">Delta</TableCell>
+                <TableCell>Fecha</TableCell>
+                <TableCell>Producto</TableCell>
+                <TableCell>Tipo</TableCell>
+                <TableCell align="right">Variación</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>

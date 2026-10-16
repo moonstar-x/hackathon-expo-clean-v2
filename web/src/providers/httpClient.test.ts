@@ -23,22 +23,22 @@ describe('httpClient', () => {
     expect(sentHeader(fetchMock.mock.calls[0][1], 'Authorization')).toBeNull();
   });
 
-  it('rejects with the status and the API message on errors', async () => {
+  it('preserves the status and localizes API notifications and inline errors', async () => {
     mockFetch(jsonResponse({ code: 'CONFLICT', message: 'SKU already exists', errors: { sku: 'SKU already exists' } }, { status: 409 }));
     await expect(httpClient('http://api.test/api/products', { method: 'POST', body: '{}' })).rejects.toMatchObject({
       status: 409,
-      message: 'SKU already exists',
+      message: 'Ya existe un producto con este SKU.',
       // root.serverError makes react-admin's form toast show the API message.
-      body: { errors: { sku: 'SKU already exists', root: { serverError: 'SKU already exists' } } },
+      body: { errors: { sku: 'Ya existe un producto con este SKU.', root: { serverError: 'Ya existe un producto con este SKU.' } } },
     });
   });
 
-  it('leaves errors without field details untouched', async () => {
+  it('localizes errors without field details and preserves the API code', async () => {
     mockFetch(jsonResponse({ code: 'CONFLICT', message: 'Product has stock history' }, { status: 409 }));
     await expect(httpClient('http://api.test/api/products/1', { method: 'DELETE' })).rejects.toMatchObject({
       status: 409,
-      message: 'Product has stock history',
-      body: { code: 'CONFLICT', message: 'Product has stock history' },
+      message: 'El producto tiene un historial de inventario. Desactívalo para archivarlo.',
+      body: { code: 'CONFLICT', message: 'El producto tiene un historial de inventario. Desactívalo para archivarlo.' },
     });
   });
 

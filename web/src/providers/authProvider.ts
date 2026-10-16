@@ -1,4 +1,5 @@
 import type { AuthProvider } from 'react-admin';
+import { translateApiError } from '../i18n/apiErrors';
 import { clearAuth, hasValidSession, readAuth, writeAuth } from './authStorage';
 import { NETWORK_ERROR_MESSAGE } from './httpClient';
 
@@ -12,7 +13,8 @@ async function readMessage(response: Response, fallback: string): Promise<string
   try {
     const body: unknown = await response.json();
     if (body && typeof body === 'object' && typeof (body as { message?: unknown }).message === 'string') {
-      return (body as { message: string }).message;
+      const error = body as { message: string; code?: unknown };
+      return translateApiError(error.message, error.code);
     }
   } catch {
     // Not JSON.
@@ -35,7 +37,7 @@ export function createAuthProvider(apiUrl: string): AuthProvider {
       }
 
       if (!response.ok) {
-        throw new Error(await readMessage(response, `Login failed (HTTP ${response.status})`));
+        throw new Error(await readMessage(response, `No se pudo iniciar sesión (HTTP ${response.status}).`));
       }
 
       const body = (await response.json()) as LoginResponse;
@@ -51,20 +53,20 @@ export function createAuthProvider(apiUrl: string): AuthProvider {
       const hadSession = readAuth() !== null;
       clearAuth();
       // First visit: go to the login page quietly. Expired token: say why.
-      throw hadSession ? new Error('Your session has expired. Please log in again.') : { message: false };
+      throw hadSession ? new Error('Tu sesión ha caducado. Vuelve a iniciar sesión.') : { message: false };
     },
 
     async checkError(error: { status?: number }) {
       if (error?.status === 401) {
         clearAuth();
-        throw new Error('Your session has expired. Please log in again.');
+        throw new Error('Tu sesión ha caducado. Vuelve a iniciar sesión.');
       }
       // Anything else (403, 409, 500, network errors) keeps the user logged in.
     },
 
     async getIdentity() {
       const auth = readAuth();
-      if (!auth) throw new Error('Not authenticated');
+      if (!auth) throw new Error('No has iniciado sesión');
       return { id: auth.email, fullName: auth.email };
     },
 

@@ -7,7 +7,7 @@ export interface AppConfig {
 
 export type ConfigResult = { ok: true; config: AppConfig } | { ok: false; errors: string[] };
 
-export const DEFAULT_APP_TITLE = 'Cleaning Inventory';
+export const DEFAULT_APP_TITLE = 'Inventario de limpieza';
 export const DEFAULT_CURRENCY = 'USD';
 
 type EnvSource = Partial<Record<'VITE_API_URL' | 'VITE_APP_TITLE' | 'VITE_CURRENCY', unknown>>;
@@ -42,15 +42,15 @@ export function parseConfig(env: EnvSource): ConfigResult {
 
   let apiUrl = clean(env.VITE_API_URL);
   if (!apiUrl) {
-    errors.push('VITE_API_URL is not set. Set it to the API base URL including /api, e.g. https://api.example.com/api.');
+    errors.push('VITE_API_URL no está definida. Indica la URL base de la API con /api, por ejemplo https://api.example.com/api.');
   } else {
     apiUrl = apiUrl.replace(/\/+$/, '');
-    if (!isHttpUrl(apiUrl)) errors.push(`VITE_API_URL must be an absolute http(s) URL, got "${apiUrl}".`);
+    if (!isHttpUrl(apiUrl)) errors.push(`VITE_API_URL debe ser una URL absoluta http(s); se recibió "${apiUrl}".`);
   }
 
   const currency = (clean(env.VITE_CURRENCY) ?? DEFAULT_CURRENCY).toUpperCase();
   if (!isSupportedCurrency(currency)) {
-    errors.push(`VITE_CURRENCY must be an ISO 4217 currency code such as USD or EUR, got "${currency}".`);
+    errors.push(`VITE_CURRENCY debe ser un código de moneda ISO 4217, como USD o EUR; se recibió "${currency}".`);
   }
 
   if (errors.length > 0 || !apiUrl) return { ok: false, errors };

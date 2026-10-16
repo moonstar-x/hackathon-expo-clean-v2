@@ -4,7 +4,7 @@ import { emptyToNull, httpUrl, maxDecimals } from './validators';
 describe('validators', () => {
   it('maxDecimals', () => {
     expect(maxDecimals(3)(1.125)).toBeUndefined();
-    expect(maxDecimals(3)(1.1255)).toMatch(/3 decimal/);
+    expect(maxDecimals(3)(1.1255)).toBe('Como máximo 3 decimales');
     expect(maxDecimals(4)(0.1234)).toBeUndefined();
     expect(maxDecimals(3)(null)).toBeUndefined();
   });

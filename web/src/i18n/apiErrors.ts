@@ -1,0 +1,86 @@
+import { formatQuantity } from '../utils/format';
+
+const messages: Record<string, string> = {
+  'Authentication required': 'Debes iniciar sesión.',
+  'Invalid email or password': 'Correo electrónico o contraseña incorrectos.',
+  'Not found': 'No se encontró el registro.',
+  'Method not allowed': 'Esta operación no está permitida.',
+  'Validation failed': 'Revisa los campos indicados.',
+  'Too many login attempts': 'Demasiados intentos de inicio de sesión. Inténtalo más tarde.',
+  'Too many login attempts, please try again later': 'Demasiados intentos de inicio de sesión. Inténtalo más tarde.',
+  'Missing Authorization header': 'Debes iniciar sesión.',
+  'Authorization header must be "Bearer <token>"': 'La sesión no es válida. Vuelve a iniciar sesión.',
+  'Session expired, please log in again': 'Tu sesión ha caducado. Vuelve a iniciar sesión.',
+  'Invalid token': 'La sesión no es válida. Vuelve a iniciar sesión.',
+  'SKU already exists': 'Ya existe un producto con este SKU.',
+  'Product has stock history': 'El producto tiene un historial de inventario. Desactívalo para archivarlo.',
+  'Product has stock history; set it inactive instead': 'El producto tiene un historial de inventario. Desactívalo para archivarlo.',
+  'Unit cannot be changed after stock movements exist': 'No se puede cambiar la unidad de un producto con movimientos de inventario.',
+  'A category with this name already exists': 'Ya existe una categoría con este nombre.',
+  'A supplier with this name already exists': 'Ya existe un proveedor con este nombre.',
+  'Required': 'Obligatorio',
+  'Must be a string': 'Debe ser texto.',
+  'Must be a number': 'Debe ser un número.',
+  'Must be a valid email': 'Debe ser un correo electrónico válido.',
+  'Must be an http:// or https:// URL': 'Debe ser una URL http:// o https://.',
+  'Must be an integer id': 'El identificador debe ser un número entero.',
+  'Must be a positive integer id': 'El identificador debe ser un número entero positivo.',
+  'Must be true or false': 'Selecciona sí o no.',
+  'May only contain letters, digits, ".", "_" and "-"': 'Solo puede contener letras, números, ".", "_" y "-".',
+  'Request body must be a JSON object': 'Los datos de la solicitud deben ser un objeto JSON.',
+  'Malformed JSON in request body': 'Los datos de la solicitud contienen un JSON no válido.',
+  'Request body is too large': 'Los datos de la solicitud son demasiado grandes.',
+  'Internal server error': 'Se produjo un error interno del servidor. Inténtalo de nuevo.',
+  'Stock movements cannot be changed or deleted; record a new movement to correct a mistake': 'Los movimientos no se pueden modificar ni eliminar. Registra un nuevo movimiento para corregir un error.',
+};
+
+const codeMessages: Record<string, string> = {
+  BAD_REQUEST: 'La solicitud no es válida.',
+  UNAUTHORIZED: 'Debes iniciar sesión.',
+  INVALID_CREDENTIALS: messages['Invalid email or password'],
+  NOT_FOUND: messages['Not found'],
+  METHOD_NOT_ALLOWED: messages['Method not allowed'],
+  CONFLICT: 'La operación entra en conflicto con los datos existentes.',
+  INSUFFICIENT_STOCK: 'No hay existencias suficientes para registrar esta salida.',
+  VALIDATION_ERROR: messages['Validation failed'],
+  RATE_LIMITED: messages['Too many login attempts'],
+  PAYLOAD_TOO_LARGE: messages['Request body is too large'],
+  INTERNAL_ERROR: messages['Internal server error'],
+};
+
+/** The API contract stays unchanged; notifications and inline field errors are localized here. */
+export function translateApiMessage(message: unknown, fallback = 'No se pudo completar la solicitud.'): string {
+  if (typeof message !== 'string') return fallback;
+  if (Object.hasOwn(messages, message)) return messages[message];
+
+  let match = /^Must be at most (\d+) characters$/.exec(message);
+  if (match) return `Debe tener como máximo ${match[1]} caracteres.`;
+  match = /^Must be (greater than|at least|at most) (\d+(?:\.\d+)?)$/.exec(message);
+  if (match) {
+    const comparison = { 'greater than': 'mayor que', 'at least': 'al menos', 'at most': 'como máximo' }[match[1]];
+    return `Debe ser ${comparison} ${formatQuantity(Number(match[2]))}.`;
+  }
+  match = /^Must have at most (\d+) decimal places$/.exec(message);
+  if (match) return `Debe tener como máximo ${match[1]} decimales.`;
+  match = /^(Category|Supplier|Product|Stock movement) (\d+) (does not exist|not found)$/.exec(message);
+  if (match) {
+    const resource = { Category: 'La categoría', Supplier: 'El proveedor', Product: 'El producto', 'Stock movement': 'El movimiento' }[match[1]];
+    return `${resource} con ID ${match[2]} no existe.`;
+  }
+  match = /^(Category|Supplier) "(.+)" is used by (\d+) product\(s\)$/.exec(message);
+  if (match) {
+    const resource = match[1] === 'Category' ? 'La categoría' : 'El proveedor';
+    return `${resource} «${match[2]}» se utiliza en ${match[3]} ${match[3] === '1' ? 'producto' : 'productos'}.`;
+  }
+  match = /^(Category|Supplier) "(.+)" is used by products$/.exec(message);
+  if (match) return `${match[1] === 'Category' ? 'La categoría' : 'El proveedor'} «${match[2]}» está en uso por productos.`;
+  match = /^Insufficient stock: requested ([\d.e+-]+) (\S+), available ([\d.e+-]+) (\S+)$/.exec(message);
+  if (match) return `Existencias insuficientes: cantidad solicitada ${formatQuantity(Number(match[1]), match[2])}; disponible ${formatQuantity(Number(match[3]), match[4])}.`;
+  if (message.startsWith('Must be one of:')) return 'Selecciona una de las opciones disponibles.';
+  return fallback;
+}
+
+export function translateApiError(message: unknown, code?: unknown): string {
+  const fallback = typeof code === 'string' && Object.hasOwn(codeMessages, code) ? codeMessages[code] : undefined;
+  return translateApiMessage(message, fallback);
+}

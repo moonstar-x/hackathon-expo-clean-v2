@@ -13,17 +13,18 @@ export function ConfigErrorPage({ errors }: { errors: string[] }) {
       }}
     >
       <h1 style={{ fontSize: 24 }}>
-        {missingApiUrl ? 'Missing configuration: VITE_API_URL' : 'Invalid configuration'}
+        {missingApiUrl ? 'Falta la configuración: VITE_API_URL' : 'Configuración no válida'}
       </h1>
-      <p>The admin app cannot start because its build-time configuration is invalid:</p>
+      <p>La aplicación no puede iniciarse porque la configuración de compilación no es válida:</p>
       <ul>
         {errors.map((error) => (
           <li key={error}>{error}</li>
         ))}
       </ul>
       <p>
-        Set the variables in <code>.env</code> (see <code>.env.example</code>) or in the build environment, then
-        restart the dev server or rebuild. Vite inlines <code>VITE_*</code> variables at build time.
+        Define las variables en <code>.env</code> (consulta <code>.env.example</code>) o en el entorno de compilación.
+        Después, reinicia el servidor de desarrollo o vuelve a compilar la aplicación. Vite incorpora las variables
+        <code> VITE_*</code> durante la compilación.
       </p>
     </main>
   );

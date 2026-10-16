@@ -1,13 +1,13 @@
 import type { MovementType } from '../../types';
 
 export const MOVEMENT_TYPE_CHOICES: { id: MovementType; name: string }[] = [
-  { id: 'IN', name: 'Receive (IN)' },
-  { id: 'OUT', name: 'Use (OUT)' },
-  { id: 'ADJUSTMENT', name: 'Count adjustment' },
+  { id: 'IN', name: 'Entrada' },
+  { id: 'OUT', name: 'Salida' },
+  { id: 'ADJUSTMENT', name: 'Ajuste de inventario' },
 ];
 
 export const QUANTITY_LABELS: Record<MovementType, { label: string; helperText: string }> = {
-  IN: { label: 'Quantity received', helperText: 'Amount added to stock' },
-  OUT: { label: 'Quantity used', helperText: 'Amount used, consumed or discarded' },
-  ADJUSTMENT: { label: 'Counted quantity on hand', helperText: 'Stock is set to this physical count' },
+  IN: { label: 'Cantidad recibida', helperText: 'Cantidad que se añade al inventario' },
+  OUT: { label: 'Cantidad consumida', helperText: 'Cantidad utilizada, consumida o desechada' },
+  ADJUSTMENT: { label: 'Cantidad contada', helperText: 'Las existencias se ajustan a este recuento físico' },
 };

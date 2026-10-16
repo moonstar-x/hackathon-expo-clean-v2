@@ -17,7 +17,7 @@ describe('parseConfig', () => {
   it.each([undefined, '', '   '])('reports a missing VITE_API_URL (%j)', (value) => {
     const result = parseConfig({ VITE_API_URL: value });
     expect(result.ok).toBe(false);
-    if (!result.ok) expect(result.errors.join('\n')).toMatch(/VITE_API_URL is not set/);
+    if (!result.ok) expect(result.errors.join('\n')).toMatch(/VITE_API_URL no está definida/);
   });
 
   it.each(['/api', 'localhost:4000/api', 'ftp://example.com/api', 'not a url'])(
@@ -25,7 +25,7 @@ describe('parseConfig', () => {
     (value) => {
       const result = parseConfig({ VITE_API_URL: value });
       expect(result.ok).toBe(false);
-      if (!result.ok) expect(result.errors.join('\n')).toMatch(/VITE_API_URL must be an absolute http\(s\) URL/);
+      if (!result.ok) expect(result.errors.join('\n')).toMatch(/VITE_API_URL debe ser una URL absoluta http\(s\)/);
     },
   );
 
