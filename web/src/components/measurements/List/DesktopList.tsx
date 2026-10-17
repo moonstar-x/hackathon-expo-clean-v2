@@ -1,3 +1,4 @@
+import { MeasurementQuoteLink } from '../../../quotes/MeasurementQuoteLink';
 import type { ReactElement } from 'react';
 import { BulkDeleteButton, DataTable, DateField, List } from 'react-admin';
 import { MEASUREMENT_PER_PAGE, MEASUREMENT_SORT } from '../../../constants/measurements';
@@ -34,6 +35,7 @@ const DesktopList = (): ReactElement => (
       <DataTable.Col source="scannedAt">
         <DateField source="scannedAt" showTime />
       </DataTable.Col>
+      <DataTable.Col label="Cotización" disableSort><MeasurementQuoteLink /></DataTable.Col>
       <DataTable.Col source="createdBy" />
       <DataTable.Col source="createdAt">
         <DateField source="createdAt" showTime />

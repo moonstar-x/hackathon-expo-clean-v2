@@ -244,3 +244,78 @@ curl -s -X POST "$API/api/measurements" -H "Authorization: Bearer $TOKEN" \
 ### SPEC-004 notes
 
 The geometry fixture was encoded from the actual Swift sample using JSONEncoder with sorted keys. The seed floor plan and thumbnail are temporary CoreGraphics drawings of that geometry: Xcode is unavailable here, so replacing them with exports from `FloorPlanImageRenderer` remains unverified. No API P0 requirements are skipped.
+
+## Monthly cleaning quotes (SPEC-005)
+
+Migrations `004_quotes` and `005_quote_defaults` install the cost model and editable workbook defaults. They also backfill existing measurements. An SQLite `AFTER INSERT` trigger creates one quote and one generation job in the measurement upload's transaction. Replaying an upload does not duplicate either. Deleting a measurement preserves its quote; deleting a quote cascades its zones, jobs and waste controls.
+
+All routes below require a valid active-user bearer token. Catalogs use the existing JSON `sort`, `range`, `filter` and `Content-Range` protocol.
+
+| Route | Operations |
+| --- | --- |
+| `/api/quote-parameters/1` | GET and merge PUT; singleton settings, source notes, revision |
+| `/api/quote-zone-types` | List, create, get, merge update, delete; risk/active filters |
+| `/api/quote-schedules` | List, create, get, merge update, delete; active filter |
+| `/api/quote-products` | List, create, get, merge update, delete; net prices, dose units and inventory stock conversion |
+| `/api/quote-location-types` | List, get, merge update of `zoneTypeId`; null filter means unmapped |
+| `/api/quoting/options` | GET active schedules, traffic choices and server defaults for the phone |
+| `/api/quotes` | List; search, status, calculation state, measurement, stale-settings and date filters |
+| `/api/quotes/:id` | GET full zones/result/snapshot; merge PUT and DELETE. No POST collection route. |
+| `/api/quotes/:id/recalculate` | POST, 202; calculate current zone inputs with current settings |
+| `/api/quotes/:id/regenerate` | POST, 202; replace zone inputs from the measurement, discarding zone edits |
+| `/api/measurements/:id/quote` | POST, 201; recreate a deleted quote |
+| `/api/quotes/:id/waste-controls/:period` | GET and PUT `{ rows: [{ productId, actual }] }`; period `YYYY-MM`; `actual: null` deletes consumption |
+
+Parameters and newly entered catalog/zone numbers accept at most six decimals. The exact workbook 24/7 night fraction (`11/24`) is preserved on unrelated schedule edits. Percentage parameters are fractions (`0.35`). The engine uses unrounded doubles, guards divisors and applies Excel-compatible ceiling only when a whole-person/container/cleaning count is required. Inventory links convert count, volume or mass into containers; purchase costs are informational and do not replace consumption costs.
+
+A quote starts **Revisar**, with `ASSUMPTIONS_NOT_CONFIRMED`. Complete zones still receive preliminary figures. Missing fixture assumptions add review causes without deactivating floor work. Manual edits record their provenance and survive recalculation. Only regeneration discards zone edits. Settings changes increment a database revision, leave existing figures intact, and make calculated quotes stale. Each calculation saves the settings snapshot and input revision that produced it.
+
+The in-process worker starts after migrations and initial-user creation. `QUOTE_WORKER` defaults to `on` (`off` is useful for tests), `QUOTE_WORKER_POLL_MS` defaults to `1000` (100–60000), and `QUOTE_JOB_MAX_ATTEMPTS` defaults to `5` (1–20). One pending job per quote is enforced in SQLite; job priority is generate > regenerate > recalculate. Requests nudge the worker. Startup recovers interrupted jobs. Failures roll back all zone/result writes and retry after 5 seconds with exponential backoff capped at 5 minutes. Exhausted jobs report `calculation.state: failed`; review results count as successful work. Shutdown stops polling before closing SQLite. Each job logs its id, kind, quote id, outcome, elapsed milliseconds and quote status, without settings/results. `db:seed` and `db:reset` drain due jobs synchronously, so the sample quote is already calculated.
+
+Additional errors:
+
+| Status | Message / field |
+| --- | --- |
+| 409 | `Zone type is in use`, `Schedule is in use`, `Quoting product is in use` — deactivate referenced rows |
+| 409 | `The quote has no results yet` |
+| 409 | `The measurement no longer exists` (regenerate) |
+| 409 | `A quote already exists` |
+| 409 | `A quoting record with this name or code already exists` |
+| 422 | `Must be less than or equal to the target margin` (`minimumMargin`) |
+| 422 | `Inventory unit is not compatible` (`inventoryProductId`) |
+| 422 | `Does not exist`, `Must be active` (named reference field) |
+| 422 | `Zone does not belong to this quote` (`zones.N.id`) |
+| 422 | `Product is not in the purchase plan` (`rows.N.productId`) |
+| 400 | `Invalid period; expected YYYY-MM` |
+
+Uploads remain compatible with SPEC-004. Optional `metadata.quoting` contains schedule code, days and traffic; optional room fields contain the selected `locationType` and room-specific traffic, fixed posts and fixture counts. Unknown schedule codes are accepted at upload time, then produce a warning and fall back to server defaults. Measurements expose these inputs and a lightweight joined quote reference, without loading quote results in lists.
+
+Example: edit one zone, preserve the other zones, then request recalculation (`API` includes `/api`, `TOKEN` is the login token):
+
+```sh
+curl -sS -H "Authorization: Bearer $TOKEN" "$API/quotes/1" \
+  | jq '{zones: [.zones[] | if .position == 0 then .traffic = "high" else . end]}' > /tmp/quote-edit.json
+curl -sS -X PUT -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+  --data-binary @/tmp/quote-edit.json "$API/quotes/1"
+curl -sS -X POST -H "Authorization: Bearer $TOKEN" "$API/quotes/1/recalculate"
+```
+
+PUT already enqueues the calculation; the final POST coalesces with that pending job. Poll GET until `calculation.state` is `done` or `failed`.
+
+### Notes for SPEC-005
+
+The executable golden fixtures cover Appendix A.1, A.1b, A.2, A.3 and A.4. Tests also exercise all review causes, 200 seeded random engine cases, migrations/backfill, job rollback/retry/recovery, settings validation, stock conversions, snapshots and quote/measurement lifecycles. The empty quote intentionally retains fixed contract costs; therefore zone-allocation totals are only equal to contract costs when there is an active zone with direct cost.
+
+The workbook file was not included in the project. Numeric defaults and formulas come from the self-contained specification. Source-note helper text uses the field descriptions and cell references supplied in §3.1; verbatim workbook “Origen” prose and source URLs not transcribed into the specification are not fabricated. The editable notes allow an admin to add that provenance. All API [P1] features are implemented.
+
+Disposable database walkthrough completed on 2026-10-16 using `npm run db:reset`, an ephemeral SQLite file, and authenticated HTTP requests:
+
+1. Seed: **Revisar**, exactly `ASSUMPTIONS_NOT_CONFIRMED`, preliminary **251.08 USD**.
+2. Confirm assumptions and process its job: **Simulación**, still **251.08 USD**.
+3. Set target margin to 40%: stale flag set, old figures retained. Explicit recalculation: **272.000927 USD** (cost **163.200556 USD**).
+4. Multipart-upload the SPEC-004 fixture with a fresh client UUID and quoting metadata: a second quote appears and room/default overrides have `app` provenance.
+5. Save detergent consumption for `2026-10` and reload: the response and stored consumption are unchanged.
+
+The disposable database was removed afterward. Automated admin screen tests separately render both statuses, all seven tabs, edit/settings/catalog screens and pending/slow/done polling.
+
+The browser walkthrough also ran against a separate disposable database: confirmed assumptions in Editar, observed **Simulación / 251.08 USD**, saved the target margin as **40%**, observed **Parámetros modificados** with the old price, clicked Recalcular and observed **272.00 USD**, then saved **1.5 L** of detergent consumption and verified it remained after reloading. This caught and fixed the singleton parameter editor's post-save redirect; a regression test keeps it on `/quote-parameters/1`.

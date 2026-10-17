@@ -4,6 +4,7 @@ import SwiftUI
 struct RoomReviewSheet: View {
     @Binding var name: String
     @Binding var type: LocationType?
+    @Binding var quoting: RoomQuotingInputs
     var roomNumber: Int
     /// The processed room. nil when the room failed.
     var room: RoomGeometry?
@@ -47,6 +48,7 @@ struct RoomReviewSheet: View {
                 .submitLabel(.done)
 
             typePicker
+            quotingFields
 
             if trackingWasInterrupted {
                 interruptionWarning
@@ -79,6 +81,43 @@ struct RoomReviewSheet: View {
                 Button(.commonRescanRoom, systemImage: "arrow.counterclockwise", action: onRescan)
                     .frame(minHeight: 44)
             }
+        }
+    }
+
+    private var quotingFields: some View {
+        DisclosureGroup(.quoteInputs) {
+            VStack(alignment: .leading, spacing: 12) {
+                Picker(String(localized: .quoteTraffic), selection: $quoting.traffic) {
+                    Text(.quoteSameAsLocation).tag(String?.none)
+                    ForEach(QuoteTraffic.allCases, id: \.self) { traffic in
+                        Text(traffic.displayName).tag(Optional(traffic.rawValue))
+                    }
+                }
+                Stepper(value: $quoting.fixedPosts, in: 0...20) {
+                    LabeledContent(String(localized: .quoteFixedPosts), value: "\(quoting.fixedPosts)")
+                }
+                Text(.quoteFixedPostsHelp).font(.caption).foregroundStyle(.secondary)
+                Toggle(String(localized: .quoteCountFixtures), isOn: Binding(
+                    get: { quoting.fixtures != nil },
+                    set: { quoting.fixtures = $0 ? RoomQuotingInputs.defaults(type: type, room: room).fixtures ?? QuoteFixtures() : nil }))
+                if quoting.fixtures != nil {
+                    fixtureStepper(.quoteToilets, key: \.toilets)
+                    fixtureStepper(.quoteUrinals, key: \.urinals)
+                    fixtureStepper(.quoteSinks, key: \.sinks)
+                }
+            }
+            .padding(.top, 8)
+        }
+        .onChange(of: type) { _, newType in
+            if quoting.fixtures == nil, newType == .bathroom || newType == .lockerRoom {
+                quoting.fixtures = RoomQuotingInputs.defaults(type: newType, room: room).fixtures
+            }
+        }
+    }
+    private func fixtureStepper(_ label: LocalizedStringResource, key: WritableKeyPath<QuoteFixtures, Int>) -> some View {
+        Stepper(value: Binding(get: { quoting.fixtures?[keyPath: key] ?? 0 },
+                               set: { quoting.fixtures?[keyPath: key] = $0 }), in: 0...50) {
+            LabeledContent(String(localized: label), value: "\(quoting.fixtures?[keyPath: key] ?? 0)")
         }
     }
 
@@ -153,7 +192,7 @@ struct RoomReviewSheet: View {
 
 #Preview("Review") {
     Color.gray.sheet(isPresented: .constant(true)) {
-        RoomReviewSheet(name: .constant("Sala"), type: .constant(.livingRoom), roomNumber: 1,
+        RoomReviewSheet(name: .constant("Sala"), type: .constant(.livingRoom), quoting: .constant(.init()), roomNumber: 1,
                         room: SampleGeometry.twoRoomApartment().rooms[0], issue: nil,
                         completedRoomCount: 1, trackingWasInterrupted: true,
                         onScanNext: {}, onFinish: {}, onRescan: {}, onDiscard: {})
@@ -162,7 +201,7 @@ struct RoomReviewSheet: View {
 
 #Preview("Failure") {
     Color.gray.sheet(isPresented: .constant(true)) {
-        RoomReviewSheet(name: .constant(""), type: .constant(nil), roomNumber: 2, room: nil,
+        RoomReviewSheet(name: .constant(""), type: .constant(nil), quoting: .constant(.init()), roomNumber: 2, room: nil,
                         issue: CaptureIssue(message: "Falló el seguimiento del entorno.", isSceneTooLarge: false),
                         completedRoomCount: 1, trackingWasInterrupted: false,
                         onScanNext: {}, onFinish: {}, onRescan: {}, onDiscard: {})

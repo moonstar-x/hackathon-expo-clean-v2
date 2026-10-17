@@ -108,3 +108,13 @@ Deviations from §6:
 - A room's detected type shows only when its name doesn't already say it ("Sala comedor" gets "Sala"; "Cocina" doesn't get "Cocina" again).
 - On a portrait stage (a phone), the starting camera backs off by the aspect ratio so the whole model fits; elsewhere it is 1.6 × the largest side, as WEB-3D-2 says.
 - The contract fixture lives in `tests/fixtures/`, with the other test code, rather than `src/measurements/__fixtures__/`.
+
+## Cotizaciones (SPEC-005)
+
+The menu adds Cotizaciones and Configuración de cotización: Parámetros, Tipos de zona, Horarios, Productos de cotización and Equivalencias de tipos. Settings remain separate from inventory. Parameters are grouped by the workbook sections, percentage inputs convert to fractions without float drift, source notes can be edited, and catalog references use searchable selectors. Product screens display net container/unit/solution prices and effective stock. Equivalences include a Sin equivalencia filter and a small edit page.
+
+Quotes open from their list or the measurement's Cotización action. The detail provides Resumen, Zonas, Oferta técnica, Plan de compras, Tarifa plana, Control de mermas and Supuestos. It shows preliminary figures and translated review causes, per-field source chips, staffing, negotiation limits, consumption/purchases and the saved settings snapshot. Pending calculations poll every second and show a slow-calculation notice after a minute. Errors offer Recalcular. Changed settings show Parámetros modificados without changing stored figures.
+
+Editar saves pessimistically, records manual inputs and returns to Show. Zone cards support adding, removing and reordering, nullable missing inputs, sanitary assumptions and the simulation review gate. Regenerar asks before replacing zone edits from the original measurement. Waste control previews the API's calculation as consumption is entered and persists by month. Measurement deletion preserves the quote.
+
+Quote contracts live in `src/types/quotes.ts`; Spanish labels, enum names, causes, warnings and screen text live in `src/i18n/quotes.ts`. Money uses `VITE_CURRENCY`; percentages, hours, FTE, quantities and surfaces use Spanish formatting. Tests cover percentage conversion, all issue codes, Appendix A.4, status chips, polling and list/show/edit/settings smoke renders. All web [P1] features are implemented using a dedicated equivalence edit page (inline editing is optional). The optional [P2] stacked bar and snapshot-change highlighting are omitted.

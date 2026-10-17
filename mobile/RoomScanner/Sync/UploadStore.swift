@@ -8,6 +8,7 @@ struct UploadSnapshot: Sendable {
     var geometryJSON: Data
     var thumbnailPNG: Data?
     var raw: StoredRawData
+    var quoting: LocationQuotingInputs = .init()
 }
 protocol UploadStore: Sendable {
     func uploadSnapshot(locationID: UUID) async throws -> UploadSnapshot?

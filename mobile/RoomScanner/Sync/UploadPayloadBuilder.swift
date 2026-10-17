@@ -4,12 +4,16 @@ import UIKit
 struct UploadMetadata: Codable, Sendable {
     struct Footprint: Codable, Sendable { var width: Float; var length: Float }
     struct Room: Codable, Sendable {
+        var locationType: String? = nil
+        var quoting: RoomQuotingInputs? = nil
         var id: UUID; var index: Int; var name: String; var type: String?
         var floorArea: Float?; var isFloorApproximate: Bool; var perimeter: Float; var ceilingHeight: Float?
         var wallCount: Int; var doorCount: Int; var windowCount: Int; var openingCount: Int; var objectCount: Int
         // Contract requires explicit nulls for unknown values (JSONEncoder omits nil by default).
         func encode(to encoder: Encoder) throws {
             var c = encoder.container(keyedBy: CodingKeys.self)
+            try c.encode(locationType, forKey: .locationType)
+            try c.encodeIfPresent(quoting, forKey: .quoting)
             try c.encode(id, forKey: .id); try c.encode(index, forKey: .index); try c.encode(name, forKey: .name)
             try c.encode(type, forKey: .type); try c.encode(floorArea, forKey: .floorArea)
             try c.encode(isFloorApproximate, forKey: .isFloorApproximate); try c.encode(perimeter, forKey: .perimeter)
@@ -18,10 +22,12 @@ struct UploadMetadata: Codable, Sendable {
             try c.encode(openingCount, forKey: .openingCount); try c.encode(objectCount, forKey: .objectCount)
         }
     }
+    var quoting: LocationQuotingInputs? = nil
     var clientId: UUID; var name: String; var scannedAt: Date; var footprint: Footprint?
     var isMerged: Bool; var geometryVersion: Int; var rooms: [Room]; var appVersion: String; var deviceModel: String
     func encode(to encoder: Encoder) throws {
         var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encodeIfPresent(quoting, forKey: .quoting)
         try c.encode(clientId, forKey: .clientId); try c.encode(name, forKey: .name); try c.encode(scannedAt, forKey: .scannedAt)
         try c.encode(footprint, forKey: .footprint); try c.encode(isMerged, forKey: .isMerged)
         try c.encode(geometryVersion, forKey: .geometryVersion); try c.encode(rooms, forKey: .rooms)
@@ -50,10 +56,11 @@ struct UploadPayloadBuilder: Sendable {
         let info = Bundle.main.infoDictionary ?? [:]
         var machine = utsname(); uname(&machine)
         let device = withUnsafeBytes(of: machine.machine) { String(decoding: $0.prefix(while: { $0 != 0 }), as: UTF8.self) }
-        let metadata = UploadMetadata(clientId: snapshot.id, name: snapshot.name, scannedAt: snapshot.createdAt, footprint: footprint,
+        let metadata = UploadMetadata(quoting: snapshot.quoting.isEmpty ? nil : snapshot.quoting, clientId: snapshot.id, name: snapshot.name, scannedAt: snapshot.createdAt, footprint: footprint,
             isMerged: geometry.merged != nil, geometryVersion: geometry.version,
             rooms: geometry.rooms.enumerated().map { i, r in
-                UploadMetadata.Room(id: r.id, index: i, name: roomNames[i], type: r.detectedType?.rawValue,
+                UploadMetadata.Room(locationType: snapshot.raw.rooms.first(where: { $0.id == r.id })?.locationType,
+                    quoting: snapshot.raw.rooms.first(where: { $0.id == r.id }).flatMap { $0.quoting.isEmpty ? nil : $0.quoting }, id: r.id, index: i, name: roomNames[i], type: r.detectedType?.rawValue,
                     floorArea: RoomMetrics.floorArea(of: r), isFloorApproximate: r.isFloorApproximate,
                     perimeter: RoomMetrics.perimeter(of: r), ceilingHeight: RoomMetrics.ceilingHeight(of: r),
                     wallCount: r.walls.count, doorCount: r.doors.count, windowCount: r.windows.count,

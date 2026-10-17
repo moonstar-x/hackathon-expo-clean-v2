@@ -4,6 +4,13 @@ import Foundation
 /// One captured room. `id` equals `RoomGeometry.id`.
 @objc(Room)
 final class Room: NSManagedObject {
+    @NSManaged var quoteTrafficRaw: String?
+    @NSManaged var quoteFixedPosts: Int16
+    @NSManaged var quoteFixturesEnabled: Bool
+    @NSManaged var quoteToilets: Int16
+    @NSManaged var quoteUrinals: Int16
+    @NSManaged var quoteSinks: Int16
+
     @NSManaged var id: UUID?
     /// 0-based capture order.
     @NSManaged var index: Int16

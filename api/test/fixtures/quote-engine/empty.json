@@ -1,0 +1,20 @@
+{
+  "status": "needsReview",
+  "costs": {
+    "totalCost": 127.05,
+    "operatingCost": 110,
+    "administration": 11,
+    "contingency": 6.05
+  },
+  "pricing": {
+    "targetPrice": 195.461538,
+    "minimumPrice": 181.5,
+    "offeredPrice": 195.461538,
+    "profit": 68.411538,
+    "vat": 29.319231,
+    "pricePerM2": 0
+  },
+  "staffing": {
+    "peopleToHire": 0
+  }
+}

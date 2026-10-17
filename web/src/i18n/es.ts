@@ -1,5 +1,6 @@
 // The admin's own copy. Field labels live under resources.<resource>.fields so react-admin infers
 // them for fields, inputs, filters and columns alike; everything else is grouped by feature under app.*.
+import { quoteFields } from './quotes';
 import type { StringMap } from 'react-admin';
 
 /** Labels several resources share. */
@@ -16,6 +17,7 @@ const commonFields: StringMap = {
 
 const appSpanish: StringMap = {
   resources: {
+    ...Object.fromEntries(Object.entries({ quotes:'Cotización |||| Cotizaciones','quote-parameters':'Parámetros','quote-zone-types':'Tipo de zona |||| Tipos de zona','quote-schedules':'Horario |||| Horarios','quote-products':'Producto de cotización |||| Productos de cotización','quote-location-types':'Equivalencia de tipos |||| Equivalencias de tipos' }).map(([resource,name]: [string,string]): [string,object] => [resource,{ name,fields:quoteFields }])),
     measurements: {
       name: 'Medición |||| Mediciones',
       fields: {
@@ -90,7 +92,7 @@ const appSpanish: StringMap = {
     },
   },
   app: {
-    menu: { inventory: 'Inventario', movements: 'Movimientos', catalog: 'Catálogo', administration: 'Administración' },
+    menu: { quoting:'Configuración de cotización', inventory: 'Inventario', movements: 'Movimientos', catalog: 'Catálogo', administration: 'Administración' },
     page: { editing: 'Editar %{name}' },
     auth: {
       title: 'Iniciar sesión',

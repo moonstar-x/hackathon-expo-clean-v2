@@ -10,6 +10,12 @@ final class MemorySessionStorage: SessionStorage, @unchecked Sendable {
     func delete() throws { lock.withLock { value = nil } }
 }
 struct StubAPIClient: APIClientProtocol {
+    var options: QuotingOptions?
+    var onOptions: (@Sendable () -> Void)?
+    func quotingOptions(token: String) async throws -> QuotingOptions {
+        onOptions?()
+        if let error { throw error }; guard let options else { throw APIError.network }; return options
+    }
     var session = Session(token: "test-token", expiresAt: .now.addingTimeInterval(3600), user: .init(id: 1, email: "ana@example.com", name: "Ana"))
     var error: APIError?
     var remoteID: Int64 = 12

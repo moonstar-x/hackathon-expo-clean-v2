@@ -103,3 +103,11 @@ These all need a LiDAR iPhone. They're also covered by the README checklist.
 - Strings are extracted at build time. `xcodebuild` doesn't write them back into the catalog, so run
   `scripts/sync-strings.sh` after command-line builds (Xcode does this automatically in the IDE).
 - SceneKit is deprecated. It's confined to `Rendering/SceneBuilder.swift` and `Rendering/SceneKitView.swift`.
+
+## SPEC-005 verification and remaining platform checks
+
+This environment has only `/Library/Developer/CommandLineTools`; there is no Xcode installation, iOS SDK, `xcodegen`, or iOS Simulator. Consequently a Simulator build and the Swift Testing suites could not be executed here. Run the existing README build/test commands on a machine with Xcode before shipping.
+
+Completed checks: `swiftc -frontend -parse` succeeds for all 77 app/test Swift files. A macOS command-line harness compiled the production `QuotingInputs.swift` and `QuotingOptionsStore.swift`, stubbing only their app/platform boundaries, and passed fixture defaults/detection, options JSON/cache round trip, one-hour throttling, cached offline retention, and 401 session loss. These checks do not replace an iOS build or a Core Data migration test.
+
+Added Simulator suites: `RoomQuotingDefaultsTests`, `QuotingOptionsStoreTests`, quoting cases in `UploadPayloadBuilderTests`, and a version 2 → 3 case in `LocationMigrationTests`. Verify generated localization symbols, the SwiftUI controls on device, migration of a real version 2 store, and capture/save/upload timing. Version 2 was not edited. All mobile [P1] features are implemented; the read-only measurements tab includes quoting values.

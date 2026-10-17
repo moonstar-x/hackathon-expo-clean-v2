@@ -21,6 +21,7 @@ struct MeasurementsTab: View {
         let names = roomNames
         List {
             summarySection(formatter)
+            quotingSummary
             ForEach(Array(geometry.rooms.enumerated()), id: \.element.id) { index, room in
                 roomSection(room, name: names[index], formatter: formatter)
             }
@@ -40,6 +41,16 @@ struct MeasurementsTab: View {
                                 uniquingKeysWith: { first, _ in first })
         let defaults = RoomNaming.defaultNames(for: geometry.rooms.map(\.detectedType))
         return geometry.rooms.enumerated().map { index, room in stored[room.id] ?? defaults[index] }
+    }
+
+    private var quotingSummary: some View {
+        Section(.quoteTitle) {
+            let location = rooms.first?.location
+            LabeledContent(String(localized: .quoteSchedule), value: location?.quoteScheduleCode ?? String(localized: .quoteServerDefault))
+            LabeledContent(String(localized: .quoteDays), value: (location?.quoteDaysPerMonth ?? 0) == 0 ? String(localized: .quoteDefault) : "\(location?.quoteDaysPerMonth ?? 0)")
+            LabeledContent(String(localized: .quoteUsualTraffic), value: location?.quoteTrafficRaw.flatMap(QuoteTraffic.init(rawValue:))?.displayName ?? String(localized: .quoteDefault))
+            Text(.quoteSavedHelp).font(.caption).foregroundStyle(.secondary)
+        }
     }
 
     // MARK: Summary
@@ -80,6 +91,17 @@ struct MeasurementsTab: View {
             surfaceGroup(String(localized: .commonWindows), noun: String(localized: .measurementsWindow), room.windows, formatter: formatter)
             surfaceGroup(String(localized: .measurementsOpenings), noun: String(localized: .measurementsOpening), room.openings, formatter: formatter)
             objectGroup(room.objects, formatter: formatter)
+            if let stored = rooms.first(where: { $0.id == room.id }) {
+                DisclosureGroup(.quoteInputs) {
+                    LabeledContent(String(localized: .quoteTraffic), value: stored.quoteTrafficRaw.flatMap(QuoteTraffic.init(rawValue:))?.displayName ?? String(localized: .quoteSameAsLocation))
+                    LabeledContent(String(localized: .quoteFixedPosts), value: "\(stored.quoteFixedPosts)")
+                    if stored.quoteFixturesEnabled {
+                        LabeledContent(String(localized: .quoteToilets), value: "\(stored.quoteToilets)")
+                        LabeledContent(String(localized: .quoteUrinals), value: "\(stored.quoteUrinals)")
+                        LabeledContent(String(localized: .quoteSinks), value: "\(stored.quoteSinks)")
+                    }
+                }
+            }
         } header: {
             Text(name)
                 .contextMenu {

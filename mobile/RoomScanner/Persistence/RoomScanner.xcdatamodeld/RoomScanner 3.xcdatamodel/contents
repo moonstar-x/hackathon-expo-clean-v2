@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="23605" systemVersion="25A354" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="Location" representedClassName="Location" syncable="YES">
+        <attribute name="quoteScheduleCode" optional="YES" attributeType="String" />
+        <attribute name="quoteDaysPerMonth" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES" />
+        <attribute name="quoteTrafficRaw" optional="YES" attributeType="String" />
+        <attribute name="syncStatusRaw" attributeType="String" defaultValueString="localOnly"/>
+        <attribute name="ownerUserID" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="ownerEmail" optional="YES" attributeType="String"/>
+        <attribute name="remoteID" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="uploadedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="lastUploadError" optional="YES" attributeType="String"/>
+        <attribute name="uploadAttempts" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="lastUploadAttemptAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="name" attributeType="String" defaultValueString=""/>
+        <attribute name="roomCount" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="statusRaw" attributeType="String" defaultValueString="draft"/>
+        <attribute name="thumbnailPNG" optional="YES" attributeType="Binary" allowsExternalBinaryDataStorage="YES"/>
+        <attribute name="totalFloorArea" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="updatedAt" attributeType="Date" usesScalarValueType="NO"/>
+        <relationship name="payload" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="LocationPayload" inverseName="location" inverseEntity="LocationPayload"/>
+        <relationship name="rooms" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Room" inverseName="location" inverseEntity="Room"/>
+    </entity>
+    <entity name="LocationPayload" representedClassName="LocationPayload" syncable="YES">
+        <attribute name="geometryJSON" optional="YES" attributeType="Binary" allowsExternalBinaryDataStorage="YES"/>
+        <attribute name="structureJSON" optional="YES" attributeType="Binary" allowsExternalBinaryDataStorage="YES"/>
+        <relationship name="location" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Location" inverseName="payload" inverseEntity="Location"/>
+    </entity>
+    <entity name="Room" representedClassName="Room" syncable="YES">
+        <attribute name="quoteTrafficRaw" optional="YES" attributeType="String" />
+        <attribute name="quoteFixedPosts" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES" />
+        <attribute name="quoteFixturesEnabled" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES" />
+        <attribute name="quoteToilets" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES" />
+        <attribute name="quoteUrinals" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES" />
+        <attribute name="quoteSinks" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES" />
+        <attribute name="capturedAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="capturedRoomJSON" optional="YES" attributeType="Binary" allowsExternalBinaryDataStorage="YES"/>
+        <attribute name="floorArea" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="index" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="name" attributeType="String" defaultValueString=""/>
+        <attribute name="typeRaw" optional="YES" attributeType="String"/>
+        <relationship name="location" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Location" inverseName="rooms" inverseEntity="Location"/>
+    </entity>
+</model>

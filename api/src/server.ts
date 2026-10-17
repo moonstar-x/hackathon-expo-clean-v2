@@ -4,6 +4,7 @@ import { API_ROOT, type Config, ConfigError, loadConfig } from './config.ts';
 import { createApp, createLogger } from './app.ts';
 import { openDatabase } from './db/connection.ts';
 import { migrate } from './db/migrate.ts';
+import { createQuoteWorker } from './modules/quotes/worker.ts';
 import { ensureInitialUser } from './modules/users/initialUser.ts';
 
 // Real environment variables take precedence over values in api/.env.
@@ -27,7 +28,9 @@ if (applied.length) logger.info({ migrations: applied }, 'applied database migra
 const initialUser = await ensureInitialUser(db, config);
 if (initialUser) logger.info({ email: initialUser.email }, 'created the initial user from ADMIN_EMAIL / ADMIN_PASSWORD');
 
-const app = createApp({ db, config, logger });
+const worker = createQuoteWorker({ db,config,logger });
+if (config.quoteWorker === 'on') worker.start();
+const app = createApp({ db, config, logger, nudgeQuotes:() => worker.nudge() });
 const server = app.listen(config.port, (err) => {
   if (err) {
     logger.fatal({ err }, 'failed to start HTTP server');
@@ -42,6 +45,7 @@ function shutdown(signal: NodeJS.Signals) {
   if (shuttingDown) return;
   shuttingDown = true;
   logger.info({ signal }, 'shutting down');
+  worker.stop();
   server.close(() => {
     db.close();
     process.exit(0);

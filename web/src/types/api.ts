@@ -100,6 +100,8 @@ export interface MeasurementRoom {
   index: number;
   name: string;
   type: RoomType | null;
+  locationType?:string | null;
+  quoting?:{ traffic?:'low' | 'medium' | 'high' | null;fixedPosts?:number;fixtures?:{ toilets:number;urinals:number;sinks:number } | null } | null;
   floorArea: number | null;
   isFloorApproximate: boolean;
   perimeter: number;
@@ -114,6 +116,8 @@ export interface MeasurementRoom {
 export interface Measurement {
   id: number;
   clientId: string;
+  quoting?:{ scheduleCode?:string | null;daysPerMonth?:number | null;traffic?:'low' | 'medium' | 'high' | null } | null;
+  quote?:{ id:number;status:'needsReview' | 'simulation' | null;calculationState:string } | null;
   name: string;
   notes: string | null;
   scannedAt: string;

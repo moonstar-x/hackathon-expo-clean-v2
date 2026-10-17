@@ -206,3 +206,13 @@ On a LiDAR iPhone:
 12. Test `.local` on shared Wi-Fi and its permission prompt. Record the working host form and ATS behavior in NOTES.md. HTTPS tunnels avoid local-network addressing differences.
 
 These checks are additional to the capture/device checklist above. See NOTES.md for what was actually verified.
+
+## Datos para cotizar (SPEC-005)
+
+Room review includes a collapsed Datos para cotizar section: traffic override, fixed posts, and optional toilet/urinal/sink counts. Bathrooms and locker rooms start with fixture counting enabled; detected toilets and sinks prefill their counts. The save sheet adds schedule, days per month and usual traffic. Leaving fields at Predeterminado sends no override, so server defaults apply. Quoting inputs appear read-only in the location's measurements tab; corrections after upload are made in the admin web app.
+
+Core Data version 3 adds these optional/defaulted fields through lightweight migration; earlier model versions are unchanged. Upload snapshots carry the selected room type even when no quoting controls were opened, and include fixture counts only when enabled. The upload queue waits until capture closes, ensuring save-sheet inputs are persisted before uploading.
+
+`QuotingOptionsStore` fetches authenticated `/api/quoting/options` after login, at launch and on becoming active, at most once per hour. It caches server-scoped JSON in Application Support for offline schedule selection, retains it on network errors and loses the session on a 401. Without a cache, schedules show only Predeterminado del servidor. New strings use semantic keys in `Localizable.xcstrings`.
+
+Tests cover metadata omission/encoding, fixture defaults, options decoding/cache/throttle/session loss and version 2 → 3 migration. See `NOTES.md` for the available verification and the required Simulator follow-up.

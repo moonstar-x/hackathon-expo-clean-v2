@@ -76,6 +76,8 @@ final class CaptureViewModel {
     var reviewName = ""
     /// The type picked for the room under review. nil is "Sin especificar".
     var reviewType: LocationType?
+    var reviewQuoting = RoomQuotingInputs()
+    var locationQuoting = LocationQuotingInputs()
     /// The editable location name on the Save sheet (SAVE-1).
     var locationName = ""
 
@@ -218,6 +220,7 @@ final class CaptureViewModel {
             if !name.isEmpty {
                 try await repository.rename(locationID: locationID, to: name)
             }
+            try await repository.setLocationQuoting(locationID: locationID, inputs: locationQuoting)
             phase = .done
             return locationID
         } catch {
@@ -276,6 +279,7 @@ final class CaptureViewModel {
         liveRoom = nil
         reviewName = name
         reviewType = type
+        reviewQuoting = RoomQuotingInputs.defaults(type: type, room: geometry)
         phase = .reviewing
 
         // §10.2: the draft is created when the first room completes, and every room is written right away.
@@ -343,6 +347,8 @@ final class CaptureViewModel {
                 try await repository.renameRoom(roomID: id, to: name)
             }
         }
+        let quoting = reviewQuoting
+        enqueuePersistence { repository in try await repository.setRoomQuoting(roomID: id, inputs: quoting) }
         let type = reviewType
         if type != completedRooms[index].type {
             completedRooms[index].type = type
