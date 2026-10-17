@@ -146,7 +146,7 @@ it.each([
   ['/measurements/1/show/measures', ['Superficie total', '34,0 m²', 'Sala', 'Dormitorio', 'Perímetro', 'Paredes']],
   ['/measurements/1/show/files', ['Plano (PNG)', 'Geometría (JSON)', 'Descargar']],
   ['/login', ['Correo electrónico', 'Contraseña', 'Iniciar sesión']],
-  ['/', ['Productos activos', 'Existencias bajas', 'Movimientos recientes', 'Entrada']],
+  ['/', ['Productos activos', 'Existencias bajas', 'Por reponer', 'Movimientos recientes', 'Entrada']],
   ['/products', ['Productos', 'Nombre', 'Cantidad', 'Crear', '2 cajas']],
   ['/products/create', ['Nombre', 'Descripción', 'Unidad', 'Cantidad inicial', 'Guardar']],
   ['/products/1', ['Existencias actuales', 'Inventario', 'Seguridad', 'Guardar']],
@@ -194,10 +194,15 @@ it.each([
     );
     await Promise.resolve();
   });
-  await vi.waitFor(async (): Promise<void> => {
-    await act(async (): Promise<void> => {
-      await Promise.resolve();
-    });
-    for (const label of labels) expect(document.body.textContent).toContain(label);
-  });
+  // The first screen of the file pays the whole app's cold start; with every test file running at
+  // once that can take longer than waitFor's default second.
+  await vi.waitFor(
+    async (): Promise<void> => {
+      await act(async (): Promise<void> => {
+        await Promise.resolve();
+      });
+      for (const label of labels) expect(document.body.textContent).toContain(label);
+    },
+    { timeout: 5000 },
+  );
 });
