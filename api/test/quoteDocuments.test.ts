@@ -49,7 +49,7 @@ describe('document routes', () => {
   });
   it('merges data without jobs, uses A.2 cents, tracks revisions, freezes numbers and rejects stale exports', async () => {
     const { api, db } = await setup(); let s = (await api.get('/api/quotes/1/document')).body;
-    expect(s.ready).toBe(true); expect(s.document.lines.map((l: { amount: { value: number } }) => l.amount.value)).toEqual([147.69, 103.39]); expect(s.document.total.value).toBe(288.74);
+    expect(s.ready).toBe(true); expect(s.document.lines.map((l: { amount: { value: number } }) => l.amount.value)).toEqual([147.99, 93.19]); expect(s.document.total.value).toBe(277.36);
     const before = quotesRepository(db).get(1); const jobs = db.prepare('SELECT * FROM quote_jobs').all();
     await api.put('/api/quotes/1/document', { clientAddress: 'Nueva dirección', number: 'IGNORED' });
     expect(quotesRepository(db).get(1)).toEqual(before); expect(db.prepare('SELECT * FROM quote_jobs').all()).toEqual(jobs);
@@ -146,7 +146,7 @@ describe('rendered files', () => {
       for (const file of fs.readdirSync(MIGRATIONS_DIR).filter(f => /^00[1-5]_/.test(f))) fs.copyFileSync(path.join(MIGRATIONS_DIR, file), path.join(directory, file));
       // Raw rows: the repository already reads columns that later migrations add.
       migrate(db, directory); seed(db, { createdBy: 'fixture@example.test' }); const before = db.prepare('SELECT * FROM quotes WHERE id = 1').get() as object;
-      expect(migrate(db)).toEqual(['006_quote_documents', '007_quote_target_margin', '008_company_branding', '009_company_signature']); expect(db.prepare('SELECT * FROM quotes WHERE id = 1').get()).toEqual({ ...before, target_margin: null }); expect(quotesRepository(db).get(1).targetMargin).toBeNull();
+      expect(migrate(db)).toEqual(['006_quote_documents', '007_quote_target_margin', '008_company_branding', '009_company_signature', '010_quote_labor_rates', '011_quote_machines_areas']); expect(db.prepare('SELECT * FROM quotes WHERE id = 1').get()).toEqual({ ...before, target_margin: null, overrides_json: '{}' }); expect(quotesRepository(db).get(1).targetMargin).toBeNull();
       expect(db.prepare('SELECT legal_name, payment_terms, brand_color FROM quote_document_settings').get()).toEqual({ legal_name: null, payment_terms: null, brand_color: '#4F46E5' });
     } finally { db.close(); fs.rmSync(directory, { recursive: true, force: true }); }
   });
@@ -155,7 +155,7 @@ describe('rendered files', () => {
     try {
       for (const file of fs.readdirSync(MIGRATIONS_DIR).filter(f => /^00[1-6]_/.test(f))) fs.copyFileSync(path.join(MIGRATIONS_DIR, file), path.join(directory, file));
       migrate(db, directory); seed(db, { createdBy: 'fixture@example.test' }); db.prepare("UPDATE quote_document_settings SET legal_name = 'Empresa de prueba S.A.', signer_name = 'Ana Ejemplo'").run();
-      expect(migrate(db)).toEqual(['007_quote_target_margin', '008_company_branding', '009_company_signature']);
+      expect(migrate(db)).toEqual(['007_quote_target_margin', '008_company_branding', '009_company_signature', '010_quote_labor_rates', '011_quote_machines_areas']);
       expect(db.prepare('SELECT legal_name, signer_name, brand_color FROM quote_document_settings').get()).toEqual({ legal_name: 'Empresa de prueba S.A.', signer_name: 'Ana Ejemplo', brand_color: '#4F46E5' });
       expect(db.prepare('SELECT count(*) FROM quote_document_logo').pluck().get()).toBe(0); expect(db.prepare('SELECT count(*) FROM quote_document_signature').pluck().get()).toBe(0);
       expect(() => db.prepare("UPDATE quote_document_settings SET brand_color = '#abcdef'").run()).toThrow(/CHECK/);

@@ -5,8 +5,8 @@ import { quoteFields } from '../../../i18n/quotes';
 import { priceInputSx } from '../../../styles/quotes';
 import type { PriceInputProps } from '../../../types/quotes';
 
-/** A price of the Resumen tab, changed in place; the row's label already names it, so only screen readers hear it here. */
-const PriceInput = ({ field, value, onChange, error, helperText, placeholder, disabled }: PriceInputProps): ReactElement => (
+/** A value of the Resumen tab, changed in place; the row's label already names it, so only screen readers hear it here. */
+const PriceInput = ({ field, value, percent, signed, onChange, error, helperText, placeholder, disabled }: PriceInputProps): ReactElement => (
   <TextField
     variant="standard"
     size="small"
@@ -19,8 +19,8 @@ const PriceInput = ({ field, value, onChange, error, helperText, placeholder, di
     onChange={(event: ChangeEvent<HTMLInputElement>): void => onChange(event.target.value)}
     sx={priceInputSx}
     slotProps={{
-      htmlInput: { min: 0, max: field === 'targetMargin' ? 99.99 : undefined, step: 'any', 'aria-label': quoteFields[field] },
-      input: field === 'targetMargin' ? { endAdornment: <InputAdornment position="end">%</InputAdornment> } : undefined,
+      htmlInput: { min: signed ? undefined : 0, max: percent ? 99.99 : undefined, step: field === 'peopleToHire' ? 1 : 'any', 'aria-label': quoteFields[field] },
+      input: percent ? { endAdornment: <InputAdornment position="end">%</InputAdornment> } : undefined,
     }}
   />
 );

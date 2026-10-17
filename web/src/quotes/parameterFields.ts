@@ -112,6 +112,27 @@ export const parameterFields: readonly ParameterField[] = [
         "nullable": false
     },
     {
+        "name": "laborHourlyRate",
+        "label": "Precio por hora de mano de obra",
+        "percentage": false,
+        "boolean": false,
+        "nullable": true
+    },
+    {
+        "name": "manualRateM2PerHour",
+        "label": "m² por hora sin máquina",
+        "percentage": false,
+        "boolean": false,
+        "nullable": false
+    },
+    {
+        "name": "machineRateM2PerHour",
+        "label": "m² por hora con máquina",
+        "percentage": false,
+        "boolean": false,
+        "nullable": false
+    },
+    {
         "name": "supervisorMonthlyCost",
         "label": "Supervisor: costo mensual completo",
         "percentage": false,

@@ -5,6 +5,7 @@ import type { MeasurementMetadata } from '../measurements/schemas.ts';
 import { computeQuote } from './engine/index.ts';
 import { deriveZones } from './derive.ts';
 import { allSettings } from './settings.ts';
+import { engineInput, snapshotFor } from './snapshot.ts';
 import { readZones, replaceZones } from './repository.ts';
 interface Job {
     id: number;
@@ -51,13 +52,14 @@ export function createQuoteWorker({ db, logger, config, compute = computeQuote }
         let status: string | null = null;
         try {
             db.transaction(() => {
-                const q = db.prepare('SELECT id, measurement_id, assumptions_confirmed, manual_price, target_margin, external_reference_price, input_revision, result_json FROM quotes WHERE id = ?').get(job.quote_id) as {
+                const q = db.prepare('SELECT id, measurement_id, assumptions_confirmed, manual_price, target_margin, external_reference_price, overrides_json, input_revision, result_json FROM quotes WHERE id = ?').get(job.quote_id) as {
                     id: number;
                     measurement_id: number | null;
                     assumptions_confirmed: number;
                     manual_price: number | null;
                     target_margin: number | null;
                     external_reference_price: number | null;
+                    overrides_json: string;
                     input_revision: number;
                     result_json: string | null;
                 } | undefined;
@@ -86,12 +88,8 @@ export function createQuoteWorker({ db, logger, config, compute = computeQuote }
                     zones = readZones(db, q.id);
                     derivationWarnings = derived.warnings;
                 }
-                // Snapshot only the catalog rows used by this quote, resolving stock once.
-                const zoneTypes = Object.fromEntries([...new Set(zones.map((z) => z.zoneTypeId))].filter((id): id is number => id !== null && !!settings.zoneTypes[id]).map((id) => [id, settings.zoneTypes[id]]));
-                const schedules = Object.fromEntries([...new Set(zones.map((z) => z.scheduleId))].filter((id): id is number => id !== null && !!settings.schedules[id]).map((id) => [id, settings.schedules[id]]));
-                const products = Object.fromEntries([...new Set(Object.values(zoneTypes).flatMap((t) => [t.cleaningProductId, t.dailyDisinfectantId, t.terminalDisinfectantId]))].filter((id) => settings.products[id]).map((id) => [id, settings.products[id]]));
-                const snapshot = { ...settings, zoneTypes, schedules, products };
-                const result = compute({ ...snapshot, quote: { assumptionsConfirmed: !!q.assumptions_confirmed, manualPrice: q.manual_price, targetMargin: q.target_margin, externalReferencePrice: q.external_reference_price }, zones });
+                const snapshot = snapshotFor(settings, zones);
+                const result = compute(engineInput(snapshot, { assumptionsConfirmed: !!q.assumptions_confirmed, manualPrice: q.manual_price, targetMargin: q.target_margin, externalReferencePrice: q.external_reference_price, overrides: JSON.parse(q.overrides_json) }, zones));
                 result.warnings.push(...derivationWarnings);
                 status = result.status;
                 const pr = result.pricing;

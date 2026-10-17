@@ -1,5 +1,5 @@
 import { round } from '../../../lib/numbers.ts';
-import type { EngineInput, Issue, ProductValues, QuoteParameterValues, ZoneInput } from '../types.ts';
+import { OVERRIDABLE_PARAMETERS, type EngineInput, type Issue, type ProductValues, type QuoteOverrides, type QuoteParameterValues, type ZoneInput } from '../types.ts';
 export type { EngineInput } from '../types.ts';
 export const ceilX = (x: number) => Math.ceil(round(x, 9));
 export const divide = (a: number, b: number) => b > 0 && Number.isFinite(b) && Number.isFinite(a / b) ? a / b : 0;
@@ -9,8 +9,31 @@ export function laborBase(p: QuoteParameterValues) {
     const availableHoursPerYear = availableDaysPerYear * p.hoursPerWorkday;
     return { annualLaborCost, availableDaysPerYear, availableHoursPerYear, hourlyCost: divide(annualLaborCost, availableHoursPerYear), fteHoursPerMonth: divide(availableHoursPerYear, p.monthsPerYear), fteMonthlyCost: divide(annualLaborCost, p.monthsPerYear) };
 }
-export const productPrices = (p: ProductValues, params: QuoteParameterValues) => {
-    const pricePerContainer = divide(p.publishedPrice, 1 + (p.publishedPriceIncludesVat ? params.purchaseVatRate : 0));
+/** The parameters with the quote's own values in their place. */
+export function effectiveParameters(p: QuoteParameterValues, overrides: QuoteOverrides = {}): QuoteParameterValues {
+    const values = { ...p };
+    for (const key of OVERRIDABLE_PARAMETERS)
+        if (overrides[key] !== undefined)
+            values[key] = overrides[key];
+    return values;
+}
+/** The price of an hour of labor: the one set, or the wage's. */
+export const laborRate = (p: QuoteParameterValues, labor: ReturnType<typeof laborBase>) => p.laborHourlyRate ?? labor.hourlyCost;
+/** How many times faster a worker cleans floor with a machine than without one. */
+export const machineSpeedup = (p: QuoteParameterValues) => divide(p.machineRateM2PerHour, p.manualRateM2PerHour) || 1;
+/** The floor a zone's work is priced on: the area chosen to be cleaned, the floor without objects, or the whole floor, at most the whole floor. */
+export const cleanedAreaOf = (z: Pick<ZoneInput, 'floorArea' | 'freeArea' | 'cleanedArea'>) => Math.min(Math.max(0, z.cleanedArea ?? z.freeArea ?? z.floorArea ?? 0), z.floorArea ?? 0);
+/** What the quote's own values change in each zone's calculation. */
+export interface ZoneAdjustments {
+    /** The price of an hour of labor, before night and holiday surcharges. */
+    hourlyRate: number;
+    /** Multiplies the billable hours, so the quote has the FTE it was given. */
+    hoursFactor: number;
+    chemicalsFactor: number;
+    eppFactor: number;
+}
+export const productPrices = (p: ProductValues, params: QuoteParameterValues, factor: number = 1) => {
+    const pricePerContainer = divide(p.publishedPrice, 1 + (p.publishedPriceIncludesVat ? params.purchaseVatRate : 0)) * factor;
     return { pricePerContainer, pricePerUnit: divide(pricePerContainer, p.presentationSize) };
 };
 export function fixtureWork(z: ZoneInput, p: QuoteParameterValues) {
@@ -29,7 +52,7 @@ export function fixtureWork(z: ZoneInput, p: QuoteParameterValues) {
     const visits = z.fixtureVisitsPerDay ?? 0;
     return { causes, count, ok, hours: ok && count > 0 ? divide(count * (z.daysPerMonth ?? 0) * visits * (z.minutesPerFixture ?? 0), 60 * p.productiveFraction) : 0, solutionLiters: ok && count > 0 ? count * (z.daysPerMonth ?? 0) * visits * (z.solutionLitersPerFixture ?? 0) : 0, paperSoap: ok ? z.paperSoapMonthly ?? 0 : 0 };
 }
-const numericZoneFields = ['floorArea', 'wallArea', 'serviceHoursPerDay', 'daysPerMonth', 'hoursBetweenCleanings', 'cleaningsPerDay', 'cleaningsPerMonth', 'terminalsPerMonth', 'terminalArea', 'dailyCleaningHours', 'terminalHours', 'taskHours', 'presenceHours', 'billableHours', 'nightFraction', 'holidayFraction', 'laborCost', 'fte', 'm2PerPersonInService', 'dailySolutionLiters', 'terminalSolutionLiters', 'cleaningProductId', 'cleaningConcentrate', 'dailyDisinfectantId', 'dailyDisinfectantConcentrate', 'terminalDisinfectantId', 'terminalDisinfectantConcentrate', 'chemicalsTheoretical', 'chemicalsWithWaste', 'eppAndHygiene', 'utensils', 'directCost', 'allocatedIndirect', 'totalCost', 'targetPrice', 'costPerM2', 'pricePerM2', 'flatRateRevenue'] as const;
+const numericZoneFields = ['floorArea', 'cleanedArea', 'machines', 'wallArea', 'serviceHoursPerDay', 'daysPerMonth', 'hoursBetweenCleanings', 'cleaningsPerDay', 'cleaningsPerMonth', 'terminalsPerMonth', 'terminalArea', 'floorRateM2PerHour', 'cleaningDuration', 'dailyCleaningHours', 'terminalHours', 'taskHours', 'presenceHours', 'billableHours', 'nightFraction', 'holidayFraction', 'laborCost', 'fte', 'm2PerPersonInService', 'dailySolutionLiters', 'terminalSolutionLiters', 'cleaningProductId', 'cleaningConcentrate', 'dailyDisinfectantId', 'dailyDisinfectantConcentrate', 'terminalDisinfectantId', 'terminalDisinfectantConcentrate', 'chemicalsTheoretical', 'chemicalsWithWaste', 'eppAndHygiene', 'utensils', 'directCost', 'allocatedIndirect', 'totalCost', 'targetPrice', 'costPerM2', 'pricePerM2', 'flatRateRevenue'] as const;
 export type ZoneResult = Record<typeof numericZoneFields[number], number> & {
     zoneId: number | null;
     name: string;
@@ -47,7 +70,7 @@ export type ZoneResult = Record<typeof numericZoneFields[number], number> & {
     flatRateMargin: number | null;
     flatRateStatus: 'loss' | 'belowMinimum' | 'ok' | null;
 };
-export function computeZone(z: ZoneInput, input: EngineInput, labor: ReturnType<typeof laborBase>): ZoneResult {
+export function computeZone(z: ZoneInput, input: EngineInput, labor: ReturnType<typeof laborBase>, adjust: ZoneAdjustments = { hourlyRate: labor.hourlyCost, hoursFactor: 1, chemicalsFactor: 1, eppFactor: 1 }): ZoneResult {
     const p = input.parameters;
     const t = input.zoneTypes[z.zoneTypeId ?? -1];
     const s = input.schedules[z.scheduleId ?? -1];
@@ -72,6 +95,8 @@ export function computeZone(z: ZoneInput, input: EngineInput, labor: ReturnType<
     if (!active)
         return r;
     r.floorArea = z.floorArea!;
+    r.cleanedArea = cleanedAreaOf(z);
+    r.machines = z.machines ?? 0;
     r.wallArea = z.wallArea ?? 0;
     r.serviceHoursPerDay = s.serviceHoursPerDay;
     r.daysPerMonth = z.daysPerMonth!;
@@ -79,18 +104,22 @@ export function computeZone(z: ZoneInput, input: EngineInput, labor: ReturnType<
     r.cleaningsPerDay = Math.max(1, ceilX(divide(r.serviceHoursPerDay, r.hoursBetweenCleanings)));
     r.cleaningsPerMonth = r.cleaningsPerDay * r.daysPerMonth;
     r.terminalsPerMonth = z.terminalsPerMonth ?? t.suggestedTerminalsPerMonth;
-    r.terminalArea = r.floorArea + (t.wallsInTerminal ? r.wallArea : 0);
-    r.dailyCleaningHours = divide(r.floorArea * r.cleaningsPerMonth, t.dailyRateM2PerHour * p.productiveFraction) + fixtures.hours;
+    r.terminalArea = r.cleanedArea + (t.wallsInTerminal ? r.wallArea : 0);
+    // Machines speed up the daily floor cleaning: each worker with one cleans the zone type's rate times the
+    // general metric's ratio. They share the floor, so more machines shorten each cleaning, not the hours paid.
+    r.floorRateM2PerHour = t.dailyRateM2PerHour * (r.machines > 0 ? machineSpeedup(p) : 1);
+    r.cleaningDuration = divide(r.cleanedArea, r.floorRateM2PerHour * Math.max(1, r.machines) * p.productiveFraction);
+    r.dailyCleaningHours = divide(r.cleanedArea * r.cleaningsPerMonth, r.floorRateM2PerHour * p.productiveFraction) + fixtures.hours;
     r.terminalHours = divide(r.terminalArea * r.terminalsPerMonth, t.terminalRateM2PerHour * p.productiveFraction);
     r.taskHours = r.dailyCleaningHours + r.terminalHours;
     r.presenceHours = z.fixedPosts * r.serviceHoursPerDay * r.daysPerMonth;
-    r.billableHours = Math.max(r.taskHours, r.presenceHours);
+    r.billableHours = Math.max(r.taskHours, r.presenceHours) * adjust.hoursFactor;
     r.nightFraction = s.nightHoursFraction;
     r.holidayFraction = s.includesHolidays ? p.nationalHolidaysPerYear / 365 : 0;
-    r.laborCost = r.billableHours * labor.hourlyCost * (1 + r.nightFraction * p.nightSurchargeRate + r.holidayFraction * p.holidaySurchargeRate);
+    r.laborCost = r.billableHours * adjust.hourlyRate * (1 + r.nightFraction * p.nightSurchargeRate + r.holidayFraction * p.holidaySurchargeRate);
     r.fte = divide(r.billableHours, labor.fteHoursPerMonth);
-    r.m2PerPersonInService = divide(r.floorArea * r.daysPerMonth * r.serviceHoursPerDay, r.billableHours);
-    r.dailySolutionLiters = r.floorArea * r.cleaningsPerMonth * t.solutionLitersPerM2 + fixtures.solutionLiters;
+    r.m2PerPersonInService = divide(r.cleanedArea * r.daysPerMonth * r.serviceHoursPerDay, r.billableHours);
+    r.dailySolutionLiters = r.cleanedArea * r.cleaningsPerMonth * t.solutionLitersPerM2 + fixtures.solutionLiters;
     r.terminalSolutionLiters = r.terminalArea * r.terminalsPerMonth * t.solutionLitersPerM2;
     r.cleaningProductId = t.cleaningProductId;
     r.dailyDisinfectantId = t.dailyDisinfectantId;
@@ -101,10 +130,11 @@ export function computeZone(z: ZoneInput, input: EngineInput, labor: ReturnType<
     r.cleaningConcentrate = (r.dailySolutionLiters + r.terminalSolutionLiters) * cleaning.dosePerLiter / 1000;
     r.dailyDisinfectantConcentrate = r.dailySolutionLiters * daily.dosePerLiter / 1000;
     r.terminalDisinfectantConcentrate = r.terminalSolutionLiters * terminal.dosePerLiter / 1000;
-    r.chemicalsTheoretical = r.cleaningConcentrate * productPrices(cleaning, p).pricePerUnit + r.dailyDisinfectantConcentrate * productPrices(daily, p).pricePerUnit + r.terminalDisinfectantConcentrate * productPrices(terminal, p).pricePerUnit;
+    const unitPrice = (product: ProductValues) => productPrices(product, p, adjust.chemicalsFactor).pricePerUnit;
+    r.chemicalsTheoretical = r.cleaningConcentrate * unitPrice(cleaning) + r.dailyDisinfectantConcentrate * unitPrice(daily) + r.terminalDisinfectantConcentrate * unitPrice(terminal);
     r.chemicalsWithWaste = r.chemicalsTheoretical * (1 + p.targetWasteRate);
-    r.eppAndHygiene = r.fte * (p.baseEppPerFte + (t.risk === 'critical' ? p.criticalEppPerFte : 0)) + fixtures.paperSoap;
-    r.utensils = divide(r.floorArea, p.mopCoverageM2) * p.mopCost * p.mopReplacementsPerMonth;
+    r.eppAndHygiene = (r.fte * (p.baseEppPerFte + (t.risk === 'critical' ? p.criticalEppPerFte : 0)) + fixtures.paperSoap) * adjust.eppFactor;
+    r.utensils = divide(r.cleanedArea, p.mopCoverageM2) * p.mopCost * p.mopReplacementsPerMonth;
     r.directCost = r.laborCost + r.chemicalsWithWaste + r.eppAndHygiene + r.utensils;
     return r;
 }
@@ -126,7 +156,7 @@ export function quoteCauses(input: EngineInput, zones: ZoneResult[], labor: Retu
     causes.push(...zones.flatMap((z) => z.causes));
     if (!(p.targetMargin < 1))
         add('TARGET_MARGIN_INVALID');
-    if (!(p.minimumMargin >= 0 && p.minimumMargin <= p.targetMargin))
+    if (!(p.minimumMargin >= 0 && p.minimumMargin <= targetMarginOf(p, input.quote)))
         add('MINIMUM_MARGIN_INVALID');
     if (!(p.productiveFraction > 0))
         add('PRODUCTIVE_FRACTION_INVALID');
@@ -152,7 +182,7 @@ export function computePricing(p: QuoteParameterValues, quote: EngineInput['quot
     const targetMargin = targetMarginOf(p, quote);
     const targetPrice = divide(totalCost, 1 - targetMargin), minimumPrice = divide(totalCost, 1 - p.minimumMargin);
     const offeredPrice = quote.manualPrice ?? targetPrice, profit = offeredPrice - totalCost, margin = divide(profit, offeredPrice), vat = offeredPrice * p.vatRate;
-    return { targetMargin, isCustomMargin: quote.targetMargin != null, targetPrice, minimumMargin: p.minimumMargin, minimumPrice, breakEvenPrice: totalCost, offeredPrice, isManualPrice: quote.manualPrice !== null, profit, margin, marginStatus: marginStatus(margin, p, targetMargin), vat, totalWithVat: offeredPrice + vat, annualProfit: profit * p.monthsPerYear, pricePerM2: divide(offeredPrice, sum('floorArea')), negotiationRoom: Math.max(0, offeredPrice - minimumPrice) };
+    return { targetMargin, isCustomMargin: quote.targetMargin != null, targetPrice, minimumMargin: p.minimumMargin, vatRate: p.vatRate, minimumPrice, breakEvenPrice: totalCost, offeredPrice, isManualPrice: quote.manualPrice !== null, profit, margin, marginStatus: marginStatus(margin, p, targetMargin), vat, totalWithVat: offeredPrice + vat, annualProfit: profit * p.monthsPerYear, pricePerM2: divide(offeredPrice, sum('cleanedArea')), negotiationRoom: Math.max(0, offeredPrice - minimumPrice) };
 }
 
 export function allocateZone(zone: ZoneResult, p: QuoteParameterValues, costs: ReturnType<typeof computeCosts>, targetMargin: number = p.targetMargin) {
@@ -162,9 +192,9 @@ export function allocateZone(zone: ZoneResult, p: QuoteParameterValues, costs: R
         z.allocatedIndirect = divide(z.directCost, directCost) * indirectToAllocate;
         z.totalCost = z.directCost + z.allocatedIndirect;
         z.targetPrice = divide(z.totalCost, 1 - targetMargin);
-        z.costPerM2 = divide(z.totalCost, z.floorArea);
-        z.pricePerM2 = divide(z.targetPrice, z.floorArea);
-        z.flatRateRevenue = z.floorArea * rate;
+        z.costPerM2 = divide(z.totalCost, z.cleanedArea);
+        z.pricePerM2 = divide(z.targetPrice, z.cleanedArea);
+        z.flatRateRevenue = z.cleanedArea * rate;
         z.flatRateMargin = z.flatRateRevenue > 0 ? (z.flatRateRevenue - z.totalCost) / z.flatRateRevenue : null;
         z.flatRateStatus = z.flatRateMargin === null ? null : z.flatRateMargin < 0 ? 'loss' : z.flatRateMargin < p.minimumMargin ? 'belowMinimum' : 'ok';
     return z;
@@ -177,8 +207,8 @@ export function flatRateComparison(active: ZoneResult[], p: QuoteParameterValues
     return { rate, revenue, margin: divide(revenue - totalCost, revenue), zonesAtLoss, zonesBelowMinimum: active.filter((z) => z.flatRateStatus === 'belowMinimum').length };
 }
 
-export function computeStaffing(p: QuoteParameterValues, sum: Sum) {
-    return { personHours: sum('billableHours'), fte: sum('fte'), peopleToHire: ceilX(sum('fte')), supervisors: divide(sum('fte'), p.operatorsPerSupervisor) };
+export function computeStaffing(p: QuoteParameterValues, sum: Sum, labor: ReturnType<typeof laborBase>, overrides: QuoteOverrides = {}) {
+    return { peopleToHire: ceilX(sum('fte')), laborHourlyRate: laborRate(p, labor), personHours: sum('billableHours'), fte: sum('fte'), supervisors: divide(sum('fte'), p.operatorsPerSupervisor), machines: sum('machines'), isCustomWorkers: overrides.workers !== undefined };
 }
 
 export function chemicalSummary(p: QuoteParameterValues, costs: ReturnType<typeof computeCosts>) {
@@ -198,15 +228,16 @@ export function priceBreakdown(costs: ReturnType<typeof computeCosts>, pricing: 
 }
 
 export function zoneTotals(sum: Sum) {
-    return Object.fromEntries(numericZoneFields.filter((k) => !['serviceHoursPerDay', 'daysPerMonth', 'hoursBetweenCleanings', 'cleaningsPerDay', 'terminalsPerMonth', 'nightFraction', 'holidayFraction', 'm2PerPersonInService', 'cleaningProductId', 'dailyDisinfectantId', 'terminalDisinfectantId', 'costPerM2', 'pricePerM2'].includes(k)).map((key) => [key, sum(key)]));
+    return Object.fromEntries(numericZoneFields.filter((k) => !['serviceHoursPerDay', 'daysPerMonth', 'hoursBetweenCleanings', 'cleaningsPerDay', 'terminalsPerMonth', 'floorRateM2PerHour', 'cleaningDuration', 'nightFraction', 'holidayFraction', 'm2PerPersonInService', 'cleaningProductId', 'dailyDisinfectantId', 'terminalDisinfectantId', 'costPerM2', 'pricePerM2'].includes(k)).map((key) => [key, sum(key)]));
 }
 
 export function purchasePlan(input: EngineInput, active: ZoneResult[]) {
     const p=input.parameters;
+    const factor=input.quote.overrides?.chemicalsFactor ?? 1;
     const rows = Object.values(input.products).sort((a, b) => a.name < b.name ? -1 : a.name > b.name ? 1 : 0).map((product) => {
         const theoretical = active.reduce((n, z) => n + (z.cleaningProductId === product.id ? z.cleaningConcentrate : 0) + (z.dailyDisinfectantId === product.id ? z.dailyDisinfectantConcentrate : 0) + (z.terminalDisinfectantId === product.id ? z.terminalDisinfectantConcentrate : 0), 0);
         const waste = theoretical * p.targetWasteRate, total = theoretical + waste, containers = ceilX(divide(total, product.presentationSize)), stock = product.effectiveStock, toBuy = Math.max(0, containers - stock);
-        const prices = productPrices(product, p);
+        const prices = productPrices(product, p, factor);
         return { productId: product.id, name: product.name, unit: product.unit, presentationSize: product.presentationSize, ...prices, theoretical, waste, total, containers, stock, toBuy, purchaseCost: toBuy * prices.pricePerContainer, wasteCost: waste * prices.pricePerUnit };
     }).filter((r) => r.theoretical > 0);
     return { rows, totalPurchaseCost: rows.reduce((n, r) => n + r.purchaseCost, 0), totalWasteCost: rows.reduce((n, r) => n + r.wasteCost, 0) };
@@ -237,20 +268,29 @@ export function quoteWarnings(input: EngineInput, zones: ZoneResult[], pricing: 
             warn('FIXTURES_DETECTED');
         if (result.active && result.risk === 'critical' && result.m2PerPersonInService > 250)
             warn('CRITICAL_DENSITY_ABOVE_LIMIT');
+        if (result.active && result.cleaningDuration > result.hoursBetweenCleanings)
+            warnings.push({ code: 'CLEANING_LONGER_THAN_INTERVAL', zoneIndex: z.position, params: { zona: z.name, horas: round(result.cleaningDuration, 1), intervalo: result.hoursBetweenCleanings, 'máquinas': result.machines } });
     }
     const general = active.filter((z) => z.risk !== 'critical' && z.serviceHoursPerDay > 8);
-    if (divide(general.reduce((n, z) => n + z.floorArea * z.daysPerMonth * z.serviceHoursPerDay, 0), general.reduce((n, z) => n + z.billableHours, 0)) > 630)
+    if (divide(general.reduce((n, z) => n + z.cleanedArea * z.daysPerMonth * z.serviceHoursPerDay, 0), general.reduce((n, z) => n + z.billableHours, 0)) > 630)
         warnings.push({ code: 'GENERAL_DENSITY_ABOVE_LIMIT' });
-    const byRisk = ['critical', 'semicritical', 'noncritical'].map((risk) => { const zs = active.filter((z) => z.risk === risk); return { area: zs.reduce((n, z) => n + z.floorArea, 0), cost: zs.reduce((n, z) => n + z.totalCost, 0) }; });
+    const byRisk = ['critical', 'semicritical', 'noncritical'].map((risk) => { const zs = active.filter((z) => z.risk === risk); return { area: zs.reduce((n, z) => n + z.cleanedArea, 0), cost: zs.reduce((n, z) => n + z.totalCost, 0) }; });
     if (byRisk.every((r) => r.area > 0) && !(byRisk[0].cost / byRisk[0].area > byRisk[1].cost / byRisk[1].area && byRisk[1].cost / byRisk[1].area > byRisk[2].cost / byRisk[2].area))
         warnings.push({ code: 'RISK_ORDER_INCOHERENT' });
     return warnings;
 }
 
-export function computeQuote(input: EngineInput) {
-    const p=input.parameters;
+export function computeQuote(original: EngineInput) {
+    const overrides=original.quote.overrides ?? {};
+    const p=effectiveParameters(original.parameters,overrides);
+    const input={...original,parameters:p};
     const labor=laborBase(p);
-    const preliminary=input.zones.map((z)=>computeZone(z,input,labor));
+    const adjust: ZoneAdjustments={hourlyRate:laborRate(p,labor),hoursFactor:1,chemicalsFactor:overrides.chemicalsFactor ?? 1,eppFactor:overrides.eppFactor ?? 1};
+    let preliminary=input.zones.map((z)=>computeZone(z,input,labor,adjust));
+    // A set number of workers spreads their hours over the zones in proportion to the work each one needs.
+    const neededHours=sumZones(preliminary.filter((z)=>z.active))('billableHours');
+    if (overrides.workers !== undefined && neededHours>0 && labor.fteHoursPerMonth>0)
+        preliminary=input.zones.map((z)=>computeZone(z,input,labor,{...adjust,hoursFactor:overrides.workers!*labor.fteHoursPerMonth/neededHours}));
     const sum=sumZones(preliminary.filter((z)=>z.active));
     const costs=computeCosts(p,sum);
     const pricing=computePricing(p,input.quote,costs,sum);
@@ -263,9 +303,11 @@ export function computeQuote(input: EngineInput) {
         engineVersion:1 as const,status:causes.length ? 'needsReview' as const : 'simulation' as const,
         causes,warnings:quoteWarnings(input,zones,pricing,flatRate),labor,zones,
         totals:zoneTotals(totalsSum),costs,pricing,
-        staffing:computeStaffing(p,totalsSum),chemicals:chemicalSummary(p,costs),flatRate,
+        staffing:computeStaffing(p,totalsSum,labor,overrides),chemicals:chemicalSummary(p,costs),flatRate,
         reference:referenceComparison(input.quote,pricing.offeredPrice),breakdown:priceBreakdown(costs,pricing),
         purchasePlan:purchasePlan(input,active),technicalOffer:technicalOffer(input,active),
+        /** The parameters this quote was calculated with: the general ones with its own values in their place. */
+        parameters:p,overrides,
     };
 }
 export type EngineResult = ReturnType<typeof computeQuote>;

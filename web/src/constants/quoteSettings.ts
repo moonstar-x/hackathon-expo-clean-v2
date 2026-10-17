@@ -146,6 +146,8 @@ export const PARAMETER_TABS: ParameterTab[] = [
         ),
       },
       { id: 'surcharges', fields: byName('nightSurchargeRate', 'holidaySurchargeRate', 'nationalHolidaysPerYear') },
+      { id: 'rates', fields: byName('laborHourlyRate') },
+      { id: 'productivity', fields: byName('manualRateM2PerHour', 'machineRateM2PerHour') },
     ],
   },
   {
@@ -209,6 +211,9 @@ export const PARAMETER_UNITS: Record<string, ParameterUnit> = {
   otherAbsenceDaysPerYear: 'days',
   hoursPerWorkday: 'hours',
   nationalHolidaysPerYear: 'days',
+  laborHourlyRate: 'moneyPerHour',
+  manualRateM2PerHour: 'squareMetersPerHour',
+  machineRateM2PerHour: 'squareMetersPerHour',
   supervisorMonthlyCost: 'money',
   baseEppPerFte: 'money',
   criticalEppPerFte: 'money',
