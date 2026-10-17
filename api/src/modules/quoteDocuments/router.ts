@@ -2,16 +2,17 @@ import express, { Router } from 'express';
 import { z } from 'zod';
 import type { AppDeps } from '../../app.ts';
 import { HttpError, notFound } from '../../lib/errors.ts';
+import { fileStore } from '../../lib/fileStore.ts';
 import { parseId, requireObjectBody } from '../../lib/validation.ts';
 import { quotesRepository } from '../quotes/repository.ts';
 import { buildQuoteDocument, dateInZone, documentHash, readiness } from './builder.ts';
-import { LOGO_MAX_BYTES, LOGO_TYPES, readLogo, type LogoInfo } from './logo.ts';
+import { LOGO_MAX_BYTES, LOGO_TYPES, companyLogo, type LogoInfo } from './logo.ts';
 import { documentRepository } from './repository.ts';
 
 export function quoteDocumentsRouter({ db, config }: AppDeps) {
-  const router = Router(), repo = documentRepository(db);
-  // The logo's metadata only: its bytes are read where a file is rendered.
-  function state(id: number, logo: LogoInfo | null = repo.logo()) {
+  const router = Router(), repo = documentRepository(db), logos = companyLogo(repo, fileStore(config.filesPath));
+  // The logo's details only: its bytes are read where a file is rendered.
+  function state(id: number, logo: LogoInfo | null = logos.info()) {
     const quote = quotesRepository(db).get(id), data = repo.data(id), settings = repo.settings();
     const { blockers, warnings } = readiness(quote, data, settings);
     const number = data.number ?? `${settings.numberPrefix}-${String(id).padStart(5, '0')}`;
@@ -29,17 +30,16 @@ export function quoteDocumentsRouter({ db, config }: AppDeps) {
   router.put('/quote-document-settings/:id', (req, res) => { if (parseId(req.params.id) !== 1) throw notFound(); repo.saveSettings(repo.settings(), requireObjectBody(req.body), req.user!.email); res.json(repo.settings()); });
   const logoPath = '/quote-document-settings/:id/logo', singleton = (id: string) => { if (parseId(id) !== 1) throw notFound(); };
   router.get(logoPath, (req, res) => {
-    singleton(req.params.id); const logo = repo.logo(); if (!logo) throw notFound('Logo not found');
-    const etag = `"${logo.sha256}"`; res.set({ 'Content-Type': logo.contentType, ETag: etag, 'Cache-Control': 'private, no-cache' });
+    singleton(req.params.id); const logo = logos.file(); if (!logo) throw notFound('Logo not found');
+    const etag = `"${logo.info.sha256}"`; res.set({ 'Content-Type': logo.info.contentType, ETag: etag, 'Cache-Control': 'private, no-cache' });
     if (req.get('If-None-Match')?.split(/,\s*/).includes(etag)) return res.status(304).end();
-    res.send(repo.logoFile()!.data);
+    res.send(logo.data);
   });
   // Check the type before reading the body, so another kind of file is refused without being buffered.
   router.put(logoPath, (req, _res, next) => { singleton(req.params.id); if (req.is([...LOGO_TYPES]) === false) throw new HttpError(415, 'UNSUPPORTED_MEDIA_TYPE', 'Logo must be a PNG or JPEG image'); next(); }, express.raw({ type: [...LOGO_TYPES], limit: LOGO_MAX_BYTES }), (req, res) => {
-    const data: Buffer = Buffer.isBuffer(req.body) ? req.body : Buffer.alloc(0);
-    repo.saveLogo(readLogo(data), data, req.user!.email); res.json(repo.logo());
+    res.json(logos.save(Buffer.isBuffer(req.body) ? req.body : Buffer.alloc(0), req.user!.email));
   });
-  router.delete(logoPath, (req, res) => { singleton(req.params.id); repo.deleteLogo(); res.status(204).end(); });
+  router.delete(logoPath, (req, res) => { singleton(req.params.id); logos.remove(); res.status(204).end(); });
   router.get('/quotes/:id/document', (req, res) => res.json(state(parseId(req.params.id))));
   router.put('/quotes/:id/document', (req, res) => { const id = parseId(req.params.id); quotesRepository(db).get(id); repo.saveData(id, repo.data(id), requireObjectBody(req.body), req.user!.email); res.json(state(id)); });
   router.get('/quotes/:id/document/exports', (req, res) => { const id = parseId(req.params.id); quotesRepository(db).get(id); res.json(repo.exports(id)); });
@@ -59,7 +59,7 @@ export function quoteDocumentsRouter({ db, config }: AppDeps) {
   });
   for (const format of ['pdf', 'xlsx'] as const) router.get(`/quotes/:id/document/${format}`, async (req, res) => {
     // One read of the logo, before any await, gives the document and the renderer the same file.
-    const id = parseId(req.params.id), logo = repo.logoFile(), s = readyState(id, logo?.info ?? null), start = performance.now();
+    const id = parseId(req.params.id), logo = logos.file(), s = readyState(id, logo?.info ?? null), start = performance.now();
     const bytes = format === 'pdf' ? await (await import('./pdf.ts')).renderPdf(s.document, logo?.data ?? null) : await (await import('./xlsx.ts')).renderXlsx(s.document, logo?.data ?? null);
     req.log.info({ quoteId: id, format, revision: s.revision, bytes: bytes.length, durationMs: Math.round(performance.now() - start) }, 'quote document rendered');
     const name = s.fileNames[format], ascii = name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\x20-\x7E]/g, '').replace(/["\\]/g, '');

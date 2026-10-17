@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import path from 'node:path';
 import zlib from 'node:zlib';
 import ExcelJS from 'exceljs';
 import request from 'supertest';
@@ -12,7 +13,8 @@ import { documentFixture } from './documentFixture.ts';
 import { makeClient, type TestClient } from './helpers.ts';
 
 let ctx: TestClient | undefined;
-afterEach(() => { ctx?.db.close(); ctx = undefined; });
+afterEach(() => { if (ctx) { ctx.db.close(); fs.rmSync(ctx.config.filesPath, { recursive: true, force: true }); } ctx = undefined; });
+const logoFiles = () => { const dir = path.join(ctx!.config.filesPath, 'logos'); return fs.existsSync(dir) ? fs.readdirSync(dir) : []; };
 const LOGO = fs.readFileSync(new URL('./fixtures/quote-document/logo.png', import.meta.url));
 const u16 = (n: number) => Buffer.from([n >> 8, n & 255]);
 // A PNG with the given header and zeroed pixels, unless `idat` replaces the compressed data.
@@ -38,11 +40,15 @@ describe('company logo', () => {
     let r = await upload(LOGO); expect(r.status).toBe(200);
     expect(r.body).toEqual({ contentType: 'image/png', width: 800, height: 151, size: LOGO.length, sha256: expect.stringMatching(/^[a-f0-9]{64}$/), updatedBy: 'admin@example.com', updatedAt: expect.any(String) });
     const etag = `"${r.body.sha256}"`;
+    // The bytes are a file named after them; the database keeps only the logo's details.
+    expect(logoFiles()).toEqual([`${r.body.sha256}.png`]); expect(Buffer.compare(fs.readFileSync(path.join(ctx.config.filesPath, 'logos', `${r.body.sha256}.png`)), LOGO)).toBe(0);
+    expect((ctx.db.prepare('PRAGMA table_info(quote_document_logo)').all() as { name: string }[]).map(c => c.name)).not.toContain('data');
     r = await binary(api.get('/api/quote-document-settings/1/logo')); expect(r.status).toBe(200); expect(r.headers['content-type']).toBe('image/png'); expect(r.headers.etag).toBe(etag); expect(r.headers['cache-control']).toBe('private, no-cache'); expect(Buffer.compare(r.body, LOGO)).toBe(0);
     expect((await api.get('/api/quote-document-settings/1/logo').set('If-None-Match', etag)).status).toBe(304);
     const photo = jpeg(640, 480); r = await upload(photo, 'image/jpeg'); expect(r.body).toMatchObject({ contentType: 'image/jpeg', width: 640, height: 480, size: photo.length });
+    expect(logoFiles()).toEqual([`${r.body.sha256}.jpg`]);
     r = await binary(api.get('/api/quote-document-settings/1/logo')); expect(r.headers['content-type']).toBe('image/jpeg'); expect(Buffer.compare(r.body, photo)).toBe(0);
-    expect((await api.delete('/api/quote-document-settings/1/logo')).status).toBe(204);
+    expect((await api.delete('/api/quote-document-settings/1/logo')).status).toBe(204); expect(logoFiles()).toEqual([]);
     r = await api.get('/api/quote-document-settings/1/logo'); expect(r.status).toBe(404); expect(r.body.message).toBe('Logo not found');
     expect((await api.delete('/api/quote-document-settings/1/logo')).status).toBe(204);
   });
@@ -57,6 +63,12 @@ describe('company logo', () => {
     await refused(jpeg(64, 64).subarray(0, 12), 'Must be a PNG or JPEG image', 'image/jpeg');
     const large = await upload(Buffer.concat([LOGO, Buffer.alloc(LOGO_MAX_BYTES)])); expect(large.status).toBe(413); expect(large.body.code).toBe('PAYLOAD_TOO_LARGE');
     expect((await ctx.api.get('/api/quote-document-settings/1/logo')).status).toBe(404); expect((await ctx.api.get('/api/quote-document-settings/1')).status).toBe(200);
+  });
+  it('treats a logo whose file has gone missing as no logo, and takes a new one', async () => {
+    ctx = await makeClient(); const { api } = ctx;
+    const { sha256 } = (await upload(LOGO)).body; fs.rmSync(path.join(ctx.config.filesPath, 'logos', `${sha256}.png`));
+    expect((await api.get('/api/quote-document-settings/1/logo')).status).toBe(404);
+    expect((await upload(LOGO)).status).toBe(200); expect((await api.get('/api/quote-document-settings/1/logo')).status).toBe(200);
   });
   it('only knows logo 1', async () => {
     ctx = await makeClient(); const { api } = ctx;

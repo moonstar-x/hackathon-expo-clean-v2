@@ -5,7 +5,6 @@ CREATE TABLE quote_document_logo (
   height       INTEGER NOT NULL CHECK (height BETWEEN 1 AND 2000),
   size         INTEGER NOT NULL CHECK (size > 0),
   sha256       TEXT    NOT NULL,
-  data         BLOB    NOT NULL,
   updated_by   TEXT    NOT NULL,
   updated_at   TEXT    NOT NULL
 );

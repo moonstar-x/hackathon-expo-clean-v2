@@ -10,8 +10,9 @@ node_modules/
 dist/
 coverage/
 
-# API SQLite database files
+# API SQLite database files, and uploaded files kept beside them (FILES_PATH)
 api/data/*.db*
+api/data/files/
 
 # OS / editor
 .DS_Store

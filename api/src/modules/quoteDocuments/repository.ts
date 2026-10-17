@@ -24,13 +24,10 @@ export function documentRepository(db: Database.Database) {
       const keys = Object.keys(value) as (keyof typeof value)[];
       db.prepare(`INSERT INTO quote_documents (quote_id, ${keys.map(snake).join(', ')}, updated_by, updated_at) VALUES (?, ${keys.map(() => '?').join(', ')}, ?, ?) ON CONFLICT(quote_id) DO UPDATE SET ${keys.map(k => `${snake(k)} = excluded.${snake(k)}`).join(', ')}, updated_by = excluded.updated_by, updated_at = excluded.updated_at`).run(id, ...keys.map(k => value[k]), user, new Date().toISOString());
     },
+    // The logo's details only: its bytes are a file on disk (companyLogo in logo.ts).
     logo: () => row('SELECT content_type, width, height, size, sha256, updated_by, updated_at FROM quote_document_logo WHERE id = 1') as unknown as LogoRecord | null,
-    logoFile() {
-      const r = db.prepare('SELECT content_type, width, height, sha256, data FROM quote_document_logo WHERE id = 1').get() as { content_type: LogoInfo['contentType']; width: number; height: number; sha256: string; data: Buffer } | undefined;
-      return r ? { info: { sha256: r.sha256, contentType: r.content_type, width: r.width, height: r.height } as LogoInfo, data: r.data } : null;
-    },
-    saveLogo(info: LogoInfo, data: Buffer, user: string) {
-      db.prepare('INSERT INTO quote_document_logo (id, content_type, width, height, size, sha256, data, updated_by, updated_at) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET content_type = excluded.content_type, width = excluded.width, height = excluded.height, size = excluded.size, sha256 = excluded.sha256, data = excluded.data, updated_by = excluded.updated_by, updated_at = excluded.updated_at').run(info.contentType, info.width, info.height, data.length, info.sha256, data, user, new Date().toISOString());
+    saveLogo(info: LogoInfo, size: number, user: string) {
+      db.prepare('INSERT INTO quote_document_logo (id, content_type, width, height, size, sha256, updated_by, updated_at) VALUES (1, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET content_type = excluded.content_type, width = excluded.width, height = excluded.height, size = excluded.size, sha256 = excluded.sha256, updated_by = excluded.updated_by, updated_at = excluded.updated_at').run(info.contentType, info.width, info.height, size, info.sha256, user, new Date().toISOString());
     },
     deleteLogo: () => { db.prepare('DELETE FROM quote_document_logo WHERE id = 1').run(); },
     exports: (id: number) => (db.prepare('SELECT id, format, number, revision, content_hash, exported_by, exported_at FROM quote_document_exports WHERE quote_id = ? ORDER BY id DESC LIMIT 100').all(id) as Record<string, string | number | null>[]).map(mapRow) as unknown as DocumentExport[],

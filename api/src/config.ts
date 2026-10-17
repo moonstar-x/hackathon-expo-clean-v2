@@ -65,6 +65,7 @@ const schema = z
     TRUST_PROXY: env(z.string().trim().default('false').refine((v) => proxyValue(v) !== undefined, 'must be a boolean, hop count, or trusted address/subnet list').transform(proxyValue)),
     UPLOAD_MAX_FILE_MB: env(z.coerce.number().int().min(1).max(500).default(50)),
     DATABASE_PATH: env(z.string().trim().default('./data/inventory.db')),
+    FILES_PATH: env(z.string().trim().default('./data/files')),
     CORS_ORIGIN: env(
       z
         .string({ error: required })
@@ -140,6 +141,8 @@ export function loadConfig(source: Record<string, string | undefined> = process.
     trustProxy: e.TRUST_PROXY,
     uploadMaxFileBytes: e.UPLOAD_MAX_FILE_MB * 1024 * 1024,
     databasePath,
+    /** Folder for uploaded files kept outside the database (the company logo). */
+    filesPath: path.resolve(API_ROOT, e.FILES_PATH),
     corsOrigins: Object.freeze(e.CORS_ORIGIN),
     jwtSecret: e.JWT_SECRET,
     jwtExpiresIn: e.JWT_EXPIRES_IN,

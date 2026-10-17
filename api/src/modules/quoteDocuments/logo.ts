@@ -1,6 +1,8 @@
 import { createHash } from 'node:crypto';
 import zlib from 'node:zlib';
 import { HttpError } from '../../lib/errors.ts';
+import type { FileStore } from '../../lib/fileStore.ts';
+import type { documentRepository, LogoRecord } from './repository.ts';
 import type { QuoteDocument } from './types.ts';
 
 export const LOGO_MAX_BYTES = 1024 * 1024, LOGO_MAX_SIDE = 2000, LOGO_TYPES = ['image/png', 'image/jpeg'] as const;
@@ -61,6 +63,33 @@ export function readLogo(data: Buffer): LogoInfo {
   if (data.length > 8 && data.readUInt32BE(0) === 0x89504e47 && data.readUInt32BE(4) === 0x0d0a1a0a) return { sha256: sha256(data), contentType: 'image/png', ...pngSize(data) };
   if (data.length > 3 && data[0] === 0xff && data[1] === 0xd8 && data[2] === 0xff) return { sha256: sha256(data), contentType: 'image/jpeg', ...jpegSize(data) };
   throw invalid(NOT_IMAGE);
+}
+/** The logo's folder under FILES_PATH. */
+export const LOGO_FOLDER = 'logos';
+// Named after its content, so a new logo never overwrites the file a request is still reading.
+const fileName = (logo: LogoInfo) => `${LOGO_FOLDER}/${logo.sha256}.${logo.contentType === 'image/png' ? 'png' : 'jpg'}`;
+/**
+ * The company logo: its details in the database (the document model and its hash use them) and its
+ * bytes as a file under FILES_PATH. The file is written before the row points to it and the old one
+ * deleted after, so a crash leaves at most an unused file; a row whose file is missing counts as no logo.
+ */
+export function companyLogo(repo: ReturnType<typeof documentRepository>, files: FileStore) {
+  const info = (): LogoRecord | null => { const logo = repo.logo(); return logo && files.exists(fileName(logo)) ? logo : null; };
+  return {
+    info,
+    /** The logo's details and bytes, read together: a rendered file and its document must share them. */
+    file() {
+      const logo = repo.logo(), data = logo && files.read(fileName(logo));
+      return logo && data ? { info: { sha256: logo.sha256, contentType: logo.contentType, width: logo.width, height: logo.height } as LogoInfo, data } : null;
+    },
+    save(data: Buffer, user: string) {
+      const logo = readLogo(data), previous = repo.logo();
+      files.write(fileName(logo), data); repo.saveLogo(logo, data.length, user);
+      if (previous && fileName(previous) !== fileName(logo)) files.remove(fileName(previous));
+      return info();
+    },
+    remove() { const previous = repo.logo(); repo.deleteLogo(); if (previous) files.remove(fileName(previous)); },
+  };
 }
 /** The logo bytes for a document's renderers: they must be the logo the document was built with. */
 export function documentLogo(d: QuoteDocument, data: Buffer | null): Buffer | null {

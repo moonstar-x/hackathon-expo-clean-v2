@@ -70,7 +70,7 @@ The admin never hits these rules in practice: it re-encodes every upload through
 
 ### 4.3 Storage
 
-A single-row table, apart from the settings row (whose `SELECT *` becomes JSON):
+The image is a file on disk, not data in the database: `{FILES_PATH}/logos/{sha256}.png` (or `.jpg`), where `FILES_PATH` defaults to `./data/files`, beside the database. The database keeps only the logo's details, in a single-row table:
 
 ```sql
 CREATE TABLE quote_document_logo (
@@ -80,13 +80,17 @@ CREATE TABLE quote_document_logo (
   height       INTEGER NOT NULL CHECK (height BETWEEN 1 AND 2000),
   size         INTEGER NOT NULL,
   sha256       TEXT    NOT NULL,
-  data         BLOB    NOT NULL,
   updated_by   TEXT    NOT NULL,
   updated_at   TEXT    NOT NULL
 );
 ```
 
-Migration `007_company_branding.sql` creates it and adds `brand_color` to `quote_document_settings`.
+- **Naming.** The file is named after its content, so a new logo never overwrites a file a request is still reading.
+- **Saving.** A file is written whole (to a temporary name, then renamed) before the row points to it, and a replaced or removed logo's file is deleted after the row changes. A crash can leave at most an unused file.
+- **A missing file.** A row whose file is missing counts as no logo.
+- **Resetting.** `db:reset` deletes the `logos` folder with the database.
+
+Migration `007_company_branding.sql` creates the table and adds `brand_color` to `quote_document_settings`. Back up `FILES_PATH` together with the database.
 
 ## 5. The document
 
