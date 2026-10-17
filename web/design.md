@@ -113,7 +113,8 @@ MUI's defaults: `sm` 600, `md` 900, `lg` 1200.
 ```
 AppBar  logo · page title (marquee on phones) · clock, theme, refresh · user menu
 Menu    Inicio, Mediciones, Cotizaciones | INVENTARIO Productos, Movimientos | CATÁLOGO Categorías, Proveedores
-        | CONFIGURACIÓN DE COTIZACIÓN Parámetros, Tipos de zona, Horarios, Productos de cotización, Equivalencias
+        | CONFIGURACIÓN DE COTIZACIÓN Parámetros, Empresa y plantilla, Tipos de zona, Horarios, Productos de cotización,
+        Equivalencias
         | ADMINISTRACIÓN Usuarios
 Page    PageHeader: eyebrow over an h1, optional badge, actions row
         content: a list, a grid of section cards, or a form card, always the page's full width
@@ -139,6 +140,7 @@ Page    PageHeader: eyebrow over an h1, optional badge, actions row
   - The list's Cotización column is the quote's state as a badge linking to it (`QuoteStatusCell`), or "Crear cotización"; neither opens the row. The page header has "Ver cotización" or "Crear cotización".
   - The plan and the model each get a framed stage with their actions above it. The plan sits on white paper in both themes, because the phone draws it for white; the thumbnails are the same paper, small.
   - `<TabbedShowLayout.Tab>` labels each child through `<Labeled>`, so each tab's content goes in `TabContent label={false}`, and `measurementTabsSx` lets it fill the tab.
+- **A quote's Documento** (SPEC-006, `/quotes/:id/document`, a custom route) follows the detail-page anatomy without `<Show>`: the header's eyebrow links back to the quote, its title is the document number and revision ("Nueva revisión" as a blue badge once it changed since the last download), and its actions are the two downloads. Below, "Datos del documento" (the client and the document, in `Section`s, Save at its foot) sits beside the preview (`lg` 4 + 8), whose card holds the warnings, or what is missing with a link to fix each, before the PDF and Excel tabs; the download history closes the page. The list's Documento column and the quote header open it (`DocumentButton`).
 - **Forms**: `<Create>` / `<Edit>` with `actions={<CreateHeader />}` / `actions={<EditHeader />}` and `sx={formPageSx}`: the card spans the page, and on desktop the toolbar stays at the bottom of the screen while a long form scrolls.
   - Inside is a `SimpleForm` with `toolbar={<FormToolbar withDelete />}`: Save on the left, a pessimistic Delete that asks first on the right. When saving needs a word, it goes beside Save as the toolbar's `note`, once (the quoting parameters and catalogs: existing quotes don't change until recalculated).
   - Fields go in titled `Section`s (with a one-line `hint`) and a `SectionDivider` between them, each field a `<Grid size={{ xs: 12, md: … }}>` cell sized by what it holds (codes and numbers 4, names 6 to 8, long text 12) with its input `fullWidth`. The section's grid drops the inputs' own margins so a row lines up.
