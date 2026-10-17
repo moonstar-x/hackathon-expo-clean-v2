@@ -4,13 +4,24 @@ import { CATALOG_SORT } from '../../../constants/catalog';
 import { NONE } from '../../../constants/components';
 import type { Supplier } from '../../../types/api';
 import AppPagination from '../../AppPagination';
+import EmptyState from '../../list/EmptyState';
 import DesktopActions from './DesktopActions';
 import { supplierFilters } from './supplierFilters';
 
 /** The suppliers as a table; a row opens its edit form. Deleting asks first and waits for the API. */
 const DesktopList = (): ReactElement => (
-  <List filters={supplierFilters} sort={CATALOG_SORT} actions={<DesktopActions />} pagination={<AppPagination />}>
-    <DataTable<Supplier> rowClick="edit" bulkActionButtons={<BulkDeleteButton mutationMode="pessimistic" />}>
+  <List
+    filters={supplierFilters}
+    sort={CATALOG_SORT}
+    actions={<DesktopActions />}
+    pagination={<AppPagination />}
+    empty={<EmptyState variant="page" />}
+  >
+    <DataTable<Supplier>
+      rowClick="edit"
+      bulkActionButtons={<BulkDeleteButton mutationMode="pessimistic" />}
+      empty={<EmptyState />}
+    >
       <DataTable.Col source="name" />
       <DataTable.Col source="contactName" label="app.suppliers.contact">
         <TextField source="contactName" emptyText={NONE} />

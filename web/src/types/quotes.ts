@@ -307,3 +307,13 @@ export interface WasteControl {
     rows: WasteRow[];
     totalExcessCost: number;
 }
+export interface StateChipProps {
+    /** A quote status, calculation state or margin/waste status; labelled by quoteEnums. */
+    value: string | null;
+    /** Smaller badge for table rows. */
+    dense?: boolean;
+}
+export interface QuoteStatusProps {
+    quote: Pick<Quote, 'status' | 'calculation'>;
+    dense?: boolean;
+}

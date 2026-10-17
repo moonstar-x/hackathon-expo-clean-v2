@@ -2,9 +2,11 @@ import type { ReactElement } from 'react';
 import { useTheme, type SxProps, type Theme } from '@mui/material/styles';
 import { BooleanField, DataTable, List, ReferenceField } from 'react-admin';
 import { PRODUCT_DEFAULT_FILTER, PRODUCT_PER_PAGE, PRODUCT_SORT } from '../../../constants/products';
+import { noWrapCellSx } from '../../../styles/list';
 import { lowStockRowSx } from '../../../styles/products';
 import type { Product } from '../../../types/api';
 import AppPagination from '../../AppPagination';
+import EmptyState from '../../list/EmptyState';
 import MoneyField from '../../fields/MoneyField';
 import QuantityField from '../../fields/QuantityField';
 import StockStatusBadge from '../../fields/StockStatusBadge';
@@ -23,9 +25,15 @@ const DesktopList = (): ReactElement => {
       perPage={PRODUCT_PER_PAGE}
       actions={<DesktopActions />}
       pagination={<AppPagination />}
+      empty={<EmptyState variant="page" />}
     >
-      <DataTable<Product> rowClick="show" rowSx={rowSx} bulkActionButtons={false}>
-        <DataTable.Col source="sku" />
+      <DataTable<Product>
+        rowClick="show"
+        rowSx={rowSx}
+        bulkActionButtons={false}
+        empty={<EmptyState defaultFilters={PRODUCT_DEFAULT_FILTER} />}
+      >
+        <DataTable.Col source="sku" cellSx={noWrapCellSx} />
         <DataTable.Col source="name" />
         <DataTable.Col source="categoryId">
           <ReferenceField source="categoryId" reference="categories" link={false} />

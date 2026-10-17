@@ -32,6 +32,7 @@ const appSpanish: StringMap = {
         createdAt: 'Fecha de subida',
         deviceModel: 'Dispositivo',
         appVersion: 'Versión de RoomScanner',
+        quote: 'Cotización',
         // Filters only. Subido por picks an account, so uploads keep matching after an email change.
         userId: 'Subido por',
         scannedAt_gte: 'Escaneada desde',
@@ -180,9 +181,14 @@ const appSpanish: StringMap = {
       areaAndRooms: '%{area}, %{rooms}',
       details: 'Detalles',
       roomsUnjoined: 'Las habitaciones no se pudieron unir, así que se muestran tal como se escanearon.',
-      empty: {
-        title: 'Todavía no hay mediciones',
-        body: 'Escanea un espacio con RoomScanner en el iPhone. La medición aparece aquí en cuanto se sube.',
+      deleteKeepsQuote: 'La medición se elimina; su cotización se conserva.',
+      quote: {
+        open: 'Abrir cotización',
+        openState: 'Abrir cotización: %{state}',
+        view: 'Ver cotización',
+        create: 'Crear cotización',
+        createError: 'No se pudo crear la cotización.',
+        none: 'Sin cotización',
       },
       tabs: { plan: 'Plano', model: '3D', rooms: 'Medidas', files: 'Archivos' },
       thumbnail: { missing: 'Sin miniatura', failed: 'No se pudo cargar la miniatura' },

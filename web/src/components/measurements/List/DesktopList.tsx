@@ -1,13 +1,13 @@
-import { MeasurementQuoteLink } from '../../../quotes/MeasurementQuoteLink';
 import type { ReactElement } from 'react';
 import { BulkDeleteButton, DataTable, DateField, List } from 'react-admin';
-import { MEASUREMENT_PER_PAGE, MEASUREMENT_SORT } from '../../../constants/measurements';
+import { MEASUREMENT_EMPTY_STEPS, MEASUREMENT_PER_PAGE, MEASUREMENT_SORT } from '../../../constants/measurements';
 import type { Measurement } from '../../../types/api';
 import AppPagination from '../../AppPagination';
 import FloorAreaField from '../../fields/FloorAreaField';
+import EmptyState from '../../list/EmptyState';
 import MeasurementThumbnail from '../MeasurementThumbnail';
+import QuoteStatusCell from '../QuoteStatusCell';
 import DesktopActions from './DesktopActions';
-import EmptyMeasurements from './EmptyMeasurements';
 import { measurementFilters } from './measurementFilters';
 
 /**
@@ -21,9 +21,13 @@ const DesktopList = (): ReactElement => (
     perPage={MEASUREMENT_PER_PAGE}
     actions={<DesktopActions />}
     pagination={<AppPagination />}
-    empty={<EmptyMeasurements />}
+    empty={<EmptyState variant="page" steps={MEASUREMENT_EMPTY_STEPS} />}
   >
-    <DataTable<Measurement> rowClick="show" bulkActionButtons={<BulkDeleteButton mutationMode="pessimistic" />}>
+    <DataTable<Measurement>
+      rowClick="show"
+      bulkActionButtons={<BulkDeleteButton mutationMode="pessimistic" />}
+      empty={<EmptyState />}
+    >
       <DataTable.Col label="resources.measurements.fields.thumbnail" disableSort>
         <MeasurementThumbnail />
       </DataTable.Col>
@@ -35,7 +39,9 @@ const DesktopList = (): ReactElement => (
       <DataTable.Col source="scannedAt">
         <DateField source="scannedAt" showTime />
       </DataTable.Col>
-      <DataTable.Col label="Cotización" disableSort><MeasurementQuoteLink /></DataTable.Col>
+      <DataTable.Col label="resources.measurements.fields.quote" disableSort>
+        <QuoteStatusCell />
+      </DataTable.Col>
       <DataTable.Col source="createdBy" />
       <DataTable.Col source="createdAt">
         <DateField source="createdAt" showTime />

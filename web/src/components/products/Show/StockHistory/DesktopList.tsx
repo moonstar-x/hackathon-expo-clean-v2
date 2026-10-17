@@ -5,11 +5,15 @@ import type { StockMovement } from '../../../../types/api';
 import MovementQuantityField from '../../../fields/MovementQuantityField';
 import MovementReasonField from '../../../fields/MovementReasonField';
 import MovementTypeBadge from '../../../fields/MovementTypeBadge';
-import EmptyHistory from './EmptyHistory';
+import EmptyState from '../../../list/EmptyState';
 
 /** The history as a table; only the columns the API can sort by sort. Labels from resources.stock-movements. */
 const DesktopList = (): ReactElement => (
-  <DataTable<StockMovement> bulkActionButtons={false} rowClick="show" empty={<EmptyHistory />}>
+  <DataTable<StockMovement>
+    bulkActionButtons={false}
+    rowClick="show"
+    empty={<EmptyState variant="compact" messages="app.empty.history" action={false} />}
+  >
     <DataTable.Col source="createdAt">
       <DateField source="createdAt" showTime />
     </DataTable.Col>

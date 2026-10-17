@@ -136,6 +136,9 @@ export const statBarValueSx: SxProps<Theme> = {
   whiteSpace: 'nowrap',
 };
 
+/** A table cell kept on one line, for short codes (a SKU) that read wrong when broken at a hyphen. */
+export const noWrapCellSx = (): SxProps => ({ whiteSpace: 'nowrap' });
+
 /**
  * A list's search box: as tall as the labeled filters beside it, and wide enough for a placeholder
  * that says what it searches ("Buscar por SKU, nombre o descripción"); the whole row on phones.

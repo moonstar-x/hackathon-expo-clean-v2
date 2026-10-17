@@ -11,6 +11,7 @@ import {
 import { USER_SORT } from '../../../constants/users';
 import type { User } from '../../../types/api';
 import AppPagination from '../../AppPagination';
+import EmptyState from '../../list/EmptyState';
 import DesktopActions from './DesktopActions';
 import UserNameField from './UserNameField';
 import { userFilters } from './userFilters';
@@ -19,12 +20,19 @@ import { userFilters } from './userFilters';
 const DesktopList = (): ReactElement => {
   const { identity }: UseGetIdentityResult = useGetIdentity();
   return (
-    <List filters={userFilters} sort={USER_SORT} actions={<DesktopActions />} pagination={<AppPagination />}>
+    <List
+      filters={userFilters}
+      sort={USER_SORT}
+      actions={<DesktopActions />}
+      pagination={<AppPagination />}
+      empty={<EmptyState variant="page" />}
+    >
       <DataTable<User>
         rowClick="edit"
         // The API refuses to delete your own account, so it cannot be selected for bulk delete.
         isRowSelectable={(record: User): boolean => record.id !== identity?.id}
         bulkActionButtons={<BulkDeleteButton mutationMode="pessimistic" />}
+        empty={<EmptyState />}
       >
         <DataTable.Col source="name">
           <UserNameField />
