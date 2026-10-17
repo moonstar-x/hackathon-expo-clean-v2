@@ -1,18 +1,24 @@
 // Shared styles of the list kit: the visual language every mobile and
 // desktop list composes, so rows, badges and meta lines look the same everywhere.
 import { blue, green, orange } from '@mui/material/colors';
-import type { SxProps, Theme } from '@mui/material/styles';
+import { darken, type SxProps, type Theme } from '@mui/material/styles';
 import { createBreakpoints } from '@mui/system';
 import type { ListRowOptions, Tone } from '../types/list';
 
-/** Mode-aware accent: a darker shade on light paper, a brighter one on dark, so outlines stay legible. */
+/** orange[800] reads 3.1:1 on white, too faint for a badge's small label; this step reads 5.1:1. */
+const LIGHT_ORANGE: string = darken(orange[800], 0.25);
+
+/**
+ * Mode-aware accent: a darker shade on light paper, a brighter one on dark, so outlines and the
+ * small labels they carry stay at least 4.5:1 on the paper (tests/lib/tones.test.ts).
+ */
 export const toneAccent = (theme: Theme, tone: Tone = 'neutral'): string => {
   const light: boolean = theme.palette.mode === 'light';
   switch (tone) {
     case 'brand':
       return light ? theme.palette.primary.dark : theme.palette.primary.main;
     case 'orange':
-      return light ? orange[800] : orange[300];
+      return light ? LIGHT_ORANGE : orange[300];
     case 'blue':
       return light ? blue[800] : blue[300];
     case 'green':
