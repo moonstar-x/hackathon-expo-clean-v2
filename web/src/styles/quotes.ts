@@ -199,3 +199,43 @@ export const emptyFiguresSx: SxProps<Theme> = { m: 0, mb: 1.5, maxWidth: '70ch',
 
 /** The waste control's month picker. */
 export const wastePeriodSx: SxProps<Theme> = { mb: 2, minWidth: 240 };
+
+/** The Resumen tab: the plan on the left, the parameters on the right; one under the other on phones. */
+export const simpleSummarySx: SxProps<Theme> = {
+  display: 'grid',
+  gridTemplateColumns: { xs: '1fr', md: 'minmax(0, 5fr) minmax(0, 7fr)' },
+  gap: { xs: 3, md: 4 },
+  alignItems: 'start',
+};
+
+/** The zone buttons: each wears its zone's colour, filled faintly when chosen. */
+export const zoneToggleSx = (color: string): SxProps<Theme> => (theme: Theme) => ({
+  gap: 1,
+  px: 1.5,
+  borderRadius: '999px !important',
+  border: `1px solid ${alpha(color, 0.6)} !important`,
+  color: 'text.primary',
+  textTransform: 'none',
+  '&.Mui-selected, &.Mui-selected:hover': { bgcolor: alpha(color, theme.palette.mode === 'dark' ? 0.3 : 0.16), borderColor: `${color} !important` },
+});
+
+/** The colour swatch inside a zone button and beside a zone's frequency. */
+export const zoneSwatchSx = (color: string): SxProps<Theme> => ({ width: 10, height: 10, borderRadius: '50%', bgcolor: color, flexShrink: 0 });
+
+/** One parameter of the Resumen tab: its label and value above its control. */
+export const simpleParameterSx: SxProps<Theme> = { display: 'flex', flexDirection: 'column', gap: 0.5 };
+
+/** A parameter's value beside its label: a figure, or a count with its buttons. */
+export const simpleValueSx: SxProps<Theme> = { typography: 'body2', fontVariantNumeric: 'tabular-nums', fontWeight: 600 };
+
+/** A parameter's label and its value on one line. */
+export const simpleParameterHeadSx: SxProps<Theme> = { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 2 };
+
+/** The figure of a parameter: tabular digits, so it doesn't jitter while a slider moves. */
+export const simpleFigureSx: SxProps<Theme> = { fontVariantNumeric: 'tabular-nums', fontWeight: 600 };
+
+/** A count with − and + beside it. */
+export const stepperSx: SxProps<Theme> = { display: 'inline-flex', alignItems: 'center', gap: 0.5, '& output': { minWidth: 32, textAlign: 'center', fontVariantNumeric: 'tabular-nums', fontWeight: 600 } };
+
+/** The price at the foot of the parameters, set apart by a hairline. */
+export const simplePriceSx: SxProps<Theme> = { pt: 2, borderTop: '1px solid', borderColor: 'divider' };

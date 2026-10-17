@@ -1,6 +1,8 @@
 import { number } from '../quotes/format';
 import { quoteText } from '../i18n/quotes';
 import { formatNumber } from './format';
+import { DAILY_DAYS, FREQUENCY_DAYS } from '../constants/quotes';
+import type { CleaningFrequency, ZoneInput } from '../types/quotes';
 
 /** Calculation states that say more about a quote than its status does. */
 const CALCULATION_STATES: ReadonlySet<string> = new Set<string>(['pending', 'running', 'failed']);
@@ -27,4 +29,27 @@ export const sourceNote = (note: string | undefined, label: string): string | un
   if (!note) return undefined;
   const source: string = note.startsWith(`${label}.`) ? note.slice(label.length + 1).trim() : note;
   return source === '' || NO_SOURCE.test(source) ? undefined : source;
+};
+
+/** A zone's whole floor, in m²; 0 when it has none. */
+export const floorArea = (zone: Pick<ZoneInput, 'floorArea'>): number => Math.max(0, zone.floorArea ?? 0);
+
+/** The floor a zone's work is priced on, as the API's cleanedAreaOf works it out: the area chosen, the floor without objects, or the whole floor. */
+export const cleanedArea = (zone: Pick<ZoneInput, 'floorArea' | 'freeArea' | 'cleanedArea'>): number =>
+  Math.min(Math.max(0, zone.cleanedArea ?? zone.freeArea ?? zone.floorArea ?? 0), floorArea(zone));
+
+/** How often a zone with these days of service a month is cleaned: once a month, about weekly, or every day. */
+export const frequencyOf = (daysPerMonth: number | null): CleaningFrequency | null =>
+  daysPerMonth === null || !(daysPerMonth > 0) ? null : daysPerMonth <= 1 ? 'monthly' : daysPerMonth <= 5 ? 'weekly' : 'daily';
+
+/** The days of service a month a frequency sets; a daily zone gets the parameters' default days. */
+export const frequencyDays = (frequency: CleaningFrequency, defaultDays: number | null | undefined): number =>
+  frequency === 'daily' ? defaultDays ?? DAILY_DAYS : FREQUENCY_DAYS[frequency];
+
+/** How many times a zone is cleaned, as the Resumen tab words it: `3 veces al día`, `1 vez al mes`. */
+export const cleaningTimes = (frequency: CleaningFrequency, cleaningsPerDay: number, cleaningsPerMonth: number): string => {
+  const daily: boolean = frequency === 'daily';
+  const times: number = daily ? cleaningsPerDay : cleaningsPerMonth;
+  if (times === 1) return daily ? quoteText.oncePerDay : quoteText.oncePerMonth;
+  return (daily ? quoteText.timesPerDay : quoteText.timesPerMonth).replace('{n}', number(times, 0));
 };

@@ -7,7 +7,7 @@ import { useAppConfig } from '../../../AppConfigContext';
 import { quoteFields, quoteText } from '../../../i18n/quotes';
 import { number } from '../../../quotes/format';
 import { formatCurrency } from '../../../utils/format';
-import { bounds, objectFootprint } from '../../../utils/geometry';
+import { bounds, centroid, objectFootprint, svgPoints as path, turnPoint as turn } from '../../../utils/geometry';
 import type { GeometryRoom, ScanGeometry, ScanObject, Vec2 } from '../../../types/geometry';
 import type { ZoneInput, ZoneResult } from '../../../types/quotes';
 
@@ -35,11 +35,6 @@ interface PlanRoom {
   label: Vec2;
   objects: Vec2[][];
 }
-
-/** A plan point turned like the 3D model (SPEC-004 §6.2), as SVG x and y. */
-const turn = (rotation: number) => ([x, z]: Vec2): Vec2 => [Math.cos(rotation) * x - Math.sin(rotation) * z, Math.sin(rotation) * x + Math.cos(rotation) * z];
-const centroid = (points: Vec2[]): Vec2 => [points.reduce((n: number, p: Vec2): number => n + p[0], 0) / points.length, points.reduce((n: number, p: Vec2): number => n + p[1], 0) / points.length];
-const path = (points: Vec2[]): string => points.map(([x, y]: Vec2): string => `${x.toFixed(3)},${y.toFixed(3)}`).join(' ');
 
 /**
  * The measurement's floor plan with each room shaded by its zone's monthly cost and labelled with it, its

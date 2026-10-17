@@ -49,7 +49,7 @@ describe('quote screens', (): void => {
         expect(await screen.findByRole('heading', { name: current.name })).toBeInTheDocument();
         if (current.status === 'needsReview')
             expect(screen.getByText('Revisar datos: esta cotización es preliminar.')).toBeInTheDocument();
-        for (const name of ['Zonas', 'Oferta técnica', 'Plan de compras', 'Tarifa plana', 'Control de mermas', 'Supuestos', 'Resumen']) {
+        for (const name of ['Detallado', 'Zonas', 'Oferta técnica', 'Plan de compras', 'Tarifa plana', 'Control de mermas', 'Supuestos', 'Resumen']) {
             fireEvent.click(screen.getByRole('tab', { name }));
             expect(screen.getByRole('tabpanel', { name })).toBeInTheDocument();
         }
@@ -73,6 +73,7 @@ describe('quote screens', (): void => {
         dataProvider.quoteAction = vi.fn();
         dataProvider.previewQuote = vi.fn((_id: number, edits: SummaryEdits): Promise<QuotePreview> => Promise.resolve(previewOf(edits)));
         renderWithAdmin(<Routes><Route path="/quotes/:id/show" element={<QuoteShow />} /></Routes>, { resource: 'quotes', at: '/quotes/1/show', dataProvider });
+        fireEvent.click(await screen.findByRole('tab', { name: 'Detallado' }));
         const target: HTMLElement = await screen.findByRole('spinbutton', { name: 'Precio objetivo' });
         expect(target).toHaveValue(9907.39);
         expect(screen.getByRole('spinbutton', { name: 'Margen objetivo sobre venta' })).toHaveValue(35);
@@ -95,10 +96,11 @@ describe('quote screens', (): void => {
         expect(dataProvider.quoteAction).not.toHaveBeenCalled();
         await waitFor((): void => { expect(screen.queryByText(/^Valores modificados/)).not.toBeInTheDocument(); });
     });
-    it('makes every Resumen value editable, and sets the people and the price per hour', async (): Promise<void> => {
+    it('makes every Detallado value editable, and sets the people and the price per hour', async (): Promise<void> => {
         const dataProvider: DataProvider = provider();
         dataProvider.previewQuote = vi.fn((_id: number, edits: SummaryEdits): Promise<QuotePreview> => Promise.resolve(previewOf(edits)));
         renderWithAdmin(<Routes><Route path="/quotes/:id/show" element={<QuoteShow />} /></Routes>, { resource: 'quotes', at: '/quotes/1/show', dataProvider });
+        fireEvent.click(await screen.findByRole('tab', { name: 'Detallado' }));
         await screen.findByRole('spinbutton', { name: 'Precio objetivo' });
         for (const name of ['IVA', 'Total con IVA', 'Ganancia mensual', 'Margen', 'Ganancia anual', 'Precio por m²', 'Mano de obra', 'Químicos teóricos', 'Costo directo', 'Supervisión', 'Administración', 'Contingencia', 'Indirectos a distribuir', 'Precio mínimo', 'Punto de equilibrio', 'Margen para negociar', 'Personas que trabajan', 'Horas-persona', 'Personal (FTE)', 'Supervisores equivalentes', 'Merma estimada sin control', 'Fracción del costo'])
             expect(screen.getAllByRole('spinbutton', { name }).length).toBeGreaterThan(0);
@@ -141,6 +143,40 @@ describe('quote screens', (): void => {
         fireEvent.change(screen.getAllByRole('spinbutton', { name: 'Máquinas' })[0], { target: { value: '2' } });
         fireEvent.click(screen.getByRole('button', { name: /Guardar/ }));
         await waitFor((): void => { expect(sent?.zones?.[0]).toMatchObject({ cleanedArea: 12.5, machines: 2, freeArea: 17.15 }); });
+    });
+    it('opens on the Resumen tab: the plan in the zones\' colours, and the parameters that move the price, previewed and saved', async (): Promise<void> => {
+        const current: Quote = structuredClone(apartment) as unknown as Quote;
+        vi.stubGlobal('fetch', vi.fn((): Promise<Response> => Promise.resolve(new Response(JSON.stringify(geometry), { status: 200 }))));
+        const sent: Partial<Quote>[] = [];
+        const dataProvider: DataProvider = provider(current);
+        dataProvider.update = <R extends RaRecord>(_resource: string, params: UpdateParams<R>): Promise<UpdateResult<R>> => { sent.push(params.data as Partial<Quote>); return Promise.resolve({ data: { ...current, id: params.id } as unknown as R }); };
+        dataProvider.previewQuote = vi.fn((): Promise<QuotePreview> => Promise.resolve({ manualPrice: null, targetMargin: null, overrides: {}, result: { ...current.result!, pricing: { ...current.result!.pricing, offeredPrice: 300 } }, errors: {} }));
+        renderWithAdmin(<Routes><Route path="/quotes/:id/show" element={<QuoteShow />} /></Routes>, { resource: 'quotes', at: '/quotes/1/show', dataProvider });
+        const panel: HTMLElement = await screen.findByRole('tabpanel', { name: 'Resumen' });
+        // The DOM's text is matched with plain spaces; the currency comes with a non-breaking one.
+        const money = (value: number): string => formatCurrency(value, 'USD').replace(/\s/gu, ' ');
+        expect(within(panel).getByText(money(current.result!.pricing.offeredPrice))).toBeInTheDocument();
+        expect(screen.getByText('Total 34 m²')).toBeInTheDocument();
+        expect(screen.getByText('mínimo 30 % · objetivo 35 %')).toBeInTheDocument();
+        const plan: HTMLElement = await screen.findByRole('img', { name: /con sus zonas/ });
+        // Choosing a room chooses its zone: its frequency and machines change it alone.
+        fireEvent.click(within(plan).getByRole('button', { name: 'Dormitorio' }));
+        expect(within(screen.getByRole('group', { name: 'Zona a ajustar' })).getByRole('button', { name: 'Dormitorio', pressed: true })).toBeInTheDocument();
+        expect(within(plan).getByRole('button', { name: 'Dormitorio', pressed: true })).toBeInTheDocument();
+        fireEvent.click(screen.getByRole('button', { name: 'Mensual' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Más máquinas' }));
+        fireEvent.change(screen.getByRole('slider', { name: 'Merma objetivo de químicos' }), { target: { value: 10 } });
+        // Back to the whole quote: the floor to clean is set in every zone.
+        fireEvent.click(within(screen.getByRole('group', { name: 'Zona a ajustar' })).getByRole('button', { name: 'Total' }));
+        fireEvent.change(screen.getByRole('slider', { name: 'Área limpiable' }), { target: { value: 50 } });
+        expect(screen.getByText('17 m² a limpiar')).toBeInTheDocument();
+        const zones: object[] = [{ id: 1, cleanedArea: 10 }, { id: 2, daysPerMonth: 1, machines: 1, cleanedArea: 7 }];
+        await waitFor((): void => { expect(dataProvider.previewQuote).toHaveBeenLastCalledWith(1, { targetWasteRate: 0.1 }, zones); });
+        expect(await within(panel).findByText(money(300))).toBeInTheDocument();
+        fireEvent.click(within(screen.getByText(/^Cambios sin guardar/).closest('[role="alert"]')!).getByRole('button', { name: 'Recalcular' }));
+        await waitFor((): void => { expect(sent).toEqual([{ zones, edits: { targetWasteRate: 0.1 } }]); });
+        await waitFor((): void => { expect(screen.queryByText(/^Cambios sin guardar/)).not.toBeInTheDocument(); });
+        vi.unstubAllGlobals();
     });
     it('shows each room of the plan with its zone\'s monthly cost, and opens the zone chosen', async (): Promise<void> => {
         const current: Quote = structuredClone(apartment) as unknown as Quote;

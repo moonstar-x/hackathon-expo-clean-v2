@@ -283,6 +283,7 @@ export const quoteEnums: Record<string, string> = {
 
 export const quoteText: Record<string,string> = {
   "summary": "Resumen",
+  "detailed": "Detallado",
   "zones": "Zonas",
   "technicalOffer": "Oferta técnica",
   "purchasePlan": "Plan de compras",
@@ -396,7 +397,35 @@ export const quoteText: Record<string,string> = {
   "every": "Cada",
   "perDay": "por día",
   "inventorySource": "desde inventario",
-  "cleaningIntervals": "Horas entre limpiezas: tráfico"
+  "cleaningIntervals": "Horas entre limpiezas: tráfico",
+  "zoneChoice": "Zona a ajustar",
+  "parameters": "Parámetros",
+  "cleanableArea": "Área limpiable",
+  "labor": "Mano de obra",
+  "waste": "Merma",
+  "marginRange": "Margen",
+  "marginMinimum": "mínimo",
+  "marginTarget": "objetivo",
+  "marginMinimumLabel": "Margen mínimo",
+  "marginTargetLabel": "Margen objetivo",
+  "daily": "Diaria",
+  "weekly": "Semanal",
+  "monthly": "Mensual",
+  "oncePerDay": "1 vez al día",
+  "timesPerDay": "{n} veces al día",
+  "oncePerMonth": "1 vez al mes",
+  "timesPerMonth": "{n} veces al mes",
+  "totalPrice": "Precio total",
+  "priceWithVat": "al mes, sin IVA · {total} con IVA",
+  "totalArea": "Total {area} m²",
+  "cleanableTotal": "{area} m² a limpiar",
+  "allZones": "Se aplica a todas las zonas.",
+  "machinesPerZone": "Elige una zona para cambiar sus máquinas.",
+  "wholeQuote": "De toda la cotización.",
+  "decrease": "Menos {label}",
+  "increase": "Más {label}",
+  "simpleDraftAdvice": "Cambios sin guardar: vista previa. Pulsa Recalcular para guardarlos en esta cotización.",
+  "simplePlanAlt": "Plano de {name} con sus zonas"
 };
 
 Object.assign(quoteFields,{ share:"Porcentaje del precio",marginStatus:"Estado del margen", hoursBetweenLow:"Intervalo con tráfico bajo (h)",hoursBetweenMedium:"Intervalo con tráfico medio (h)",hoursBetweenHigh:"Intervalo con tráfico alto (h)" });

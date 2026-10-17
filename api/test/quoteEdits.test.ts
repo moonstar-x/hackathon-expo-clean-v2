@@ -26,7 +26,7 @@ const none: QuoteAdjustments = { manualPrice: null, targetMargin: null, override
 const sum = (xs: number[]) => xs.reduce((a, b) => a + b, 0);
 /** Where each editable value is in a result. */
 function valueOf(r: EngineResult, field: EditableField): number | boolean {
-    for (const group of [r.pricing, r.costs, r.staffing, r.chemicals] as Record<string, number | boolean>[])
+    for (const group of [r.pricing, r.costs, r.staffing, r.chemicals, r.parameters] as Record<string, number | boolean>[])
         if (field in group)
             return group[field];
     throw new Error(`No ${field} in the result`);
@@ -188,6 +188,21 @@ describe('quote edits API', () => {
         expect((await ctx.api.get(url)).body).toEqual(before);
         expect((await ctx.api.post(`${url}/preview`, { edits: { name: 1 } })).body.errors).toEqual({ 'edits.name': 'Is not an editable value' });
         expect((await ctx.api.post(`${url}/preview`, { edits: { fte: 'x' } })).status).toBe(422);
+    });
+    it('previews changed zones with the edits, without saving them', async () => {
+        const url = quoteUrl();
+        const before = (await ctx.api.get(url)).body;
+        const [first, ...rest] = before.zones;
+        const zones = [{ id: first.id, cleanedArea: first.floorArea / 2, machines: 1, daysPerMonth: 1 }, ...rest.map((z: { id: number }) => ({ id: z.id }))];
+        const preview = await ctx.api.post(`${url}/preview`, { zones, edits: { targetMargin: .4, minimumMargin: .2, targetWasteRate: .1 } });
+        expect(preview.status).toBe(200);
+        expect(preview.body.errors).toEqual({});
+        expect(preview.body.result.zones[0]).toMatchObject({ cleanedArea: first.floorArea / 2, machines: 1, daysPerMonth: 1 });
+        expect(preview.body.result.pricing).toMatchObject({ targetMargin: .4, minimumMargin: .2 });
+        expect(preview.body.result.parameters.targetWasteRate).toBe(.1);
+        expect((await ctx.api.get(url)).body).toEqual(before);
+        expect((await ctx.api.post(`${url}/preview`, { edits: { minimumMargin: .9 } })).body.errors).toEqual({ minimumMargin: 'aboveTarget' });
+        expect((await ctx.api.post(`${url}/preview`, { zones: [{ id: 9999 }] })).status).toBe(422);
     });
     it('saves edits as the quote\'s own values and recalculates with them', async () => {
         const url = quoteUrl();

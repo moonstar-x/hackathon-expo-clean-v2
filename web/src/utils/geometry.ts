@@ -149,3 +149,12 @@ export const bounds = (points: Vec2[]): { min: Vec2; max: Vec2 } | null => {
   const zs: number[] = points.map((point: Vec2): number => point[1]);
   return { min: [Math.min(...xs), Math.min(...zs)], max: [Math.max(...xs), Math.max(...zs)] };
 };
+
+/** A plan point turned like the 3D model (SPEC-004 §6.2), as SVG x and y. */
+export const turnPoint = (rotation: number) => ([x, z]: Vec2): Vec2 => [Math.cos(rotation) * x - Math.sin(rotation) * z, Math.sin(rotation) * x + Math.cos(rotation) * z];
+
+/** The average of some plan points: where a room's label goes when the scan has none. */
+export const centroid = (points: Vec2[]): Vec2 => [points.reduce((n: number, p: Vec2): number => n + p[0], 0) / points.length, points.reduce((n: number, p: Vec2): number => n + p[1], 0) / points.length];
+
+/** Plan points as an SVG polygon's `points`. */
+export const svgPoints = (points: Vec2[]): string => points.map(([x, y]: Vec2): string => `${x.toFixed(3)},${y.toFixed(3)}`).join(' ');

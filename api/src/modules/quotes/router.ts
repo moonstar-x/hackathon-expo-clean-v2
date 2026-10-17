@@ -44,6 +44,25 @@ export function quotesRouter({ db }: AppDeps, nudge: () => void = () => { }) {
     const repo = quotesRepository(db);
     /** Edits applied to a quote as it would be calculated now: current settings, these zones and values. */
     const solve = (quote: EngineInput['quote'] & QuoteAdjustments, zones: ZoneInput[], edits: [EditableField, EditValue][]) => applyEdits(engineInput(snapshotFor(allSettings(db), zones), quote, zones), quote, edits);
+    /** The zones as sent, each merged onto the one with its id (a new one without); the ones left out are removed. */
+    function mergeZones(body: unknown, oldZones: ZoneInput[]): ZoneInput[] {
+        const raw = z.array(z.record(z.string(), z.unknown())).max(100).parse(body);
+        const seen = new Set<number>();
+        const merged = raw.map((item, index) => { const old = item.id === undefined ? blankZone : oldZones.find((z) => z.id === item.id); if (!old || (item.id !== undefined && seen.has(item.id as number)))
+            throw validationError({ [`zones.${index}.id`]: 'Zone does not belong to this quote' }); if (item.id !== undefined)
+            seen.add(item.id as number); return { ...mergeForUpdate(old, item, ZONE_FIELDS), ...(item.id !== undefined ? { id: item.id } : {}) }; });
+        const parsed = z.object({ zones: z.array(zoneSchema).max(100) }).parse({ zones: merged }).zones;
+        return parsed.map((z, index) => {
+            const old = z.id ? oldZones.find((o) => o.id === z.id)! : blankZone;
+            assertReference(db, 'quote_zone_types', z.zoneTypeId, `zones.${index}.zoneTypeId`, old.zoneTypeId);
+            assertReference(db, 'quote_schedules', z.scheduleId, `zones.${index}.scheduleId`, old.scheduleId);
+            const sources = { ...old.sources };
+            for (const field of ZONE_FIELDS)
+                if (z[field] !== old[field])
+                    sources[field] = 'manual';
+            return { ...old, ...z, position: index, sources };
+        });
+    }
     router.get('/quoting/options', (_req, res) => { const p = parameters(db); const schedules = db.prepare('SELECT code, name, service_hours_per_day AS serviceHoursPerDay FROM quote_schedules WHERE active = 1 ORDER BY name COLLATE NOCASE').all(); const scheduleCode = p.defaultScheduleId ? (db.prepare('SELECT code FROM quote_schedules WHERE id = ?').pluck().get(p.defaultScheduleId) ?? null) : null; res.json({ revision: p.revision, traffic: ['low', 'medium', 'high'], schedules, defaults: { traffic: p.defaultTraffic, scheduleCode, daysPerMonth: p.defaultDaysPerMonth } }); });
     router.get('/quotes', (req, res) => { const parsed = parseListQuery(req.query, quoteListSpec); const { records, total } = repo.list(parsed); sendList(res, 'quotes', parsed.range, records, total); });
     router.get('/quotes/:id', (req, res) => res.json(repo.get(parseId(req.params.id))));
@@ -54,25 +73,7 @@ export function quotesRouter({ db }: AppDeps, nudge: () => void = () => { }) {
         const data = quoteSchema.parse(mergeForUpdate(current, body, QUOTE_FIELDS));
         const oldZones = readZones(db, id);
         let overrides: QuoteOverrides = Object.hasOwn(body, 'overrides') ? overridesSchema.parse(body.overrides ?? {}) : current.overrides;
-        let zones: ZoneInput[] | undefined;
-        if (Object.hasOwn(body, 'zones')) {
-            const raw = z.array(z.record(z.string(), z.unknown())).max(100).parse(body.zones);
-            const seen = new Set<number>();
-            const merged = raw.map((item, index) => { const old = item.id === undefined ? blankZone : oldZones.find((z) => z.id === item.id); if (!old || (item.id !== undefined && seen.has(item.id as number)))
-                throw validationError({ [`zones.${index}.id`]: 'Zone does not belong to this quote' }); if (item.id !== undefined)
-                seen.add(item.id as number); return { ...mergeForUpdate(old, item, ZONE_FIELDS), ...(item.id !== undefined ? { id: item.id } : {}) }; });
-            const parsed = z.object({ zones: z.array(zoneSchema).max(100) }).parse({ zones: merged }).zones;
-            zones = parsed.map((z, index) => {
-                const old = z.id ? oldZones.find((o) => o.id === z.id)! : blankZone;
-                assertReference(db, 'quote_zone_types', z.zoneTypeId, `zones.${index}.zoneTypeId`, old.zoneTypeId);
-                assertReference(db, 'quote_schedules', z.scheduleId, `zones.${index}.scheduleId`, old.scheduleId);
-                const sources = { ...old.sources };
-                for (const field of ZONE_FIELDS)
-                    if (z[field] !== old[field])
-                        sources[field] = 'manual';
-                return { ...old, ...z, position: index, sources };
-            });
-        }
+        const zones: ZoneInput[] | undefined = Object.hasOwn(body, 'zones') ? mergeZones(body.zones, oldZones) : undefined;
         // Edited Resumen values become the prices and the quote's own values that give them.
         if (Object.hasOwn(body, 'edits')) {
             const { adjustments, errors } = solve({ ...data, overrides }, zones ?? oldZones, parseEdits(body.edits));
@@ -87,10 +88,12 @@ export function quotesRouter({ db }: AppDeps, nudge: () => void = () => { }) {
         res.json(repo.get(id));
         nudge();
     });
-    // What edits would give, without saving them: the whole calculation, and the edits that can't be applied.
+    // What edits and changed zones would give, without saving them: the whole calculation, and the edits that can't be applied.
     router.post('/quotes/:id/preview', (req, res) => {
         const id = parseId(req.params.id);
-        const { adjustments, result, errors } = solve(repo.get(id), readZones(db, id), parseEdits(requireObjectBody(req.body).edits ?? {}));
+        const body = requireObjectBody(req.body);
+        const oldZones = readZones(db, id);
+        const { adjustments, result, errors } = solve(repo.get(id), Object.hasOwn(body, 'zones') ? mergeZones(body.zones, oldZones) : oldZones, parseEdits(body.edits ?? {}));
         res.json({ ...adjustments, result, errors });
     });
     router.delete('/quotes/:id', (req, res) => { const id = parseId(req.params.id); const current = repo.get(id); db.prepare('DELETE FROM quotes WHERE id = ?').run(id); res.json(current); });

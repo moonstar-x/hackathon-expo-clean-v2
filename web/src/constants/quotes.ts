@@ -1,6 +1,6 @@
 import type { SortPayload } from 'react-admin';
 import type { Tone } from '../types/list';
-import type { OfferProductKey } from '../types/quotes';
+import type { CleaningFrequency, OfferProductKey, SimpleDraft } from '../types/quotes';
 
 /**
  * Badge tone per quote state, calculation and margin status (the labels live in quoteEnums): red for
@@ -45,3 +45,28 @@ export const OFFER_PRODUCTS: [string, OfferProductKey][] = [
 
 /** How many months back the waste control's month picker reaches, this one included. */
 export const WASTE_PERIODS: number = 24;
+
+/**
+ * Each zone's colour on the Resumen tab, by its order in the quote: the categorical hues in a fixed order
+ * (light and dark steps of the same hues), never cycled. Zones past the eighth are drawn neutral.
+ */
+export const ZONE_COLORS: Record<'light' | 'dark', string[]> = {
+  light: ['#2a78d6', '#eb6834', '#1baf7a', '#eda100', '#e87ba4', '#008300', '#4a3aa7', '#e34948'],
+  dark: ['#3987e5', '#d95926', '#199e70', '#c98500', '#d55181', '#008300', '#9085e9', '#e66767'],
+};
+
+/** The cleaning frequencies the Resumen tab offers, in order. */
+export const FREQUENCIES: CleaningFrequency[] = ['daily', 'weekly', 'monthly'];
+
+/** Days of service a month a weekly and a monthly zone get; a daily one gets the parameters' default days. */
+export const FREQUENCY_DAYS: Record<Exclude<CleaningFrequency, 'daily'>, number> = { weekly: 4, monthly: 1 };
+
+/** Days of service a month of a daily zone when the parameters have no default (the seeded default). */
+export const DAILY_DAYS: number = 22;
+
+/** The top of the Resumen tab's sliders, unless the quote's own value is higher. */
+export const MAX_WASTE_RATE: number = 0.5;
+export const MAX_MARGIN: number = 0.8;
+
+/** The Resumen tab with nothing changed. */
+export const EMPTY_SIMPLE_DRAFT: SimpleDraft = { zones: {}, edits: {} };

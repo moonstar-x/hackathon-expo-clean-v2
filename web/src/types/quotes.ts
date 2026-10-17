@@ -1,4 +1,6 @@
 // API contract duplicated intentionally; this app compiles independently.
+import type { Dispatch, SetStateAction } from 'react';
+import type { ScanGeometry } from './geometry';
 import type { ParameterField } from '../quotes/parameterFields';
 export interface QuoteParameterValues {
     monthlyWage: number;
@@ -138,7 +140,7 @@ export interface ZoneInput {
     fixturesExcludeFloor: boolean;
     sources: Record<string, Source>;
 }
-/** A quote's own values, edited on its Resumen tab; an absent key uses the parameters or what the calculator works out. */
+/** A quote's own values, edited on its Resumen and Detallado tabs; an absent key uses the parameters or what the calculator works out. */
 export interface QuoteOverrides {
     laborHourlyRate?: number;
     supervisorMonthlyCost?: number;
@@ -314,7 +316,7 @@ export interface Quote {
     /** This quote's target margin on sales; null uses the parameters' (only a reference). */
     targetMargin: number | null;
     externalReferencePrice: number | null;
-    /** Its own values in place of the parameters' and the calculated ones, set on the Resumen tab. */
+    /** Its own values in place of the parameters' and the calculated ones, set on the Resumen and Detallado tabs. */
     overrides: QuoteOverrides;
     notes: string | null;
     status: 'needsReview' | 'simulation' | null;
@@ -440,13 +442,14 @@ export interface OfferZoneProps extends TechnicalOfferRowProps {
     heading?: boolean;
 }
 export type OfferProductKey = 'cleaningProduct' | 'dailyDisinfectant' | 'terminalDisinfectant';
-/** A value of the Resumen tab that can be changed in place (the API's EDITABLE_FIELDS). */
+/** A value of the Detallado or Resumen tab that can be changed in place (the API's EDITABLE_FIELDS). */
 export type SummaryField = 'offeredPrice' | 'vat' | 'totalWithVat' | 'profit' | 'margin' | 'annualProfit' | 'pricePerM2'
     | 'laborCost' | 'chemicalsTheoretical' | 'chemicalsWaste' | 'eppAndHygiene' | 'utensils' | 'directCost' | 'supervision' | 'equipment' | 'transport' | 'insurance' | 'operatingCost' | 'administration' | 'contingency' | 'totalCost' | 'indirectToAllocate'
     | 'targetMargin' | 'targetPrice' | 'minimumPrice' | 'breakEvenPrice' | 'negotiationRoom'
     | 'peopleToHire' | 'laborHourlyRate' | 'personHours' | 'fte' | 'supervisors'
-    | 'withWaste' | 'uncontrolledWasteCost' | 'controlledWasteCost' | 'monthlyWasteSavings' | 'annualWasteSavings' | 'shareOfCost';
-/** The Resumen inputs as typed, by field, in the order they were changed; only the ones changed since the last calculation. */
+    | 'withWaste' | 'uncontrolledWasteCost' | 'controlledWasteCost' | 'monthlyWasteSavings' | 'annualWasteSavings' | 'shareOfCost'
+    | 'minimumMargin' | 'targetWasteRate';
+/** The Detallado inputs as typed, by field, in the order they were changed; only the ones changed since the last calculation. */
 export type SummaryDraft = Partial<Record<SummaryField, string>>;
 /** What the API applies: numbers (fractions for percentages), or null to go back to the calculated value. */
 export type SummaryEdits = Partial<Record<SummaryField, number | null>>;
@@ -474,4 +477,28 @@ export interface PriceInputProps {
     /** What a cleared input falls back to. */
     placeholder?: string;
     disabled?: boolean;
+}
+/** A zone's values the Resumen tab changes; the rest stay as saved. */
+export type ZonePatch = Partial<Pick<ZoneInput, 'cleanedArea' | 'machines' | 'daysPerMonth'>>;
+/** How often a zone is cleaned on the Resumen tab, from its days of service a month. */
+export type CleaningFrequency = 'daily' | 'weekly' | 'monthly';
+/** The Resumen tab's changes since the last calculation: zones by position, and values as the API applies them. */
+export interface SimpleDraft {
+    zones: Record<number, ZonePatch>;
+    edits: SummaryEdits;
+}
+export interface SimpleSummaryProps {
+    quote: Quote;
+    draft: SimpleDraft;
+    onDraftChange: Dispatch<SetStateAction<SimpleDraft>>;
+}
+export interface ZonePlanProps {
+    geometry: ScanGeometry;
+    /** The quote's zones as shown, with the Resumen tab's changes. */
+    zones: ZoneInput[];
+    /** Each zone's colour, by position; a zone without one is drawn neutral. */
+    colors: Record<number, string>;
+    /** The chosen zone's position; null is the whole quote. */
+    selected: number | null;
+    onSelect: (position: number | null) => void;
 }
