@@ -90,7 +90,7 @@ CREATE TABLE quote_document_logo (
 - **A missing file.** A row whose file is missing counts as no logo.
 - **Resetting.** `db:reset` deletes the `logos` folder with the database.
 
-Migration `007_company_branding.sql` creates the table and adds `brand_color` to `quote_document_settings`. Back up `FILES_PATH` together with the database.
+Migration `008_company_branding.sql` creates the table and adds `brand_color` to `quote_document_settings`. Back up `FILES_PATH` together with the database.
 
 ## 5. The document
 
