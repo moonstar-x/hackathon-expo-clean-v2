@@ -110,6 +110,8 @@ export interface FormToolbarProps {
   withDelete?: boolean;
   /** A short line beside Save about what saving does. */
   note?: ReactNode;
+  /** More buttons after Save, such as a save that also changes a field. */
+  actions?: ReactNode;
 }
 
 export interface FormHeaderProps {

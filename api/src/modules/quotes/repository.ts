@@ -5,7 +5,7 @@ import { mapRow, snake } from './settings.ts';
 import type { ZoneInput } from './types.ts';
 import type { EngineResult } from './engine/index.ts';
 import type { allSettings } from './settings.ts';
-export const QUOTE_FIELDS = ['name', 'installationType', 'city', 'visitDate', 'measurementOrigin', 'assumptionsConfirmed', 'manualPrice', 'externalReferencePrice', 'notes'] as const;
+export const QUOTE_FIELDS = ['name', 'installationType', 'city', 'visitDate', 'measurementOrigin', 'assumptionsConfirmed', 'manualPrice', 'targetMargin', 'externalReferencePrice', 'notes'] as const;
 export const ZONE_FIELDS = ['name', 'zoneTypeId', 'floorArea', 'wallArea', 'traffic', 'scheduleId', 'daysPerMonth', 'terminalsPerMonth', 'fixedPosts', 'measurementSource', 'observation', 'toilets', 'urinals', 'sinks', 'fixtureVisitsPerDay', 'minutesPerFixture', 'solutionLitersPerFixture', 'paperSoapMonthly', 'fixturesExcludeFloor'] as const;
 const zoneFields = ['position', 'origin', 'roomId', ...ZONE_FIELDS, 'isFloorApproximate', 'sourcesJson'] as const;
 const zoneColumns = ['id', 'quote_id', ...zoneFields.map(snake), 'created_at', 'updated_at'].join(', ');
@@ -49,7 +49,7 @@ export function quotesRepository(db: Database.Database) {
         const r = mapRow(row as Record<string, string | number | null>);
         const result = detail && row.result_json ? JSON.parse(row.result_json as string) as EngineResult : null;
         const snapshot = detail && row.snapshot_json ? JSON.parse(row.snapshot_json as string) as ReturnType<typeof allSettings> : null;
-        return { id: r.id as number, measurementId: r.measurementId as number | null, name: r.name as string, installationType: r.installationType, city: r.city, visitDate: r.visitDate, measurementOrigin: r.measurementOrigin, assumptionsConfirmed: !!r.assumptionsConfirmed, manualPrice: r.manualPrice as number | null, externalReferencePrice: r.externalReferencePrice as number | null, notes: r.notes, status: r.status,
+        return { id: r.id as number, measurementId: r.measurementId as number | null, name: r.name as string, installationType: r.installationType, city: r.city, visitDate: r.visitDate, measurementOrigin: r.measurementOrigin, assumptionsConfirmed: !!r.assumptionsConfirmed, manualPrice: r.manualPrice as number | null, targetMargin: r.targetMargin as number | null, externalReferencePrice: r.externalReferencePrice as number | null, notes: r.notes, status: r.status,
             calculation: { state: r.calculationState as string, error: r.calculationError, calculatedAt: r.calculatedAt, parametersRevision: r.parametersRevision, isStale: !!r.isStale, inputRevision: r.inputRevision as number, isCurrent: r.calculatedInputRevision === r.inputRevision },
             summary: { offeredPrice: r.offeredPrice, totalCost: r.totalCost, profit: r.profit, margin: r.margin, marginStatus: r.marginStatus, totalFloorArea: r.totalFloorArea, fte: r.fte, activeZoneCount: r.activeZoneCount, zoneCount: r.zoneCount },
             ...(detail ? { zones: readZones(db, r.id as number), result, snapshot } : {}), createdBy: r.createdBy, createdAt: r.createdAt, updatedAt: r.updatedAt };

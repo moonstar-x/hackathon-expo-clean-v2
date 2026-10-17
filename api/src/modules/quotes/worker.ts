@@ -51,11 +51,12 @@ export function createQuoteWorker({ db, logger, config, compute = computeQuote }
         let status: string | null = null;
         try {
             db.transaction(() => {
-                const q = db.prepare('SELECT id, measurement_id, assumptions_confirmed, manual_price, external_reference_price, input_revision, result_json FROM quotes WHERE id = ?').get(job.quote_id) as {
+                const q = db.prepare('SELECT id, measurement_id, assumptions_confirmed, manual_price, target_margin, external_reference_price, input_revision, result_json FROM quotes WHERE id = ?').get(job.quote_id) as {
                     id: number;
                     measurement_id: number | null;
                     assumptions_confirmed: number;
                     manual_price: number | null;
+                    target_margin: number | null;
                     external_reference_price: number | null;
                     input_revision: number;
                     result_json: string | null;
@@ -90,7 +91,7 @@ export function createQuoteWorker({ db, logger, config, compute = computeQuote }
                 const schedules = Object.fromEntries([...new Set(zones.map((z) => z.scheduleId))].filter((id): id is number => id !== null && !!settings.schedules[id]).map((id) => [id, settings.schedules[id]]));
                 const products = Object.fromEntries([...new Set(Object.values(zoneTypes).flatMap((t) => [t.cleaningProductId, t.dailyDisinfectantId, t.terminalDisinfectantId]))].filter((id) => settings.products[id]).map((id) => [id, settings.products[id]]));
                 const snapshot = { ...settings, zoneTypes, schedules, products };
-                const result = compute({ ...snapshot, quote: { assumptionsConfirmed: !!q.assumptions_confirmed, manualPrice: q.manual_price, externalReferencePrice: q.external_reference_price }, zones });
+                const result = compute({ ...snapshot, quote: { assumptionsConfirmed: !!q.assumptions_confirmed, manualPrice: q.manual_price, targetMargin: q.target_margin, externalReferencePrice: q.external_reference_price }, zones });
                 result.warnings.push(...derivationWarnings);
                 status = result.status;
                 const pr = result.pricing;
