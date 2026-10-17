@@ -45,7 +45,6 @@ describe('quote screens', (): void => {
     it.each([['simulation', quote], ['needsReview', apartment as unknown as Quote]] as const)('renders all show tabs for %s', async (_status: string, current: Quote): Promise<void> => {
         renderWithAdmin(<Routes><Route path="/quotes/:id/show" element={<QuoteShow />} /></Routes>, { resource: 'quotes', at: '/quotes/1/show', dataProvider: provider(current) });
         expect(await screen.findByRole('heading', { name: current.name })).toBeInTheDocument();
-        expect(screen.getByText('No equivale a oferta validada.')).toBeInTheDocument();
         if (current.status === 'needsReview')
             expect(screen.getByText('Revisar datos: esta cotización es preliminar.')).toBeInTheDocument();
         for (const name of ['Zonas', 'Oferta técnica', 'Plan de compras', 'Tarifa plana', 'Control de mermas', 'Supuestos', 'Resumen']) {
@@ -60,6 +59,15 @@ describe('quote screens', (): void => {
         current.zones[0].floorArea = 99;
         renderWithAdmin(<Routes><Route path="/quotes/:id" element={<QuoteEdit/>}/></Routes>,{ resource:'quotes',at:'/quotes/1',dataProvider:provider(current) });
         expect(await screen.findByText(/Escaneo: 20,00 m²/)).toBeInTheDocument();
+    });
+    it.each([[false, 'Confirmar', true], [true, 'Quitar confirmación', false]] as const)('confirmed %s: %s saves assumptionsConfirmed %s', async (confirmed: boolean, label: string, expected: boolean): Promise<void> => {
+        const current: Quote = { ...structuredClone(apartment) as unknown as Quote, assumptionsConfirmed: confirmed };
+        let sent: Partial<Quote> | undefined;
+        const dataProvider: DataProvider = provider(current);
+        dataProvider.update = <R extends RaRecord>(_resource: string,params: UpdateParams<R>): Promise<UpdateResult<R>> => { sent = params.data as Partial<Quote>; return Promise.resolve({ data:{ ...current,...params.data,id:params.id } as unknown as R }); };
+        renderWithAdmin(<Routes><Route path="/quotes/:id" element={<QuoteEdit/>}/><Route path="*" element={<CurrentRoute/>}/></Routes>,{ resource:'quotes',at:'/quotes/1',dataProvider });
+        fireEvent.click(await screen.findByRole('button',{ name:label }));
+        await waitFor((): void => { expect(sent?.assumptionsConfirmed).toBe(expected); });
     });
     it('keeps the singleton parameter route after saving',async (): Promise<void> => {
         let saved: boolean = false;

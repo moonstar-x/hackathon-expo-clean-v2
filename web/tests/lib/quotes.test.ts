@@ -11,7 +11,7 @@ describe('quoting contracts', (): void => {
         expect(Object.keys(quoteIssues).sort()).toEqual(codes.sort());
         for (const code of codes)
             expect(quoteIssues[code].length).toBeGreaterThan(12);
-        expect(['healthy', 'acceptable', 'belowMinimum', 'loss', 'simulation', 'needsReview', 'ok', 'noData', 'watch', 'alert'].map((code: string): string => quoteEnums[code])).toEqual(['Saludable', 'Aceptable', 'Bajo el mínimo', 'Pérdida', 'Simulación', 'Revisar', 'OK', 'Sin dato', 'Vigilar', 'Alerta']);
+        expect(['healthy', 'acceptable', 'belowMinimum', 'loss', 'simulation', 'needsReview', 'ok', 'noData', 'watch', 'alert'].map((code: string): string => quoteEnums[code])).toEqual(['Saludable', 'Aceptable', 'Bajo el mínimo', 'Pérdida', 'Confirmado', 'Revisar', 'OK', 'Sin dato', 'Vigilar', 'Alerta']);
     });
     it('previews Appendix A.4 with the stored prices and waste target', (): void => { const actual: WasteControl = previewWaste(quote.result!.purchasePlan.rows, quote.snapshot!.parameters.targetWasteRate, { 1: 20.5, 3: 4.4, 4: 15 }, '2026-11'); expect(actual.totalExcessCost).toBeCloseTo(6.068637, 6); expect(actual.rows.map((r: WasteRow): string => r.status)).toEqual(['ok', 'watch', 'alert', 'noData']); expect(actual.rows[1].excess).toBeCloseTo(.72136, 6); expect(actual.rows[2].excessCost).toBeCloseTo(3.640443, 6); });
 });

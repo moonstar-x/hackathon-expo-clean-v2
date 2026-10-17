@@ -14,7 +14,7 @@ export const QUOTE_STATE_TONE: Record<string, Tone> = {
   needsReview: 'orange',
   belowMinimum: 'orange',
   watch: 'orange',
-  simulation: 'blue',
+  simulation: 'green',
   acceptable: 'blue',
   healthy: 'green',
   ok: 'green',

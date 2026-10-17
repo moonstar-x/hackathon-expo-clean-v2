@@ -258,7 +258,6 @@ export function QuoteDetail(): ReactElement | null {
         { label: quoteFields.totalFloorArea, value: number(quote.summary.totalFloorArea) },
     ]}/>
     <Box sx={quoteMetaSx}>
-    <Typography variant="body2" color="text.secondary">{quoteText.notValidated}</Typography>
     {quote.measurementId !== null && <Link component={RouterLink} to={`/measurements/${quote.measurementId}/show`} variant="body2">{quoteText.measurement} {quote.measurementId}</Link>}
     <Typography variant="body2" color="text.secondary">{quoteText.calculatedOn} {quote.calculation.calculatedAt ? formatDateTime(quote.calculation.calculatedAt) : '—'}</Typography>
     </Box>

@@ -6,13 +6,14 @@ import { formToolbarNoteSx, formToolbarStartSx, formToolbarSx } from '../styles/
 import type { FormToolbarProps } from '../types/components';
 
 /**
- * Save on the left, with a line beside it when saving needs a word, and, on edit pages, Delete on
- * the right; it asks first and waits for the API.
+ * Save on the left, then any extra actions, with a line beside them when saving needs a word, and,
+ * on edit pages, Delete on the right; it asks first and waits for the API.
  */
-const FormToolbar = ({ withDelete = false, note }: FormToolbarProps): ReactElement => (
+const FormToolbar = ({ withDelete = false, note, actions }: FormToolbarProps): ReactElement => (
   <Toolbar sx={formToolbarSx}>
     <Box sx={formToolbarStartSx}>
       <SaveButton />
+      {actions}
       {note ? <Typography sx={formToolbarNoteSx}>{note}</Typography> : null}
     </Box>
     {withDelete ? <DeleteButton mutationMode="pessimistic" /> : null}
