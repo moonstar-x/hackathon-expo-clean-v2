@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { percentToFraction, fractionToPercent, previewWaste } from '../../src/quotes/format';
 import { quoteEnums, quoteFields, quoteIssues, quoteText } from '../../src/i18n/quotes';
 import { draftEdits, editDraft, editErrorText, SUMMARY_FIELDS } from '../../src/quotes/summaryDraft';
+import { cleanedArea, cleaningTimes, frequencyDays, frequencyOf } from '../../src/utils/quotes';
 import type { Quote, WasteControl, WasteRow } from '../../src/types/quotes';
 import clinic from '../fixtures/quotes/clinic.json';
 const quote: Quote = clinic as unknown as Quote;
@@ -31,5 +32,15 @@ describe('quoting contracts', (): void => {
             expect(quoteFields[field]).toBeTruthy();
         for (const message of Object.values(editErrorText))
             expect(message.length).toBeGreaterThan(5);
+    });
+    it('reads a zone\'s frequency from its days of service, and sets the days a frequency means', (): void => {
+        expect([null, 0, 1, 4, 5, 6, 22, 30].map(frequencyOf)).toEqual([null, null, 'monthly', 'weekly', 'weekly', 'daily', 'daily', 'daily']);
+        expect([frequencyDays('daily', 30), frequencyDays('daily', null), frequencyDays('weekly', 30), frequencyDays('monthly', 30)]).toEqual([30, 22, 4, 1]);
+        expect([cleaningTimes('daily', 3, 66), cleaningTimes('daily', 1, 22), cleaningTimes('monthly', 1, 1), cleaningTimes('weekly', 2, 8)]).toEqual(['3 veces al día', '1 vez al día', '1 vez al mes', '8 veces al mes']);
+    });
+    it('works out the floor to clean as the API does', (): void => {
+        expect(cleanedArea({ floorArea: 20, freeArea: 17, cleanedArea: null })).toBe(17);
+        expect(cleanedArea({ floorArea: 20, freeArea: null, cleanedArea: 25 })).toBe(20);
+        expect(cleanedArea({ floorArea: null, freeArea: null, cleanedArea: null })).toBe(0);
     });
 });

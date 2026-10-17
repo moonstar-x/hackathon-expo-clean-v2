@@ -1,15 +1,16 @@
 import { quoteText } from '../i18n/quotes';
 import type { SummaryDraft, SummaryEditError, SummaryEdits, SummaryField } from '../types/quotes';
-/** The Resumen values that can be changed in place, as the API's EDITABLE_FIELDS lists them. */
+/** The values that can be changed in place, as the API's EDITABLE_FIELDS lists them. */
 export const SUMMARY_FIELDS: ReadonlySet<string> = new Set<SummaryField>([
     'offeredPrice', 'vat', 'totalWithVat', 'profit', 'margin', 'annualProfit', 'pricePerM2',
     'laborCost', 'chemicalsTheoretical', 'chemicalsWaste', 'eppAndHygiene', 'utensils', 'directCost', 'supervision', 'equipment', 'transport', 'insurance', 'operatingCost', 'administration', 'contingency', 'totalCost', 'indirectToAllocate',
     'targetMargin', 'targetPrice', 'minimumPrice', 'breakEvenPrice', 'negotiationRoom',
     'peopleToHire', 'laborHourlyRate', 'personHours', 'fte', 'supervisors',
     'withWaste', 'uncontrolledWasteCost', 'controlledWasteCost', 'monthlyWasteSavings', 'annualWasteSavings', 'shareOfCost',
+    'minimumMargin', 'targetWasteRate',
 ]);
 /** Typed as a percentage, sent as a fraction. */
-export const PERCENT_FIELDS: ReadonlySet<SummaryField> = new Set<SummaryField>(['margin', 'targetMargin', 'shareOfCost']);
+export const PERCENT_FIELDS: ReadonlySet<SummaryField> = new Set<SummaryField>(['margin', 'targetMargin', 'shareOfCost', 'minimumMargin', 'targetWasteRate']);
 /** May be below 0: a loss is a profit, margin or saving below 0. */
 export const SIGNED_FIELDS: ReadonlySet<SummaryField> = new Set<SummaryField>(['profit', 'margin', 'annualProfit', 'monthlyWasteSavings', 'annualWasteSavings']);
 /** An input as a number: null when cleared, NaN when it isn't one. */

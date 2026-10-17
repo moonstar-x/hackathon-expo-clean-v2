@@ -9,6 +9,8 @@ export const EDITABLE_FIELDS = [
     'targetMargin', 'targetPrice', 'minimumPrice', 'breakEvenPrice', 'negotiationRoom',
     'peopleToHire', 'laborHourlyRate', 'personHours', 'fte', 'supervisors',
     'withWaste', 'uncontrolledWasteCost', 'controlledWasteCost', 'monthlyWasteSavings', 'annualWasteSavings', 'shareOfCost',
+    // Set straight on the simple Resumen tab's sliders.
+    'minimumMargin', 'targetWasteRate',
 ] as const;
 export type EditableField = typeof EDITABLE_FIELDS[number];
 /** A new value for an editable field: a number (a fraction for margins and shares), or null to go back to what it was calculated as. */
@@ -48,7 +50,7 @@ const fieldLeaves: Partial<Record<EditableField, Leaf[]>> = {
 };
 /** The overrides other fields are set through, cleared with them. */
 const fieldKeys: Partial<Record<EditableField, (keyof QuoteOverrides)[]>> = {
-    vat: ['vatRate'], minimumPrice: ['minimumMargin'], chemicalsWaste: ['targetWasteRate'], controlledWasteCost: ['targetWasteRate'], administration: ['administrationRate'], contingency: ['contingencyRate'],
+    vat: ['vatRate'], minimumPrice: ['minimumMargin'], minimumMargin: ['minimumMargin'], targetWasteRate: ['targetWasteRate'], chemicalsWaste: ['targetWasteRate'], controlledWasteCost: ['targetWasteRate'], administration: ['administrationRate'], contingency: ['contingencyRate'],
     peopleToHire: ['workers'], fte: ['workers'], personHours: ['workers'], laborHourlyRate: ['laborHourlyRate'], supervisors: ['operatorsPerSupervisor'],
     uncontrolledWasteCost: ['uncontrolledWasteRate'], monthlyWasteSavings: ['uncontrolledWasteRate'], annualWasteSavings: ['uncontrolledWasteRate'],
 };
@@ -111,6 +113,8 @@ function solve(field: EditableField, value: EditValue, r: EngineResult, a: Quote
             const margin = 1 - c.totalCost / value;
             return margin > pr.targetMargin + 1e-9 ? 'aboveTarget' : set('minimumMargin', margin, 1);
         }
+        case 'minimumMargin': return value > pr.targetMargin + 1e-9 ? 'aboveTarget' : set('minimumMargin', value, 1);
+        case 'targetWasteRate': return set('targetWasteRate', value, 1);
         case 'laborCost': return scaleTo(c.laborCost);
         case 'chemicalsTheoretical': return scaleTo(c.chemicalsTheoretical);
         case 'withWaste': return scaleTo(chemicals);

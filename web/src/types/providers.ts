@@ -1,6 +1,6 @@
 // Types of the providers that connect react-admin to the inventory API.
 import type { DataProvider } from 'react-admin';
-import type { Quote, QuotePreview, SummaryEdits, WasteControl } from './quotes';
+import type { Quote, QuotePreview, SummaryEdits, WasteControl, ZonePatch } from './quotes';
 import type { Stats } from './api';
 
 /** What `httpClient` resolves with; `json` is the parsed body, typed by the caller. */
@@ -41,5 +41,6 @@ export interface InventoryDataProvider extends DataProvider {
   getWaste: (id:number,period:string) => Promise<WasteControl>;
   saveWaste: (id:number,period:string,rows:{ productId:number;actual:number | null }[]) => Promise<WasteControl>;
   createMeasurementQuote: (id:number) => Promise<Quote>;
-  previewQuote: (id:number,edits:SummaryEdits) => Promise<QuotePreview>;
+  /** `zones`, when given, replace the saved ones as PUT /quotes/:id takes them: every zone, by id, with only what changes. */
+  previewQuote: (id:number,edits:SummaryEdits,zones?:({ id?: number } & ZonePatch)[]) => Promise<QuotePreview>;
 }
