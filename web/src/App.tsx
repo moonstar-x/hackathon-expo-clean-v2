@@ -1,3 +1,6 @@
+import { Route } from 'react-router-dom';
+import { DocumentSettings } from './quoteDocuments/DocumentSettings';
+import { QuoteDocumentRoute } from './quoteDocuments/QuoteDocumentRoute';
 import { useMemo, type ReactElement } from 'react';
 import RequestQuoteIcon from '@mui/icons-material/RequestQuote';
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -5,7 +8,7 @@ import { QuoteList } from './quotes/QuoteList';
 import { QuoteShow } from './quotes/QuoteShow';
 import { QuoteEdit } from './quotes/QuoteEdit';
 import { CatalogList, CatalogEdit, CatalogCreate, ParametersEdit } from './quotes/Settings';
-import { Admin, Resource, type AuthProvider } from 'react-admin';
+import { Admin, CustomRoutes, Resource, type AuthProvider } from 'react-admin';
 import Dashboard from './components/dashboard/Dashboard';
 import LoginPage from './components/login/LoginPage';
 import { i18nProvider } from './i18n';
@@ -54,6 +57,8 @@ const App = ({ config }: AppProps): ReactElement => {
       <Resource name="suppliers" {...suppliers} />
       <Resource name="quote-parameters" edit={ParametersEdit} icon={SettingsIcon} />
       {['quote-zone-types','quote-schedules','quote-products','quote-location-types'].map((resource: string): ReactElement => <Resource key={resource} name={resource} list={<CatalogList resource={resource} />} edit={<CatalogEdit resource={resource} />} create={resource === 'quote-location-types' ? undefined : <CatalogCreate resource={resource} />} />)}
+      <Resource name="quote-document-settings" edit={DocumentSettings} />
+      <CustomRoutes><Route path="/quotes/:id/document" element={<QuoteDocumentRoute />} /></CustomRoutes>
       <Resource name="users" {...users} />
     </Admin>
   );

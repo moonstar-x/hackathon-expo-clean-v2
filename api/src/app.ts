@@ -18,6 +18,7 @@ import { suppliersRouter } from './modules/suppliers/router.ts';
 import { quotesRouter } from './modules/quotes/router.ts';
 import { settingsRouter } from './modules/quotes/settings.ts';
 import { usersRouter } from './modules/users/router.ts';
+import { quoteDocumentsRouter } from './modules/quoteDocuments/router.ts';
 
 /** Paths never written to logs: credentials and tokens. */
 export const LOG_REDACT_PATHS = [
@@ -55,7 +56,7 @@ export function createApp({ db, config, logger = createLogger(config), nudgeQuot
   app.use(
     cors({
       origin: [...config.corsOrigins],
-      exposedHeaders: ['Content-Range', 'Content-Disposition', 'Location'],
+      exposedHeaders: ['Content-Range', 'Content-Disposition', 'Location', 'X-Document-Hash', 'X-Document-Revision'],
       // ra-data-simple-rest sends `Range: <resource>=<start>-<end>` on every getList.
       // It is not a CORS-safelisted header, so the preflight must allow it.
       allowedHeaders: ['Content-Type', 'Authorization', 'Range'],
@@ -80,6 +81,7 @@ export function createApp({ db, config, logger = createLogger(config), nudgeQuot
 
   const api = express.Router();
   api.use(requireAuth(deps));
+  api.use(quoteDocumentsRouter(deps));
   api.use(settingsRouter(deps));
   api.use(quotesRouter(deps,nudgeQuotes));
   api.use('/measurements', measurementsRouter(deps,nudgeQuotes));

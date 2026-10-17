@@ -22,6 +22,7 @@ const AppMenu = (): ReactElement => (
     <Menu.ResourceItem name="suppliers" />
     <SectionLabel label="app.menu.quoting" />
     <Menu.Item to="/quote-parameters/1" primaryText="Parámetros" leftIcon={<SettingsIcon />} />
+    <Menu.Item to="/quote-document-settings/1" primaryText="Empresa y plantilla" leftIcon={<SettingsIcon />} />
     <Menu.ResourceItem name="quote-zone-types" />
     <Menu.ResourceItem name="quote-schedules" />
     <Menu.ResourceItem name="quote-products" />

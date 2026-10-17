@@ -1,6 +1,8 @@
+import DescriptionIcon from '@mui/icons-material/Description';
+import { Link as RouterLink } from 'react-router-dom';
 import { quoteFields, quoteEnums, quoteText } from '../i18n/quotes';
 import type { ReactElement } from 'react';
-import { Chip } from '@mui/material';
+import { Button, Chip } from '@mui/material';
 import { BooleanInput, DataTable, DateField, DateInput, List, SelectInput, TextInput, useRecordContext } from 'react-admin';
 import { useAppConfig } from '../AppConfigContext';
 import { formatCurrency } from '../utils/format';
@@ -22,5 +24,6 @@ export function QuoteList(): ReactElement {
     <DataTable.Col source="fte" label={quoteFields.fte} render={(q: Quote): string => number(q.summary.fte)}/>
     <DataTable.Col source="calculatedAt" label={quoteFields.calculatedAt}><DateField source="calculation.calculatedAt" locales="es" showTime/></DataTable.Col>
     <DataTable.Col label="Parámetros" disableSort render={(q: Quote): ReactElement | null => q.calculation.isStale ? <Chip size="small" color="warning" label={quoteText.stale}/> : null}/>
+    <DataTable.Col label="Documento" disableSort render={(q: Quote): ReactElement => <Button component={RouterLink} to={`/quotes/${q.id}/document`} startIcon={<DescriptionIcon />} onClick={(e: React.MouseEvent): void => e.stopPropagation()}>Documento</Button>} />
     </DataTable></List>;
 }

@@ -38,6 +38,7 @@ Every setting comes from environment variables. `src/server.ts` loads `api/.env`
 | `JWT_EXPIRES_IN` | no | `8h` | Token lifetime (`30m`, `8h`, `7d`, …) |
 | `ADMIN_EMAIL` | **yes** | – | Email of the **initial user** (see below) |
 | `ADMIN_PASSWORD` | **yes** | – | Password of the initial user, 8–128 characters |
+| `QUOTE_DOCUMENT_TIMEZONE` | no | `America/Guayaquil` | Valid IANA timezone for document issue dates and metadata. |
 | `LOG_LEVEL` | no | `info` | `fatal`, `error`, `warn`, `info`, `debug`, `trace` or `silent` |
 
 With `NODE_ENV=production`, startup also fails if `JWT_SECRET` or `ADMIN_PASSWORD` still has its `.env.example` placeholder value.
@@ -87,6 +88,8 @@ Every error response has the same shape:
 | 404 | `NOT_FOUND` | Unknown record or route |
 | 405 | `METHOD_NOT_ALLOWED` | `PUT`/`DELETE` on stock movements |
 | 409 | `CONFLICT` | Duplicate name, SKU or user email; deleting a record that is still referenced; deleting your own account |
+| 409 | `DOCUMENT_NOT_READY` | Calculation, issuer, payment or client data is incomplete. |
+| 409 | `DOCUMENT_CHANGED` | Content changed after the preview; refresh before saving a file. |
 | 409 | `INSUFFICIENT_STOCK` | `OUT` larger than the quantity on hand |
 | 422 | `VALIDATION_ERROR` | Invalid body, a referenced id that does not exist, or deactivating your own account |
 | 429 | `RATE_LIMITED` | More than 10 login attempts per 15 minutes per IP |
@@ -319,3 +322,51 @@ Disposable database walkthrough completed on 2026-10-16 using `npm run db:reset`
 The disposable database was removed afterward. Automated admin screen tests separately render both statuses, all seven tabs, edit/settings/catalog screens and pending/slow/done polling.
 
 The browser walkthrough also ran against a separate disposable database: confirmed assumptions in Editar, observed **Simulación / 251.08 USD**, saved the target margin as **40%**, observed **Parámetros modificados** with the old price, clicked Recalcular and observed **272.00 USD**, then saved **1.5 L** of detergent consumption and verified it remained after reloading. This caught and fixed the singleton parameter editor's post-save redirect; a regression test keeps it on `/quote-parameters/1`.
+
+
+## Quote documents (SPEC-006)
+
+All routes require a bearer token. Company and per-quote document data use merge updates, independently of engine inputs and the parameters revision.
+
+| Method | Path | Result |
+|---|---|---|
+| GET, PUT | `/api/quote-document-settings/1` | Singleton issuer, signature, numbering, paper and commercial text settings; other ids return 404. |
+| GET, PUT | `/api/quotes/:id/document` | Readiness, all blockers/warnings, raw client/document data, defaults, resolved Spanish model, hash, revision and filenames. |
+| GET | `/api/quotes/:id/document/pdf` | Embedded Poppins PDF, inline; `?download=1` selects attachment. |
+| GET | `/api/quotes/:id/document/xlsx` | Literal-value, two-sheet Excel workbook; the same disposition option. |
+| POST | `/api/quotes/:id/document/exports` | `{format, contentHash}` registers the previewed content atomically, freezes the number and returns its revision. |
+| GET | `/api/quotes/:id/document/exports` | Latest 100 exports, newest first. |
+
+Files have `Cache-Control: no-store`, `X-Document-Hash` and `X-Document-Revision` (both exposed through CORS). Fetching a preview does not register an export. A changed hash returns `409 DOCUMENT_CHANGED` without inserting anything. The audit row stores the allow-listed document model, exporter and timestamp. Quote deletion cascades to document data and history.
+
+The pure builder resolves dates, Spanish text, largest-remainder line allocation, VAT in cents, amount in words and optional contract value before either renderer runs. Only the offered price, commercial scope and supplied party data enter files; internal calculations and creator identity are excluded. Each rendering logs only quote id, format, revision, byte count and elapsed milliseconds.
+
+```sh
+curl -f -H "Authorization: Bearer $TOKEN" \
+  'http://localhost:4000/api/quotes/1/document/pdf?download=1' \
+  -o cotizacion.pdf
+```
+
+This curl example retrieves bytes only. The admin registers `/document/exports` with the preview hash before saving those exact bytes.
+
+### Notes for SPEC-006
+
+All P1 features are implemented: global line mode, Spanish amount in words, contract value, margin confirmation, quote-list document action and download history. P2 features remain optional future work.
+
+The document model additionally carries `metadata.subject` and `metadata.issueInstant`, resolved by the builder, so renderers never derive the site name or timezone offset. Excel print-title names are the built-in names required by repeated print headers; no custom defined names exist. ExcelJS's missing TypeScript enum entry for Letter is represented by the standard OOXML paper id 1. Assets include the unchanged SVG, its 800-pixel PNG, and Poppins Regular/SemiBold with the OFL license.
+
+Regenerate the committed web workbook/model fixtures and the temporary PDF with `node scripts/document-fixture.ts` from `api/`. The test party identities are explicitly fictional fixtures; they are never seeded into company settings. PDF text, metadata, privacy, 100-zone performance, workbook structure/types, routes, rounding, revision and auth checks run in `npm test`.
+
+Dependency notes: the specified ExcelJS 4.4 dependency has deprecated transitive packages, so `npm ci` emits upstream deprecation notices. Its UUID dependency is overridden to compatible v11 to address the published buffer-bounds advisory; the PDF test reader uses patched PDF.js 6. No runtime application warnings are expected from the new feature.
+
+
+SPEC-006 verification on 2026-10-16 used `npm run db:reset` with `/tmp/spec006/walkthrough.db` (API port 4016; isolated admin port 5176). No normal development database was changed.
+
+1. The initial Documento page showed Revisar, the five missing issuer/payment requirements and both missing client fields, with disabled downloads.
+2. Saved fictional issuer data through Empresa y plantilla, completed the client form, and confirmed assumptions through the quote editor. The PDF preview showed `COT-00001`, lines **147.69 / 103.39**, subtotal **251.08**, IVA **37.66**, and total **288.74**. Optional installation/city/contact fields were omitted.
+3. Downloaded PDF and Excel through the page; the stored history contains both formats as **Rev. 1**. Reading the saved workbook confirmed both sheets and exactly those numeric line amounts and totals.
+4. Authenticated HTTP verification changed the contact: **Rev. 2**, with `-Rev2.pdf`; registered and saved that exact preview response. A subsequent payment-term change made the old hash return **409 DOCUMENT_CHANGED**, with no extra export row. Component tests independently verify that a rejected export saves no blob and refreshes state.
+
+Manual verification limitation: the native browser accessibility driver changed the tab's reported selection without dispatching its React click handler (no XLSX request in the trace); pointer fallback then failed with `noWindowsAvailable`, and desktop viewer automation timed out. The visual Excel-tab and desktop-viewer portions of the manual walkthrough could not be completed with that driver. Automated tests click the actual page's Excel tab, parse the committed API workbook and verify both sheet tabs, merged cells, logo and formatted amounts. The exact ExcelJS browser distribution separately parsed the downloaded workbook successfully. No application feature or P1 item is omitted.
+
+VAT multiplication uses BigInt before integer division, so the largest permitted manual price also retains exact cents. Spanish words cover the specified range and larger safe integers, including “mil millones”, so that valid large prices can still be exported.

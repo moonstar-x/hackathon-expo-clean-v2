@@ -81,6 +81,7 @@ const schema = z
     ADMIN_PASSWORD: env(
       z.string({ error: required }).min(8, 'must be at least 8 characters').max(128, 'must be at most 128 characters'),
     ),
+    QUOTE_DOCUMENT_TIMEZONE: env(z.string().default('America/Guayaquil').refine((v) => { try { new Intl.DateTimeFormat('es', { timeZone: v }); return true; } catch { return false; } }, 'must be a valid IANA timezone')),
     QUOTE_WORKER: env(z.enum(['on','off']).default('on')),
     QUOTE_WORKER_POLL_MS: env(z.coerce.number().int().min(100).max(60000).default(1000)),
     QUOTE_JOB_MAX_ATTEMPTS: env(z.coerce.number().int().min(1).max(20).default(5)),
@@ -145,6 +146,7 @@ export function loadConfig(source: Record<string, string | undefined> = process.
     adminEmail: e.ADMIN_EMAIL,
     adminPassword: e.ADMIN_PASSWORD,
     logLevel: e.LOG_LEVEL,
+    quoteDocumentTimezone: e.QUOTE_DOCUMENT_TIMEZONE,
     quoteWorker: e.QUOTE_WORKER,
     quoteWorkerPollMs: e.QUOTE_WORKER_POLL_MS,
     quoteJobMaxAttempts: e.QUOTE_JOB_MAX_ATTEMPTS,

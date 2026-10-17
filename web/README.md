@@ -118,3 +118,23 @@ Quotes open from their list or the measurement's Cotización action. The detail 
 Editar saves pessimistically, records manual inputs and returns to Show. Zone cards support adding, removing and reordering, nullable missing inputs, sanitary assumptions and the simulation review gate. Regenerar asks before replacing zone edits from the original measurement. Waste control previews the API's calculation as consumption is entered and persists by month. Measurement deletion preserves the quote.
 
 Quote contracts live in `src/types/quotes.ts`; Spanish labels, enum names, causes, warnings and screen text live in `src/i18n/quotes.ts`. Money uses `VITE_CURRENCY`; percentages, hours, FTE, quantities and surfaces use Spanish formatting. Tests cover percentage conversion, all issue codes, Appendix A.4, status chips, polling and list/show/edit/settings smoke renders. All web [P1] features are implemented using a dedicated equivalence edit page (inline editing is optional). The optional [P2] stacked bar and snapshot-change highlighting are omitted.
+
+
+## Documentos de cotización (SPEC-006)
+
+The **Documento** action on the quote header and list opens `/quotes/:id/document` in every calculation state. The page lists all missing inputs with fix links, edits client/document data independently of the calculation, and shows saved-data PDF or Excel previews. Unsaved changes show **Cambios sin guardar**. **Empresa y plantilla**, under Configuración de cotización, edits the singleton company, signature, numbering and commercial-text settings.
+
+PDF uses a blob iframe and a browser-viewer fallback. ExcelJS is dynamically imported only for the Excel tab; the production build emits a separate `exceljs.min` chunk. The preview parses the API's workbook, including both sheets, merged ranges, cell styles, column widths, row heights and its embedded logo. Its four supported numeric/date formats are independently pinned by tests.
+
+Authenticated file queries include API URL, user id, quote id, format and content hash. A hash mismatch drops the bytes and refreshes state. Download registers the cached blob's hash first, then saves that same blob; changed or no-longer-ready documents are refreshed without saving. Export history and revisions update after downloads. Low-margin quotes ask for confirmation.
+
+Regenerate `tests/fixtures/quote-document-A1.xlsx` and its JSON model with:
+
+```sh
+cd ../api
+node scripts/document-fixture.ts
+```
+
+### Notes for SPEC-006
+
+All web P1 items are implemented. Optional P2 canvas PDF viewing and old-revision download are not included. The mandated ExcelJS dependency emits upstream package-deprecation notices during installation; a scoped UUID v11 override resolves its known buffer-bounds advisory. The company editor intentionally has only a Save action because its singleton cannot be deleted.

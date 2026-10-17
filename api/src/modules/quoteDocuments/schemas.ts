@@ -1,0 +1,21 @@
+import { z } from 'zod';
+import { nullableText, nullableEmail, nullableHttpUrl, requiredText } from '../../lib/validation.ts';
+
+const phone = () => nullableText(30).refine(v => v === null || /^[0-9+() -]+$/.test(v), 'Must be a valid phone');
+const days = z.number().int().min(1).max(365);
+export const settingsSchema = z.object({
+  tradeName: requiredText(100), legalName: nullableText(150),
+  taxId: nullableText(13).refine(v => v === null || /^\d{13}$/.test(v), 'Must be exactly 13 digits'),
+  address: nullableText(200), city: nullableText(100), phone: phone(), email: nullableEmail(), website: nullableHttpUrl(200),
+  signerName: nullableText(100), signerTitle: nullableText(100), numberPrefix: z.string().regex(/^[A-Z0-9]{1,10}$/),
+  validityDays: days, paymentTerms: nullableText(500), introText: nullableText(1000), termsText: nullableText(4000), paperSize: z.enum(['A4', 'LETTER']),
+});
+export const dataSchema = z.object({
+  clientLegalName: nullableText(150), clientTaxId: nullableText(20).refine(v => v === null || /^[A-Za-z0-9-]+$/.test(v), 'Must be a valid identification'),
+  clientContactName: nullableText(100), clientContactTitle: nullableText(100), clientEmail: nullableEmail(), clientPhone: phone(), clientAddress: nullableText(200),
+  issueDate: nullableText(10).refine(v => v === null || (/^\d{4}-\d{2}-\d{2}$/.test(v) && !Number.isNaN(Date.parse(v)) && new Date(v).toISOString().slice(0, 10) === v), 'Must be a valid date'),
+  validityDays: days.nullable(), paymentTerms: nullableText(500), clientNotes: nullableText(2000), lineMode: z.enum(['perZone', 'single']), contractMonths: z.number().int().min(1).max(60).nullable(),
+});
+export type QuoteDocumentSettings = z.infer<typeof settingsSchema> & { id: 1; updatedBy: string | null; updatedAt: string };
+export type QuoteDocumentData = z.infer<typeof dataSchema> & { number: string | null };
+export const emptyData: QuoteDocumentData = { clientLegalName: null, clientTaxId: null, clientContactName: null, clientContactTitle: null, clientEmail: null, clientPhone: null, clientAddress: null, issueDate: null, validityDays: null, paymentTerms: null, clientNotes: null, lineMode: 'perZone', contractMonths: null, number: null };

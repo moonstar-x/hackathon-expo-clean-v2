@@ -2,6 +2,11 @@ import { REQUEST_FAILED_MESSAGE } from '../constants/http';
 import { formatQuantity } from '../utils/format';
 
 const messages: Record<string, string> = {
+  'The quote document is not ready': 'Falta información para generar la cotización.',
+  'The quote changed after the preview': 'La cotización cambió. Revisa la vista previa actualizada.',
+  'Must be a valid phone': 'Debe ser un teléfono válido.',
+  'Must be exactly 13 digits': 'Debe tener exactamente 13 dígitos.',
+  'Must be a valid identification': 'Debe ser una identificación válida.',
   'Must be less than or equal to the target margin':'Debe ser menor o igual al margen objetivo.',
   'Inventory unit is not compatible':'La unidad del inventario no es compatible.',
   'Zone type is in use':'El tipo de zona está en uso. Puedes desactivarlo.',
@@ -62,6 +67,8 @@ const messages: Record<string, string> = {
 };
 
 const codeMessages: Record<string, string> = {
+  DOCUMENT_NOT_READY: 'Falta información para generar la cotización.',
+  DOCUMENT_CHANGED: 'La cotización cambió. Revisa la vista previa actualizada.',
   BAD_REQUEST: 'La solicitud no es válida.',
   UNAUTHORIZED: 'Debes iniciar sesión.',
   INVALID_CREDENTIALS: messages['Invalid email or password'],
