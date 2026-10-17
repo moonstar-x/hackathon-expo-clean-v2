@@ -48,9 +48,3 @@ export const USER_MENU_TRANSFORM: PopoverOrigin = { vertical: 'top', horizontal:
 
 /** Speed of a long title sliding across the phone AppBar, in px/s while moving. */
 export const MARQUEE_SPEED: number = 45;
-
-/** Widest a create or edit form grows; wider lines of inputs get hard to scan. */
-export const FORM_MAX_WIDTH: number = 640;
-
-/** The product form lays its sections out in two columns from `md`, so it gets more room. */
-export const WIDE_FORM_MAX_WIDTH: number = 960;

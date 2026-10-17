@@ -59,3 +59,21 @@ export const stockSummarySx: SxProps<Theme> = {
 
 /** The stock on hand, the figure the page is opened for. */
 export const stockFigureSx: SxProps<Theme> = { fontSize: 30, fontWeight: 700, lineHeight: 1.2, letterSpacing: '-0.02em', mt: 0.25, mb: 1.5 };
+
+/** The movement form's preview panel: a quiet tinted panel beside the inputs. */
+export const movementPreviewSx: SxProps<Theme> = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 2.5,
+  p: 2.5,
+  mt: 1,
+  borderRadius: '12px',
+  border: '1px solid',
+  borderColor: 'divider',
+  bgcolor: (theme: Theme): string => alpha(theme.palette.text.primary, 0.025),
+};
+
+/** One state of the preview: its label, the quantity, and its meter. */
+export const previewLineSx: SxProps<Theme> = { display: 'flex', flexDirection: 'column' };
+
+export const previewFigureSx: SxProps<Theme> = { fontSize: 22, fontWeight: 600, lineHeight: 1.25, mt: 0.25, mb: 1.25 };

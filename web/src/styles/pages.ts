@@ -58,13 +58,16 @@ export const detailGridSx: SxProps<Theme> = {
 export const wideFieldSx: SxProps<Theme> = { gridColumn: '1 / -1' };
 
 /**
- * A <Create> or <Edit> page: its card only as wide as the form reads well, never wider than the
- * page. react-admin's own classes, so the page stays a plain <Create>/<Edit>.
+ * A <Create> or <Edit> page: its card spans the page, and on desktop the form's toolbar stays at the
+ * bottom of the screen while a long form scrolls under it, so Save is always in reach. The card clips
+ * (overflow: clip, not hidden, which would stop the toolbar sticking) to keep its rounded corners;
+ * the toolbar sits above the inputs' floating labels. On phones react-admin pins the toolbar itself.
  */
-export const formPageSx = (maxWidth: number): SxProps<Theme> => ({
+export const formPageSx: SxProps<Theme> = {
   mb: 3,
-  '& .RaCreate-main, & .RaEdit-main': { maxWidth },
-});
+  '& .RaCreate-card, & .RaEdit-card': { overflow: 'clip' },
+  '& .RaToolbar-desktopToolbar': { position: 'sticky', bottom: 0, zIndex: 2 },
+};
 
 /**
  * Save on the left, Delete on the right, on a hairline that closes the card. On phones react-admin
@@ -82,6 +85,3 @@ export const detailPageSx: SxProps<Theme> = { pb: 3 };
 
 /** A muted note under a field, such as "Registra un movimiento para modificar las existencias". */
 export const fieldNoteSx: SxProps<Theme> = { display: 'block', color: 'text.secondary' };
-
-/** The current-stock line sits close under the product input it describes. */
-export const currentStockSx: SxProps<Theme> = { mt: -1, mb: 2, color: 'text.secondary' };
