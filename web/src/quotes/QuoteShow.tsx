@@ -9,13 +9,14 @@ import KeyFigures from '../components/KeyFigures';
 import OutlinedBadge from '../components/list/OutlinedBadge';
 import ShowSection from '../components/show/ShowSection';
 import DocumentButton from '../components/quotes/List/DocumentButton';
+import TechnicalOffer from '../components/quotes/show/TechnicalOffer';
 import { detailPageSx } from '../styles/pages';
 import { quoteMetaSx, quoteTabPanelSx, quoteTabsSx } from '../styles/quotes';
 import ConfirmButton from '../components/ConfirmButton';
 import { useAppConfig } from '../AppConfigContext';
 import { quoteEnums, quoteFields, quoteIssues, quoteText } from '../i18n/quotes';
 import type { InventoryDataProvider } from '../types/providers';
-import type { Issue, PurchasePlanRow, Quote, TechnicalOfferRow, TechnicalProduct, WasteControl, WasteRow, ZoneInput, ZoneResult, ZoneTypeValues } from '../types/quotes';
+import type { Issue, PurchasePlanRow, Quote, TechnicalProduct, WasteControl, WasteRow, ZoneInput, ZoneResult, ZoneTypeValues } from '../types/quotes';
 import { formatCurrency } from '../utils/format';
 import { formatDateTime } from '../utils/dates';
 import { QuoteStatus, StateChip } from './Chips';
@@ -284,7 +285,7 @@ export function QuoteDetail(): ReactElement | null {
             share: number | null;
         }): object => ({ name: quoteFields[r.key], totalCost: r.amount, share: r.share }))}/><Typography variant="h6">{quoteText.zoneBreakdown}</Typography><Rows fields={['name', 'zoneTypeName', 'risk', 'floorArea', 'fte', 'totalCost', 'targetPrice', 'pricePerM2']} rows={[...result.zones.map((z: ZoneResult, i: number): object => ({ ...z, zoneTypeName: quote.snapshot!.zoneTypes[quote.zones[i].zoneTypeId!]?.name })), { name: quoteText.grandTotal, ...result.totals }]}/></>}
         {tab === 1 && <ZoneDetails quote={quote} openZone={openZone}/>}
-        {tab === 2 && <Rows rows={result.technicalOffer.map((r: TechnicalOfferRow): object => ({ ...r, hoursBetweenCleanings: `${quoteText.every} ${number(r.hoursBetweenCleanings, 0)} h · ${number(r.cleaningsPerDay, 0)} ${quoteText.perDay}`, disinfectantPerCleaning: `${number(r.disinfectantPerCleaning, 3)} ${r.dailyDisinfectant.doseUnit}` }))} fields={['name', 'zoneTypeName', 'risk', 'scheduleName', 'hoursBetweenCleanings', 'terminalsPerMonth', 'cleaningProduct', 'dailyDisinfectant', 'terminalDisinfectant', 'solutionPerDailyCleaning', 'disinfectantPerCleaning', 'fte']}/>}
+        {tab === 2 && <TechnicalOffer rows={result.technicalOffer} totalFte={result.totals.fte}/>}
         {tab === 3 && <><Rows fields={['name', 'unit', 'presentationSize', 'pricePerContainer', 'pricePerUnit', 'theoretical', 'waste', 'total', 'containers', 'stock', 'toBuy', 'purchaseCost', 'wasteCost']} rows={result.purchasePlan.rows.map((r: PurchasePlanRow): object => ({ ...r, stock: quote.snapshot!.products[r.productId]?.inventoryProductId ? `${number(r.stock, 0)} · ${quoteText.inventorySource}` : r.stock }))}/><Values title={quoteText.totals} values={{ purchaseCost: result.purchasePlan.totalPurchaseCost, wasteCost: result.purchasePlan.totalWasteCost }}/></>}
         {tab === 4 && <>{result.flatRate.rate > 0 ? <Values title={quoteText.flatRate} values={result.flatRate}/> : <Alert severity="info">{quoteText.noFlatRate}</Alert>}<Rows fields={['name', 'floorArea', 'totalCost', 'flatRateRevenue', 'flatRateMargin', 'status']} rows={result.zones.map((z: ZoneResult): object => ({ ...z, status: z.flatRateStatus }))}/>{result.reference.price ? <Values title={quoteFields.externalReferencePrice} values={result.reference}/> : <Alert severity="info">{quoteText.referencePrompt}</Alert>}</>}
         {tab === 5 && <WasteEditor quote={quote}/>}

@@ -1,5 +1,6 @@
 import type { SortPayload } from 'react-admin';
 import type { Tone } from '../types/list';
+import type { OfferProductKey } from '../types/quotes';
 
 /**
  * Badge tone per quote state, calculation and margin status (the labels live in quoteEnums): red for
@@ -27,3 +28,17 @@ export const QUOTE_SORT_FIELDS: string[] = ['createdAt', 'name', 'offeredPrice',
 
 /** The statuses a quote can be filtered by; labels from quoteEnums, untranslated. */
 export const QUOTE_STATUSES: string[] = ['needsReview', 'simulation'];
+
+/** Badge tone per sanitary risk of a zone type: critical red, semicritical orange, the rest neutral. */
+export const RISK_TONE: Record<string, Tone> = {
+  critical: 'red',
+  semicritical: 'orange',
+  noncritical: 'neutral',
+};
+
+/** A zone's three products in the technical offer, by what each is for (`app.quotes.offer.roles`). */
+export const OFFER_PRODUCTS: [string, OfferProductKey][] = [
+  ['cleaning', 'cleaningProduct'],
+  ['daily', 'dailyDisinfectant'],
+  ['terminal', 'terminalDisinfectant'],
+];

@@ -356,3 +356,16 @@ export interface CatalogActionsProps {
     /** Icons instead of labelled buttons, for the card layout. */
     compact?: boolean;
 }
+export interface TechnicalOfferProps {
+    rows: TechnicalOfferRow[];
+    /** The quote's total FTE, for the table's last row. */
+    totalFte: number;
+}
+export interface TechnicalOfferRowProps {
+    row: TechnicalOfferRow;
+}
+export interface OfferZoneProps extends TechnicalOfferRowProps {
+    /** The zone's name as the heading of a card, instead of a table cell's first line. */
+    heading?: boolean;
+}
+export type OfferProductKey = 'cleaningProduct' | 'dailyDisinfectant' | 'terminalDisinfectant';

@@ -364,6 +364,22 @@ const appSpanish: StringMap = {
       document: 'Documento',
       marginLine: 'Margen: %{margin}',
       glance: 'De un vistazo',
+      // The Oferta técnica tab: a zone's cleaning plan in five groups.
+      offer: {
+        zone: 'Zona',
+        frequency: 'Frecuencia',
+        products: 'Productos (dosis por litro de agua)',
+        perCleaning: 'Por limpieza',
+        staff: 'Personal (FTE)',
+        total: 'Total',
+        totalStaff: 'Personal total (FTE)',
+        terminals: '%{count} terminal al mes |||| %{count} terminales al mes',
+        noTerminals: 'Sin terminales',
+        solution: '%{amount} L de solución',
+        disinfectant: '%{amount} de desinfectante',
+        roles: { cleaning: 'Limpieza', daily: 'Desinfección diaria', terminal: 'Desinfección terminal' },
+        empty: 'No hay zonas activas: activa al menos una para ver su plan de limpieza.',
+      },
     },
     quoteSettings: {
       parameters: 'Parámetros de cotización',
