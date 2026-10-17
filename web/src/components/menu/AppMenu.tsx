@@ -1,3 +1,4 @@
+import BusinessIcon from '@mui/icons-material/Business';
 import SettingsIcon from '@mui/icons-material/Settings';
 import type { ReactElement } from 'react';
 import { Menu } from 'react-admin';
@@ -21,8 +22,9 @@ const AppMenu = (): ReactElement => (
     <Menu.ResourceItem name="categories" />
     <Menu.ResourceItem name="suppliers" />
     <SectionLabel label="app.menu.quoting" />
-    <Menu.Item to="/quote-parameters/1" primaryText="Parámetros" leftIcon={<SettingsIcon />} />
-    <Menu.Item to="/quote-document-settings/1" primaryText="Empresa y plantilla" leftIcon={<SettingsIcon />} />
+    {/* A single record with no list: the item opens it directly. */}
+    <Menu.Item to="/quote-parameters/1" primaryText="app.menu.parameters" leftIcon={<SettingsIcon />} />
+    <Menu.Item to="/quote-document-settings/1" primaryText="app.menu.documentSettings" leftIcon={<BusinessIcon />} />
     <Menu.ResourceItem name="quote-zone-types" />
     <Menu.ResourceItem name="quote-schedules" />
     <Menu.ResourceItem name="quote-products" />

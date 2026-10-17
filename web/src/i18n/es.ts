@@ -92,7 +92,15 @@ const appSpanish: StringMap = {
     },
   },
   app: {
-    menu: { quoting:'Configuración de cotización', inventory: 'Inventario', movements: 'Movimientos', catalog: 'Catálogo', administration: 'Administración' },
+    menu: {
+      quoting: 'Configuración de cotización',
+      parameters: 'Parámetros',
+      documentSettings: 'Empresa y plantilla',
+      inventory: 'Inventario',
+      movements: 'Movimientos',
+      catalog: 'Catálogo',
+      administration: 'Administración',
+    },
     page: { editing: 'Editar %{name}' },
     auth: {
       title: 'Iniciar sesión',

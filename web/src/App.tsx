@@ -1,14 +1,6 @@
-import { Route } from 'react-router-dom';
-import { DocumentSettings } from './quoteDocuments/DocumentSettings';
-import { QuoteDocumentRoute } from './quoteDocuments/QuoteDocumentRoute';
 import { useMemo, type ReactElement } from 'react';
-import RequestQuoteIcon from '@mui/icons-material/RequestQuote';
-import SettingsIcon from '@mui/icons-material/Settings';
-import { QuoteList } from './quotes/QuoteList';
-import { QuoteShow } from './quotes/QuoteShow';
-import { QuoteEdit } from './quotes/QuoteEdit';
-import { CatalogList, CatalogEdit, CatalogCreate, ParametersEdit } from './quotes/Settings';
-import { Admin, CustomRoutes, Resource, type AuthProvider } from 'react-admin';
+import { Admin, CustomRoutes, Resource, type AuthProvider, type ResourceProps } from 'react-admin';
+import { Route } from 'react-router-dom';
 import Dashboard from './components/dashboard/Dashboard';
 import LoginPage from './components/login/LoginPage';
 import { i18nProvider } from './i18n';
@@ -18,6 +10,9 @@ import { createDataProvider } from './providers/dataProvider';
 import categories from './resources/categories';
 import measurements from './resources/measurements';
 import products from './resources/products';
+import { QuoteDocumentRoute } from './quoteDocuments/QuoteDocumentRoute';
+import { quoteCatalogs, quoteDocumentSettings, quoteParameters } from './resources/quote-settings';
+import quotes from './resources/quotes';
 import stockMovements from './resources/stock-movements';
 import suppliers from './resources/suppliers';
 import users from './resources/users';
@@ -50,15 +45,21 @@ const App = ({ config }: AppProps): ReactElement => {
       disableTelemetry
     >
       <Resource name="measurements" {...measurements} />
-      <Resource name="quotes" list={QuoteList} show={QuoteShow} edit={QuoteEdit} icon={RequestQuoteIcon} />
+      <Resource name="quotes" {...quotes} />
       <Resource name="products" {...products} />
       <Resource name="stock-movements" {...stockMovements} />
       <Resource name="categories" {...categories} />
       <Resource name="suppliers" {...suppliers} />
-      <Resource name="quote-parameters" edit={ParametersEdit} icon={SettingsIcon} />
-      {['quote-zone-types','quote-schedules','quote-products','quote-location-types'].map((resource: string): ReactElement => <Resource key={resource} name={resource} list={<CatalogList resource={resource} />} edit={<CatalogEdit resource={resource} />} create={resource === 'quote-location-types' ? undefined : <CatalogCreate resource={resource} />} />)}
-      <Resource name="quote-document-settings" edit={DocumentSettings} />
-      <CustomRoutes><Route path="/quotes/:id/document" element={<QuoteDocumentRoute />} /></CustomRoutes>
+      <Resource name="quote-parameters" {...quoteParameters} />
+      {quoteCatalogs.map(
+        ([name, resource]: [string, Omit<ResourceProps, 'name'>]): ReactElement => (
+          <Resource key={name} name={name} {...resource} />
+        ),
+      )}
+      <Resource name="quote-document-settings" {...quoteDocumentSettings} />
+      <CustomRoutes>
+        <Route path="/quotes/:id/document" element={<QuoteDocumentRoute />} />
+      </CustomRoutes>
       <Resource name="users" {...users} />
     </Admin>
   );
