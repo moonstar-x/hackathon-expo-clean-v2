@@ -29,6 +29,9 @@ export interface QuoteDocument {
   conditions: { label: string; text: string[] }[];         // §3.6, text split in paragraphs
   clientNotes: string[] | null;
   acceptance: { issuer: string[]; client: string[] };
+  // The company's electronic signature, stamped as a QR in the issuer's acceptance box of the PDF, which it signs;
+  // the renderer gets the key apart. Absent, not null, when the company doesn't sign: such documents keep their hash.
+  signature?: { signerName: string; certificateSha256: string; reason: string; location: string | null };
   footer: string;                                          // "CleanCode · COT-00007 Rev. 2"
   fileBaseName: string;                                    // §7.4
 }

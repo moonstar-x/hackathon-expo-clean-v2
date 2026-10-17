@@ -32,6 +32,7 @@ export interface QuoteDocument {
   conditions: { label: string; text: string[] }[];         // §3.6, text split in paragraphs
   clientNotes: string[] | null;
   acceptance: { issuer: string[]; client: string[] };
+  signature?: DocumentSignature;                           // absent when the company doesn't sign
   footer: string;                                          // "CleanCode · COT-00007 Rev. 2"
   fileBaseName: string;                                    // §7.4
 }
@@ -68,6 +69,35 @@ export interface CompanyLogo {
   upload: UseMutationResult<Blob, Error, Blob>;
   remove: UseMutationResult<void, Error, void>;
 }
+/** The company's electronic signature on a document: the PDF is signed with it and stamps its QR in the company's signature box. */
+export interface DocumentSignature { signerName: string; certificateSha256: string; reason: string; location: string | null }
+/** Whether the stored signature signs: it may have expired, or the API may no longer open it (it must be loaded again). */
+export type SignatureStatus = 'valid' | 'expired' | 'unavailable';
+/** The certificate of the company's electronic signature, as the API describes it: never the .p12 or its password. */
+export interface SignatureInfo {
+  signerName: string; issuerName: string; serialNumber: string; validFrom: string; validTo: string; certificateSha256: string;
+  size: number; sha256: string; status: SignatureStatus; updatedBy: string; updatedAt: string;
+}
+/** A .p12 and its password, sent together. */
+export interface SignatureUpload { file: File; password: string }
+/** The company's electronic signature, and loading or removing it; both update what every screen shows. */
+export interface CompanySignature {
+  signature: UseQueryResult<SignatureInfo | null, Error>;
+  upload: UseMutationResult<SignatureInfo, Error, SignatureUpload>;
+  remove: UseMutationResult<void, Error, void>;
+}
+export interface SignaturePreviewProps {
+  /** A signature that signs; without one the box keeps the space to sign by hand. */
+  signerName: string | undefined;
+  loading: boolean;
+}
+export interface SignatureDialogProps {
+  open: boolean;
+  onClose: () => void;
+  upload: CompanySignature['upload'];
+}
+/** What to fix before a signature loads, in Spanish, by field. */
+export interface SignatureFieldErrors { file?: string; password?: string }
 /** A titled block of the document settings: each field with its width on the form's grid. */
 export interface SettingGroup { title: string; hint?: string; fields: [string, number][] }
 export interface DocumentSettingsEditProps {
@@ -76,7 +106,7 @@ export interface DocumentSettingsEditProps {
   groups: SettingGroup[];
   /** The settings this page saves: the API merges a partial PUT, so the other page's fields stay as saved. */
   fields: readonly string[];
-  /** A section after the groups (Empresa's "Logo y colores"). */
+  /** Sections after the groups (Empresa's "Firma electrónica" and "Logo y colores"). */
   children?: ReactNode;
 }
 export interface HeaderPreviewProps {

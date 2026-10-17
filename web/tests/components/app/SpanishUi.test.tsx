@@ -99,7 +99,7 @@ const measurement: Record<string, unknown> = {
     }),
   ),
 };
-// The quote documents' settings record behind Empresa and Plantilla; the company has no logo yet.
+// The quote documents' settings record behind Empresa and Plantilla; the company has no logo or signature yet.
 const documentSettings: Record<string, unknown> = {
   id: 1,
   tradeName: 'CleanCode',
@@ -142,8 +142,8 @@ const fakeApi = (input: string | URL | Request): Promise<Response> => {
   }
   if (resource === 'quote-document-settings') {
     return Promise.resolve(
-      url.pathname.endsWith('/logo')
-        ? jsonResponse({ code: 'NOT_FOUND', message: 'Logo not found' }, { status: 404 })
+      url.pathname.endsWith('/logo') || url.pathname.endsWith('/signature')
+        ? jsonResponse({ code: 'NOT_FOUND', message: 'Not found' }, { status: 404 })
         : jsonResponse(documentSettings),
     );
   }
@@ -197,7 +197,7 @@ it.each([
   ['/users/1', ['Nueva contraseña', 'No puedes desactivar tu propia cuenta.']],
   [
     '/company',
-    ['Administración', 'Logo y colores', 'Subir logo', 'Color principal', 'Datos de la empresa', 'Razón social', 'Representante legal', 'Cargo', 'Guardar'],
+    ['Administración', 'Logo y colores', 'Subir logo', 'Color principal', 'Datos de la empresa', 'Razón social', 'Representante legal', 'Cargo', 'Firma electrónica', 'Cargar firma', 'Guardar'],
   ],
   ['/template', ['Administración', 'Plantilla', 'Numeración y validez', 'Tamaño de papel (PDF)', 'Textos', 'Términos generales', 'Guardar']],
 ])('renders %s in Spanish', async (path: string, labels: string[]): Promise<void> => {

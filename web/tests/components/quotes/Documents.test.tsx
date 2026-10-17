@@ -102,6 +102,11 @@ describe('Documento page', (): void => {
     renderPage(); await screen.findByTitle('Vista previa PDF'); fireEvent.click(screen.getByRole('button', { name: 'Descargar PDF' }));
     expect(confirm).toHaveBeenCalledWith('El margen está bajo el mínimo. ¿Descargar de todos modos?'); expect(provider.registerDocumentExport).not.toHaveBeenCalled();
   });
+  it('says why the PDF goes out unsigned and links to Empresa to fix it', async (): Promise<void> => {
+    vi.mocked(provider.getDocumentState).mockResolvedValue({ ...state(), warnings: [{ code: 'SIGNATURE_EXPIRED' }] });
+    renderPage(); expect(await screen.findByText('La firma electrónica de tu empresa caducó: el PDF sale sin firma. Carga una vigente en Empresa.')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Ir a Empresa' })).toHaveAttribute('href', '/company'); expect(screen.getByRole('button', { name: 'Descargar PDF' })).toBeEnabled();
+  });
   it('shows history and indicates when the current content is a new revision', async (): Promise<void> => {
     vi.mocked(provider.getDocumentState).mockResolvedValue({ ...state(), revision: 2 }); vi.mocked(provider.getDocumentExports).mockResolvedValue([exported]);
     renderPage(); expect(await screen.findByText('nueva revisión: cambió desde la última descarga')).toBeInTheDocument(); expect(screen.getByText(/Rev. 1 · PDF · ana@example.test/)).toBeInTheDocument();
@@ -128,10 +133,10 @@ describe('document settings and actual workbook preview', (): void => {
     fireEvent.click(screen.getByRole('tab', { name: 'Alcance' })); expect(screen.getByRole('table', { name: 'Alcance' })).toBeInTheDocument();
   });
   it.each([
-    ['/company', <CompanySettings key="company" />, ['Logo y colores', 'Datos de la empresa', 'Razón social', 'Representante legal', 'Cargo'], ['Numeración y validez', 'Términos generales']],
-    ['/template', <TemplateSettings key="template" />, ['Numeración y validez', 'Textos', 'Términos generales', 'Forma de pago predeterminada'], ['Razón social', 'Representante legal', 'Logo y colores']],
+    ['/company', <CompanySettings key="company" />, ['Logo y colores', 'Datos de la empresa', 'Razón social', 'Representante legal', 'Cargo', 'Firma electrónica', 'Cargar firma'], ['Numeración y validez', 'Términos generales']],
+    ['/template', <TemplateSettings key="template" />, ['Numeración y validez', 'Textos', 'Términos generales', 'Forma de pago predeterminada'], ['Razón social', 'Representante legal', 'Firma electrónica', 'Logo y colores']],
   ])('smoke renders %s with its own settings only', async (path: string, page: ReactElement, shown: string[], hidden: string[]): Promise<void> => {
-    // The logo is fetched apart from the record; this company has none yet.
+    // The logo and the signature are fetched apart from the record; this company has neither yet.
     vi.stubGlobal('fetch', vi.fn((): Promise<Response> => Promise.resolve(new Response(JSON.stringify({ code: 'NOT_FOUND', message: 'Logo not found' }), { status: 404 }))));
     const dataProvider: DataProvider = testDataProvider({ getOne: <R extends RaRecord>(_r: string, p: GetOneParams<R>): Promise<GetOneResult<R>> => Promise.resolve({ data: { id: p.id, tradeName: 'CleanCode', numberPrefix: 'COT', validityDays: 30, paperSize: 'A4', brandColor: '#4F46E5' } as unknown as R }) });
     renderWithAdmin(<Routes><Route path={path} element={page} /></Routes>, { at: path, dataProvider });
@@ -139,11 +144,11 @@ describe('document settings and actual workbook preview', (): void => {
     for (const text of shown) expect(screen.getAllByText(text).length).toBeGreaterThan(0);
     for (const text of hidden) expect(screen.queryByText(text)).not.toBeInTheDocument();
   });
-  it('puts Logo y colores last on Empresa, after the company data and its representative', async (): Promise<void> => {
+  it('puts Logo y colores last on Empresa, after the company data, its representative and its electronic signature', async (): Promise<void> => {
     vi.stubGlobal('fetch', vi.fn((): Promise<Response> => Promise.resolve(new Response(JSON.stringify({ code: 'NOT_FOUND', message: 'Logo not found' }), { status: 404 }))));
     const dataProvider: DataProvider = testDataProvider({ getOne: <R extends RaRecord>(_r: string, p: GetOneParams<R>): Promise<GetOneResult<R>> => Promise.resolve({ data: { id: p.id, tradeName: 'CleanCode', brandColor: '#4F46E5' } as unknown as R }) });
     renderWithAdmin(<Routes><Route path="/company" element={<CompanySettings />} /></Routes>, { at: '/company', dataProvider });
     expect(await screen.findByText('Logo y colores')).toBeInTheDocument();
-    expect(screen.getAllByRole('heading', { level: 2 }).map((heading: HTMLElement): string | null => heading.textContent)).toEqual(['Datos de la empresa', 'Representante legal', 'Logo y colores']);
+    expect(screen.getAllByRole('heading', { level: 2 }).map((heading: HTMLElement): string | null => heading.textContent)).toEqual(['Datos de la empresa', 'Representante legal', 'Firma electrónica', 'Logo y colores']);
   });
 });

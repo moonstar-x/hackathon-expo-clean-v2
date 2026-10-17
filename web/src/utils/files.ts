@@ -14,6 +14,19 @@ export const downloadName = (disposition: string | null, fallback: string): stri
   return /filename="([^"]+)"/i.exec(header)?.[1] ?? fallback;
 };
 
+/** A file's bytes in base64, as a JSON body carries them. */
+export const readBase64 = (file: Blob): Promise<string> =>
+  new Promise((resolve: (value: string) => void, reject: (reason: Error) => void): void => {
+    const reader: FileReader = new FileReader();
+    reader.onload = (): void => {
+      // A data URL: "data:<type>;base64," and then the bytes.
+      const url: string = typeof reader.result === 'string' ? reader.result : '';
+      resolve(url.slice(url.indexOf(',') + 1));
+    };
+    reader.onerror = (): void => reject(reader.error ?? new Error('The file could not be read'));
+    reader.readAsDataURL(file);
+  });
+
 /** Saves a Blob as a download, through a link the browser clicks on its own. */
 export const saveBlob = (blob: Blob, name: string): void => {
   const url: string = URL.createObjectURL(blob);

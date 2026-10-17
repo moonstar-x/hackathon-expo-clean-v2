@@ -44,6 +44,15 @@ export const LOGO_MIN_COLOR_SHARE: number = 0.02;
 /** Colors closer than this (RGB distance) are offered as one. */
 export const LOGO_COLOR_MERGE_DISTANCE: number = 24;
 
+/** The files the API takes as an electronic signature, by extension: browsers rarely know a .p12's type. */
+export const SIGNATURE_EXTENSIONS: readonly string[] = ['.p12', '.pfx'];
+
+/** The API's limit on a signature file, in bytes; real ones weigh a few KB. */
+export const SIGNATURE_MAX_BYTES: number = 64 * 1024;
+
+/** Closer than this to its expiry, a signature warns that it needs renewing. */
+export const SIGNATURE_RENEWAL_DAYS: number = 30;
+
 /** The settings each page saves (see DocumentSettingsEditProps.fields). */
 export const COMPANY_FIELDS: readonly string[] = ['tradeName', 'legalName', 'taxId', 'address', 'city', 'phone', 'email', 'website', 'signerName', 'signerTitle', 'brandColor'];
 export const TEMPLATE_FIELDS: readonly string[] = ['numberPrefix', 'validityDays', 'paperSize', 'paymentTerms', 'introText', 'termsText'];

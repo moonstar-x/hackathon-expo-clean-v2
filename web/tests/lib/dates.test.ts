@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatDateTime, formatDay, formatPeriod, formatTime, recentPeriods } from '../../src/utils/dates';
+import { formatDate, formatDateTime, formatDay, formatPeriod, formatTime, recentPeriods } from '../../src/utils/dates';
 
 describe('formatDateTime', () => {
   it('formats an ISO timestamp and ignores bad input', (): void => {
@@ -9,6 +9,14 @@ describe('formatDateTime', () => {
     expect(formatDateTime('2026-10-16T14:03:11.512Z')).toBe(
       new Date('2026-10-16T14:03:11.512Z').toLocaleString('es', { dateStyle: 'medium', timeStyle: 'short' }),
     );
+  });
+});
+
+describe('formatDate', () => {
+  it('formats the day of an ISO timestamp and ignores bad input', (): void => {
+    expect(formatDate('2126-01-01T12:00:00.000Z')).toBe(new Date('2126-01-01T12:00:00.000Z').toLocaleDateString('es', { dateStyle: 'medium' }));
+    expect(formatDate('nope')).toBe('');
+    expect(formatDate(undefined)).toBe('');
   });
 });
 

@@ -8,24 +8,28 @@ import { quotesRepository } from '../quotes/repository.ts';
 import { buildQuoteDocument, dateInZone, documentHash, readiness } from './builder.ts';
 import { LOGO_MAX_BYTES, LOGO_TYPES, companyLogo, type LogoInfo } from './logo.ts';
 import { documentRepository } from './repository.ts';
+import { signatureUploadSchema } from './schemas.ts';
+import { companySignature, signingTime } from './signature.ts';
 
 export function quoteDocumentsRouter({ db, config }: AppDeps) {
-  const router = Router(), repo = documentRepository(db), logos = companyLogo(repo, fileStore(config.filesPath));
-  // The logo's details only: its bytes are read where a file is rendered.
-  function state(id: number, logo: LogoInfo | null = logos.info()) {
+  const router = Router(), repo = documentRepository(db), files = fileStore(config.filesPath), logos = companyLogo(repo, files), signatures = companySignature(repo, files, config.jwtSecret);
+  // The logo's details only: its bytes are read where a file is rendered. The signature is the one that signs now.
+  function state(id: number, logo: LogoInfo | null = logos.info(), signature = signatures.current(new Date())) {
     const quote = quotesRepository(db).get(id), data = repo.data(id), settings = repo.settings();
     const { blockers, warnings } = readiness(quote, data, settings);
+    // Optional: a signature that can't sign leaves the PDF unsigned and says why, never blocks it.
+    if (signature && 'warning' in signature) warnings.push({ code: signature.warning });
     const number = data.number ?? `${settings.numberPrefix}-${String(id).padStart(5, '0')}`;
     const defaults = { issueDate: quote.calculation.calculatedAt ? dateInZone(quote.calculation.calculatedAt as string, config.quoteDocumentTimezone) : null, validityDays: settings.validityDays, paymentTerms: settings.paymentTerms };
     const base = { quoteId: id, ready: !blockers.length, blockers, warnings, data, defaults, number };
     if (blockers.length) return { ...base, contentHash: null, revision: null, fileNames: null, document: null };
-    const input = { quote, data, settings, number, timezone: config.quoteDocumentTimezone, revision: 1, logo };
+    const input = { quote, data, settings, number, timezone: config.quoteDocumentTimezone, revision: 1, logo, signature: signature && 'info' in signature ? signature.info : null };
     const initial = buildQuoteDocument(input), contentHash = documentHash(initial), last = repo.exports(id)[0];
     const revision = last ? last.revision + (last.contentHash === contentHash ? 0 : 1) : 1;
     const document = revision === 1 ? initial : buildQuoteDocument({ ...input, revision });
     return { ...base, contentHash, revision, fileNames: { pdf: `${document.fileBaseName}.pdf`, xlsx: `${document.fileBaseName}.xlsx` }, document };
   }
-  const readyState = (id: number, logo?: LogoInfo | null) => { const s = state(id, logo); if (!s.document) throw new HttpError(409, 'DOCUMENT_NOT_READY', 'The quote document is not ready'); return s as typeof s & { document: NonNullable<typeof s.document>; contentHash: string; revision: number; fileNames: { pdf: string; xlsx: string } }; };
+  const readyState = (id: number, logo?: LogoInfo | null, signature?: ReturnType<typeof signatures.current>) => { const s = state(id, logo, signature); if (!s.document) throw new HttpError(409, 'DOCUMENT_NOT_READY', 'The quote document is not ready'); return s as typeof s & { document: NonNullable<typeof s.document>; contentHash: string; revision: number; fileNames: { pdf: string; xlsx: string } }; };
   router.get('/quote-document-settings/:id', (req, res) => { if (parseId(req.params.id) !== 1) throw notFound(); res.json(repo.settings()); });
   router.put('/quote-document-settings/:id', (req, res) => { if (parseId(req.params.id) !== 1) throw notFound(); repo.saveSettings(repo.settings(), requireObjectBody(req.body), req.user!.email); res.json(repo.settings()); });
   const logoPath = '/quote-document-settings/:id/logo', singleton = (id: string) => { if (parseId(id) !== 1) throw notFound(); };
@@ -40,6 +44,14 @@ export function quoteDocumentsRouter({ db, config }: AppDeps) {
     res.json(logos.save(Buffer.isBuffer(req.body) ? req.body : Buffer.alloc(0), req.user!.email));
   });
   router.delete(logoPath, (req, res) => { singleton(req.params.id); logos.remove(); res.status(204).end(); });
+  // The certificate's details, never the .p12 or its password.
+  const signaturePath = '/quote-document-settings/:id/signature';
+  router.get(signaturePath, (req, res) => { singleton(req.params.id); const signature = signatures.info(new Date()); if (!signature) throw notFound('Signature not found'); res.json(signature); });
+  router.put(signaturePath, (req, res) => {
+    singleton(req.params.id); const { file, password } = signatureUploadSchema.parse(requireObjectBody(req.body));
+    res.json(signatures.save(Buffer.from(file, 'base64'), password, req.user!.email, new Date()));
+  });
+  router.delete(signaturePath, (req, res) => { singleton(req.params.id); signatures.remove(); res.status(204).end(); });
   router.get('/quotes/:id/document', (req, res) => res.json(state(parseId(req.params.id))));
   router.put('/quotes/:id/document', (req, res) => { const id = parseId(req.params.id); quotesRepository(db).get(id); repo.saveData(id, repo.data(id), requireObjectBody(req.body), req.user!.email); res.json(state(id)); });
   router.get('/quotes/:id/document/exports', (req, res) => { const id = parseId(req.params.id); quotesRepository(db).get(id); res.json(repo.exports(id)); });
@@ -58,9 +70,11 @@ export function quoteDocumentsRouter({ db, config }: AppDeps) {
     res.status(201).json(result);
   });
   for (const format of ['pdf', 'xlsx'] as const) router.get(`/quotes/:id/document/${format}`, async (req, res) => {
-    // One read of the logo, before any await, gives the document and the renderer the same file.
-    const id = parseId(req.params.id), logo = logos.file(), s = readyState(id, logo?.info ?? null), start = performance.now();
-    const bytes = format === 'pdf' ? await (await import('./pdf.ts')).renderPdf(s.document, logo?.data ?? null) : await (await import('./xlsx.ts')).renderXlsx(s.document, logo?.data ?? null);
+    // One read of the logo and the signature, before any await, gives the document and the renderer the same files;
+    // the PDF is signed at the moment the document was built for.
+    const id = parseId(req.params.id), at = new Date(), logo = logos.file(), signature = signatures.current(at), s = readyState(id, logo?.info ?? null, signature), start = performance.now();
+    const signing = signature && 'signer' in signature ? { signer: signature.signer, at, time: signingTime(at, config.quoteDocumentTimezone) } : null;
+    const bytes = format === 'pdf' ? await (await import('./pdf.ts')).renderPdf(s.document, logo?.data ?? null, signing) : await (await import('./xlsx.ts')).renderXlsx(s.document, logo?.data ?? null);
     req.log.info({ quoteId: id, format, revision: s.revision, bytes: bytes.length, durationMs: Math.round(performance.now() - start) }, 'quote document rendered');
     const name = s.fileNames[format], ascii = name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\x20-\x7E]/g, '').replace(/["\\]/g, '');
     const encoded = encodeURIComponent(name).replace(/['()*]/g, c => `%${c.charCodeAt(0).toString(16).toUpperCase()}`);
