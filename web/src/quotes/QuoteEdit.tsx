@@ -11,7 +11,7 @@ import ResponsiveTabbedFormTabs from '../components/ResponsiveTabbedFormTabs';
 import Section from '../components/Section';
 import CleanedAreaInput from '../components/quotes/CleanedAreaInput';
 import { formPageSx } from '../styles/pages';
-import { parametersGridSx } from '../styles/quotes';
+import { parametersGridSx, zonesIteratorSx } from '../styles/quotes';
 import type { Measurement, MeasurementRoom } from '../types/api';
 import type { Quote, ZoneTypeValues } from '../types/quotes';
 import { fractionToPercent, number, percentToFraction } from './format';
@@ -56,7 +56,8 @@ const ConfirmQuoteButton = (): ReactElement | null => {
 /**
  * A quote's inputs in two tabs, since a quote with many zones is far longer than one page should be:
  * the case's data, then the zones, each in sections. The Zonas tab has its own address
- * (/quotes/:id/zones), so a zone's "Editar zona" opens it directly.
+ * (/quotes/:id/zones), so a zone's "Editar zona" opens it directly. Each zone has its own remove
+ * button and there is no "clear the list" one, which emptied every zone when one was meant.
  */
 export function QuoteEdit(): ReactElement {
     return <Edit mutationMode="pessimistic" redirect="show" actions={<EditHeader />} sx={formPageSx}><OriginalMeasurement><TabbedForm tabs={<ResponsiveTabbedFormTabs />} toolbar={<FormToolbar withDelete actions={<ConfirmQuoteButton />} />}>
@@ -75,7 +76,7 @@ export function QuoteEdit(): ReactElement {
     </TabbedForm.Tab>
     <TabbedForm.Tab label={quoteText.zones} path="zones">
     <Alert severity="info" sx={{ width: '100%', mb: 1 }}>{quoteText.manualEditsAdvice}</Alert>
-    <ArrayInput source="zones" label={false}><SimpleFormIterator disableReordering={false} getItemLabel={(index: number): string => `${quoteText.zone} ${index + 1}`}>
+    <ArrayInput source="zones" label={false}><SimpleFormIterator disableReordering={false} disableClear sx={zonesIteratorSx} getItemLabel={(index: number): string => `${quoteText.zone} ${index + 1}`}>
     <ScanHint />
     <Section title={quoteText.zone}>
     <Cell><TextInput source="name" label={quoteFields.name} required fullWidth/></Cell>

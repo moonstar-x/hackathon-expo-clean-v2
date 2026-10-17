@@ -6,6 +6,12 @@ import { sectionGridSx } from './pages';
 export const parametersGridSx: SxProps<Theme> = [sectionGridSx, { width: '100%' }] as SxProps<Theme>;
 
 /**
+ * The Zonas tab's list: each zone's remove and reorder buttons always show. react-admin shows them
+ * only while the zone is hovered, and a zone is taller than the screen, so they were missed.
+ */
+export const zonesIteratorSx: SxProps<Theme> = { '& .RaSimpleFormIterator-action': { visibility: 'visible' } };
+
+/**
  * A parameter's unit, level with its value: a filled input's value sits below its label, and MUI only
  * lowers start adornments to match.
  */

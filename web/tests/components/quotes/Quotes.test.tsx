@@ -144,6 +144,20 @@ describe('quote screens', (): void => {
         fireEvent.click(screen.getByRole('button', { name: /Guardar/ }));
         await waitFor((): void => { expect(sent?.zones?.[0]).toMatchObject({ cleanedArea: 12.5, machines: 2, freeArea: 17.15 }); });
     });
+    it('removes only the zone asked for, and has no button that empties the list', async (): Promise<void> => {
+        let sent: Partial<Quote> | undefined;
+        const dataProvider: DataProvider = provider();
+        dataProvider.update = <R extends RaRecord>(_resource: string, params: UpdateParams<R>): Promise<UpdateResult<R>> => { sent = params.data as Partial<Quote>; return Promise.resolve({ data: { ...quote, ...params.data, id: params.id } as unknown as R }); };
+        renderWithAdmin(<Routes><Route path="/quotes/:id/*" element={<QuoteEdit/>}/></Routes>, { resource: 'quotes', at: '/quotes/1', dataProvider });
+        fireEvent.click(await screen.findByRole('tab', { name: 'Zonas' }));
+        const removes: HTMLElement[] = await screen.findAllByRole('button', { name: 'Quitar' });
+        expect(removes).toHaveLength(quote.zones.length);
+        expect(screen.queryByRole('button', { name: 'Vaciar la lista' })).not.toBeInTheDocument();
+        fireEvent.click(removes[1]);
+        await waitFor((): void => { expect(screen.getAllByRole('button', { name: 'Quitar' })).toHaveLength(quote.zones.length - 1); });
+        fireEvent.click(screen.getByRole('button', { name: /Guardar/ }));
+        await waitFor((): void => { expect(sent?.zones?.map((z: ZoneInput): number | undefined => z.id)).toEqual(quote.zones.filter((_z: ZoneInput, i: number): boolean => i !== 1).map((z: ZoneInput): number | undefined => z.id)); });
+    });
     it('opens on the Resumen tab: the plan in the zones\' colours, and the parameters that move the price, previewed and saved', async (): Promise<void> => {
         const current: Quote = structuredClone(apartment) as unknown as Quote;
         vi.stubGlobal('fetch', vi.fn((): Promise<Response> => Promise.resolve(new Response(JSON.stringify(geometry), { status: 200 }))));
