@@ -608,12 +608,16 @@ const buildComponents = (mode: Mode): Components<Omit<Theme, 'components'>> => {
       styleOverrides: { root: { '& .RaSimpleFormIterator-form': { paddingTop: '8px' } } },
     },
 
-    // Lists shrink with the page instead of stretching it: the table scrolls inside its card and
-    // the toolbar's filters and actions wrap onto more lines on narrow screens.
+    // From `md` up a wide table widens the page (the window scrolls sideways) instead of being cut
+    // at its card's edge; below it the lists are cards and shrink with the screen (see layoutSx).
     // The card itself stays unclipped: the bulk-actions bar slides up out of it, over the results
     // toolbar, when rows are selected. The table's scroller clips the rows instead (RaDataTable).
     RaList: {
-      styleOverrides: { root: { minWidth: 0, '& .RaList-main': { minWidth: 0 } } },
+      styleOverrides: {
+        root: ({ theme }: StyleArgs) => ({
+          [theme.breakpoints.down('md')]: { minWidth: 0, '& .RaList-main': { minWidth: 0 } },
+        }),
+      },
     },
     RaListToolbar: {
       styleOverrides: {
