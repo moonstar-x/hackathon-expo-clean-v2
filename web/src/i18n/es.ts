@@ -436,8 +436,8 @@ const appSpanish: StringMap = {
     },
     suppliers: {
       total: '1 proveedor |||| %{smart_count} proveedores',
-      sections: { supplier: 'Proveedor', contact: 'Contacto' },
-      hints: { supplier: 'A quién le compras y lo que conviene recordar de él.', contact: 'Con quién hablar y cómo localizarlo.' },
+      sections: { supplier: 'Proveedor' },
+      hints: { supplier: 'A quién le compras, con quién hablar y lo que conviene recordar.' },
       search: 'Buscar por nombre, contacto o correo',
       contact: 'Contacto',
     },

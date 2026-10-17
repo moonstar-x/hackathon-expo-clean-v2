@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react';
-import Grid from '@mui/material/Grid';
 import { maxLength, required, SimpleForm, TextInput, useTranslate, type TranslateFunction, type Validator } from 'react-admin';
 import { emptyToNull } from '../../../utils/validators';
+import FieldsBesideNote from '../../FieldsBesideNote';
 import FormToolbar from '../../FormToolbar';
 import Section from '../../Section';
 
@@ -13,20 +13,20 @@ const MeasurementForm = (): ReactElement => {
   return (
     <SimpleForm toolbar={<FormToolbar withDelete />}>
       <Section title={translate('app.measurements.sections.measurement')} hint={translate('app.measurements.hints.measurement')}>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <TextInput source="name" validate={validateName} fullWidth />
-        </Grid>
-        <Grid size={12}>
-          <TextInput
-            source="notes"
-            multiline
-            minRows={3}
-            validate={maxLength(1000)}
-            parse={emptyToNull}
-            helperText="app.measurements.help.notes"
-            fullWidth
-          />
-        </Grid>
+        <FieldsBesideNote
+          fields={<TextInput source="name" validate={validateName} fullWidth />}
+          note={
+            <TextInput
+              source="notes"
+              multiline
+              minRows={3}
+              validate={maxLength(1000)}
+              parse={emptyToNull}
+              helperText="app.measurements.help.notes"
+              fullWidth
+            />
+          }
+        />
       </Section>
     </SimpleForm>
   );

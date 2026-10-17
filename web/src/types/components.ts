@@ -55,6 +55,13 @@ export interface KeyFiguresProps {
   size?: FigureSize;
 }
 
+export interface FieldsBesideNoteProps {
+  /** The short inputs, stacked in the left half. */
+  fields: ReactNode;
+  /** The multiline input, in the right half, as tall as the fields. */
+  note: ReactNode;
+}
+
 export interface ShowSectionProps {
   title: ReactNode;
   children: ReactNode;

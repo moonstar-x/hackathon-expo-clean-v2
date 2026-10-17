@@ -13,6 +13,21 @@ export const sectionGridSx: SxProps<Theme> = {
   '& .MuiFormGroup-root > .MuiFormControlLabel-root': { minHeight: FILTER_CONTROL_HEIGHT },
 };
 
+/** FieldsBesideNote's left half: its inputs one under another, spaced by the gap, not margins. */
+export const noteFieldsSx: SxProps<Theme> = { gap: 2 };
+
+/**
+ * FieldsBesideNote's right half: as tall as the fields beside it, with its multiline input filling it
+ * and the text starting at the top.
+ */
+export const noteColumnSx: SxProps<Theme> = {
+  alignSelf: 'stretch',
+  display: 'flex',
+  flexDirection: 'column',
+  '& .MuiFormControl-root': { flex: 1 },
+  '& .MuiInputBase-root': { flex: 1, alignItems: 'flex-start' },
+};
+
 /**
  * Key figures: each a label over its value, no boxes, no rules. Columns of a natural width as many as
  * fit (auto-fill, not auto-fit): three figures stay together on the left of a wide card.
