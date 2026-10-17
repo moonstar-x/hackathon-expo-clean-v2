@@ -5,18 +5,45 @@ import { badRequest, conflict, validationError } from '../../lib/errors.ts';
 import { parseListQuery, sendList } from '../../lib/listQuery.ts';
 import { decimal, foreignId, mergeForUpdate, nullableText, parseId, requiredText, requireObjectBody } from '../../lib/validation.ts';
 import { enqueue, QUOTE_FIELDS, quoteListSpec, quotesRepository, readZones, replaceZones, ZONE_FIELDS } from './repository.ts';
-import { assertReference, parameters, snake } from './settings.ts';
-import type { ZoneInput } from './types.ts';
+import { allSettings, assertReference, parameters, snake } from './settings.ts';
+import { engineInput, snapshotFor } from './snapshot.ts';
+import { applyEdits, EDIT_ERROR_MESSAGES, EDITABLE_FIELDS, type EditableField, type EditValue, type QuoteAdjustments } from './engine/edits.ts';
+import { MAX_NUMBER } from '../../lib/numbers.ts';
+import type { EngineInput, QuoteOverrides, ZoneInput } from './types.ts';
 import { wasteControl } from './waste.ts';
 const date = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine((v) => { const d = new Date(`${v}T00:00:00Z`); return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === v; }, 'Must be a valid date').nullable();
 const numeric = () => decimal(6).nullable();
 const integer = () => decimal(6).refine(Number.isInteger, 'Must be an integer').nullable();
 const quoteSchema = z.object({ name: requiredText(100), installationType: z.enum(['privateHospital', 'publicHospital', 'office', 'mall', 'other']).nullable(), city: nullableText(100), visitDate: date, measurementOrigin: z.enum(['siteVisit', 'plans', 'estimate']), assumptionsConfirmed: z.boolean(), manualPrice: numeric(), targetMargin: decimal(10).refine((n) => n < 1, 'Must be less than 1').nullable(), externalReferencePrice: decimal(6, { exclusiveMin: true }).nullable(), notes: nullableText(2000) });
-const zoneSchema = z.object({ id: foreignId().optional(), name: requiredText(100), zoneTypeId: foreignId().nullable(), floorArea: numeric(), wallArea: numeric(), traffic: z.enum(['low', 'medium', 'high']).nullable(), scheduleId: foreignId().nullable(), daysPerMonth: numeric().refine((v) => v === null || v <= 31, 'Must be at most 31'), terminalsPerMonth: numeric(), fixedPosts: integer().transform((v) => v ?? 0), measurementSource: z.enum(['measured', 'plans', 'estimated']), observation: nullableText(1000), toilets: integer(), urinals: integer(), sinks: integer(), fixtureVisitsPerDay: numeric(), minutesPerFixture: numeric(), solutionLitersPerFixture: numeric(), paperSoapMonthly: numeric(), fixturesExcludeFloor: z.boolean() });
-const blankZone: ZoneInput = { position: 0, origin: 'manual', roomId: null, name: '', zoneTypeId: null, floorArea: null, wallArea: null, isFloorApproximate: false, traffic: null, scheduleId: null, daysPerMonth: null, terminalsPerMonth: null, fixedPosts: 0, measurementSource: 'measured', observation: null, toilets: null, urinals: null, sinks: null, fixtureVisitsPerDay: null, minutesPerFixture: null, solutionLitersPerFixture: null, paperSoapMonthly: null, fixturesExcludeFloor: false, sources: {} };
+const zoneSchema = z.object({ id: foreignId().optional(), name: requiredText(100), zoneTypeId: foreignId().nullable(), floorArea: numeric(), wallArea: numeric(), traffic: z.enum(['low', 'medium', 'high']).nullable(), scheduleId: foreignId().nullable(), daysPerMonth: numeric().refine((v) => v === null || v <= 31, 'Must be at most 31'), terminalsPerMonth: numeric(), fixedPosts: integer().transform((v) => v ?? 0), machines: integer().refine((v) => v === null || v <= 1000, 'Must be at most 1000').transform((v) => v ?? 0), freeArea: numeric(), cleanedArea: numeric(), measurementSource: z.enum(['measured', 'plans', 'estimated']), observation: nullableText(1000), toilets: integer(), urinals: integer(), sinks: integer(), fixtureVisitsPerDay: numeric(), minutesPerFixture: numeric(), solutionLitersPerFixture: numeric(), paperSoapMonthly: numeric(), fixturesExcludeFloor: z.boolean() }).superRefine((zone, ctx) => {
+    for (const key of ['freeArea', 'cleanedArea'] as const)
+        if (zone[key] !== null && zone.floorArea !== null && zone[key] > zone.floorArea)
+            ctx.addIssue({ code: 'custom', path: [key], message: 'Must be at most the floor area' });
+});
+const amount = () => z.number().min(0).max(MAX_NUMBER).optional();
+const fraction = () => z.number().min(0).max(1).optional();
+const positive = () => z.number().positive().max(MAX_NUMBER).optional();
+const overridesSchema = z.strictObject({ laborHourlyRate: amount(), supervisorMonthlyCost: amount(), operatorsPerSupervisor: positive(), mopCost: amount(), equipmentMonthly: amount(), transportMonthly: amount(), insuranceMonthly: amount(), administrationRate: fraction(), contingencyRate: fraction(), minimumMargin: fraction(), vatRate: fraction(), targetWasteRate: fraction(), uncontrolledWasteRate: fraction(), workers: positive(), chemicalsFactor: amount(), eppFactor: amount() }) satisfies z.ZodType<QuoteOverrides>;
+const editValue = z.number().nullable();
+/** `{ field: value }` in the order they were made, which `applyEdits` keeps. */
+function parseEdits(raw: unknown): [EditableField, EditValue][] {
+    if (raw === null || typeof raw !== 'object' || Array.isArray(raw))
+        throw validationError({ edits: 'Must be an object' });
+    return Object.entries(raw).map(([field, value]) => {
+        if (!(EDITABLE_FIELDS as readonly string[]).includes(field))
+            throw validationError({ [`edits.${field}`]: 'Is not an editable value' });
+        const parsed = editValue.safeParse(value);
+        if (!parsed.success)
+            throw validationError({ [`edits.${field}`]: 'Must be a number or null' });
+        return [field as EditableField, parsed.data];
+    });
+}
+const blankZone: ZoneInput = { position: 0, origin: 'manual', roomId: null, name: '', zoneTypeId: null, floorArea: null, wallArea: null, isFloorApproximate: false, traffic: null, scheduleId: null, daysPerMonth: null, terminalsPerMonth: null, fixedPosts: 0, machines: 0, freeArea: null, cleanedArea: null, measurementSource: 'measured', observation: null, toilets: null, urinals: null, sinks: null, fixtureVisitsPerDay: null, minutesPerFixture: null, solutionLitersPerFixture: null, paperSoapMonthly: null, fixturesExcludeFloor: false, sources: {} };
 export function quotesRouter({ db }: AppDeps, nudge: () => void = () => { }) {
     const router = Router();
     const repo = quotesRepository(db);
+    /** Edits applied to a quote as it would be calculated now: current settings, these zones and values. */
+    const solve = (quote: EngineInput['quote'] & QuoteAdjustments, zones: ZoneInput[], edits: [EditableField, EditValue][]) => applyEdits(engineInput(snapshotFor(allSettings(db), zones), quote, zones), quote, edits);
     router.get('/quoting/options', (_req, res) => { const p = parameters(db); const schedules = db.prepare('SELECT code, name, service_hours_per_day AS serviceHoursPerDay FROM quote_schedules WHERE active = 1 ORDER BY name COLLATE NOCASE').all(); const scheduleCode = p.defaultScheduleId ? (db.prepare('SELECT code FROM quote_schedules WHERE id = ?').pluck().get(p.defaultScheduleId) ?? null) : null; res.json({ revision: p.revision, traffic: ['low', 'medium', 'high'], schedules, defaults: { traffic: p.defaultTraffic, scheduleCode, daysPerMonth: p.defaultDaysPerMonth } }); });
     router.get('/quotes', (req, res) => { const parsed = parseListQuery(req.query, quoteListSpec); const { records, total } = repo.list(parsed); sendList(res, 'quotes', parsed.range, records, total); });
     router.get('/quotes/:id', (req, res) => res.json(repo.get(parseId(req.params.id))));
@@ -26,6 +53,7 @@ export function quotesRouter({ db }: AppDeps, nudge: () => void = () => { }) {
         const body = requireObjectBody(req.body);
         const data = quoteSchema.parse(mergeForUpdate(current, body, QUOTE_FIELDS));
         const oldZones = readZones(db, id);
+        let overrides: QuoteOverrides = Object.hasOwn(body, 'overrides') ? overridesSchema.parse(body.overrides ?? {}) : current.overrides;
         let zones: ZoneInput[] | undefined;
         if (Object.hasOwn(body, 'zones')) {
             const raw = z.array(z.record(z.string(), z.unknown())).max(100).parse(body.zones);
@@ -45,10 +73,25 @@ export function quotesRouter({ db }: AppDeps, nudge: () => void = () => { }) {
                 return { ...old, ...z, position: index, sources };
             });
         }
-        db.transaction(() => { const fields = QUOTE_FIELDS; db.prepare(`UPDATE quotes SET ${fields.map((f) => `${snake(f)} = ?`).join(', ')}, updated_at = ?, input_revision = input_revision + 1 WHERE id = ?`).run(...fields.map((f) => typeof data[f] === 'boolean' ? +data[f] : data[f]), new Date().toISOString(), id); if (zones)
+        // Edited Resumen values become the prices and the quote's own values that give them.
+        if (Object.hasOwn(body, 'edits')) {
+            const { adjustments, errors } = solve({ ...data, overrides }, zones ?? oldZones, parseEdits(body.edits));
+            if (Object.keys(errors).length)
+                throw validationError(Object.fromEntries(Object.entries(errors).map(([field, error]) => [`edits.${field}`, EDIT_ERROR_MESSAGES[error]])));
+            data.manualPrice = adjustments.manualPrice;
+            data.targetMargin = adjustments.targetMargin;
+            overrides = adjustments.overrides;
+        }
+        db.transaction(() => { const fields = QUOTE_FIELDS; db.prepare(`UPDATE quotes SET ${fields.map((f) => `${snake(f)} = ?`).join(', ')}, overrides_json = ?, updated_at = ?, input_revision = input_revision + 1 WHERE id = ?`).run(...fields.map((f) => typeof data[f] === 'boolean' ? +data[f] : data[f]), JSON.stringify(overrides), new Date().toISOString(), id); if (zones)
             replaceZones(db, id, zones); enqueue(db, id, 'recalculate', req.user!.email); })();
         res.json(repo.get(id));
         nudge();
+    });
+    // What edits would give, without saving them: the whole calculation, and the edits that can't be applied.
+    router.post('/quotes/:id/preview', (req, res) => {
+        const id = parseId(req.params.id);
+        const { adjustments, result, errors } = solve(repo.get(id), readZones(db, id), parseEdits(requireObjectBody(req.body).edits ?? {}));
+        res.json({ ...adjustments, result, errors });
     });
     router.delete('/quotes/:id', (req, res) => { const id = parseId(req.params.id); const current = repo.get(id); db.prepare('DELETE FROM quotes WHERE id = ?').run(id); res.json(current); });
     for (const action of ['recalculate', 'regenerate'] as const)
@@ -76,7 +119,7 @@ export function quotesRouter({ db }: AppDeps, nudge: () => void = () => { }) {
         throw conflict('The quote has no results yet'); const actuals = Object.fromEntries((db.prepare('SELECT product_id, actual_consumption FROM quote_waste_controls WHERE quote_id = ? AND period = ?').all(id, month) as {
         product_id: number;
         actual_consumption: number;
-    }[]).map((r) => [r.product_id, r.actual_consumption])); return wasteControl(q.result.purchasePlan.rows, q.snapshot.parameters.targetWasteRate, actuals, month); }
+    }[]).map((r) => [r.product_id, r.actual_consumption])); return wasteControl(q.result.purchasePlan.rows, (q.result.parameters ?? q.snapshot.parameters).targetWasteRate, actuals, month); }
     router.get('/quotes/:id/waste-controls/:period', (req, res) => res.json(readWaste(parseId(req.params.id), period(req.params.period))));
     router.put('/quotes/:id/waste-controls/:period', (req, res) => {
         const id = parseId(req.params.id), month = period(req.params.period);

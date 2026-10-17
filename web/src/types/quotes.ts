@@ -16,6 +16,12 @@ export interface QuoteParameterValues {
     nightSurchargeRate: number;
     holidaySurchargeRate: number;
     nationalHolidaysPerYear: number;
+    /** Price of an hour of labor; null works it out from the wage. */
+    laborHourlyRate: number | null;
+    /** m² of floor a worker cleans in an hour without a machine: the general metric. */
+    manualRateM2PerHour: number;
+    /** m² of floor a worker cleans in an hour with a machine. */
+    machineRateM2PerHour: number;
     supervisorMonthlyCost: number;
     operatorsPerSupervisor: number;
     baseEppPerFte: number;
@@ -114,6 +120,12 @@ export interface ZoneInput {
     daysPerMonth: number | null;
     terminalsPerMonth: number | null;
     fixedPosts: number;
+    /** Machines the floor is cleaned with; each one is run by a worker. Absent from zones saved before machines existed. */
+    machines?: number;
+    /** The floor without the objects on it; null is the whole floor. */
+    freeArea?: number | null;
+    /** The floor that is cleaned, from 0 to the whole floor; null is the floor without objects. */
+    cleanedArea?: number | null;
     measurementSource: 'measured' | 'plans' | 'estimated';
     observation: string | null;
     toilets: number | null;
@@ -126,6 +138,28 @@ export interface ZoneInput {
     fixturesExcludeFloor: boolean;
     sources: Record<string, Source>;
 }
+/** A quote's own values, edited on its Resumen tab; an absent key uses the parameters or what the calculator works out. */
+export interface QuoteOverrides {
+    laborHourlyRate?: number;
+    supervisorMonthlyCost?: number;
+    operatorsPerSupervisor?: number;
+    mopCost?: number;
+    equipmentMonthly?: number;
+    transportMonthly?: number;
+    insuranceMonthly?: number;
+    administrationRate?: number;
+    contingencyRate?: number;
+    minimumMargin?: number;
+    vatRate?: number;
+    targetWasteRate?: number;
+    uncontrolledWasteRate?: number;
+    /** Full-time people who do the work, in place of what the hours need. */
+    workers?: number;
+    /** Multiplies the chemicals' prices. */
+    chemicalsFactor?: number;
+    /** Multiplies EPP and hygiene. */
+    eppFactor?: number;
+}
 export interface EngineInput {
     parameters: QuoteParameterValues;
     zoneTypes: Record<number, ZoneTypeValues>;
@@ -137,6 +171,7 @@ export interface EngineInput {
         /** This quote's own target margin; null or absent uses parameters.targetMargin. */
         targetMargin?: number | null;
         externalReferencePrice: number | null;
+        overrides?: QuoteOverrides;
     };
     zones: ZoneInput[];
 }
@@ -156,7 +191,7 @@ export interface PurchasePlanRow {
     purchaseCost: number;
     wasteCost: number;
 }
-type NumericZoneField = 'floorArea' | 'wallArea' | 'serviceHoursPerDay' | 'daysPerMonth' | 'hoursBetweenCleanings' | 'cleaningsPerDay' | 'cleaningsPerMonth' | 'terminalsPerMonth' | 'terminalArea' | 'dailyCleaningHours' | 'terminalHours' | 'taskHours' | 'presenceHours' | 'billableHours' | 'nightFraction' | 'holidayFraction' | 'laborCost' | 'fte' | 'm2PerPersonInService' | 'dailySolutionLiters' | 'terminalSolutionLiters' | 'cleaningProductId' | 'cleaningConcentrate' | 'dailyDisinfectantId' | 'dailyDisinfectantConcentrate' | 'terminalDisinfectantId' | 'terminalDisinfectantConcentrate' | 'chemicalsTheoretical' | 'chemicalsWithWaste' | 'eppAndHygiene' | 'utensils' | 'directCost' | 'allocatedIndirect' | 'totalCost' | 'targetPrice' | 'costPerM2' | 'pricePerM2' | 'flatRateRevenue';
+type NumericZoneField = 'floorArea' | 'cleanedArea' | 'machines' | 'floorRateM2PerHour' | 'cleaningDuration' | 'wallArea' | 'serviceHoursPerDay' | 'daysPerMonth' | 'hoursBetweenCleanings' | 'cleaningsPerDay' | 'cleaningsPerMonth' | 'terminalsPerMonth' | 'terminalArea' | 'dailyCleaningHours' | 'terminalHours' | 'taskHours' | 'presenceHours' | 'billableHours' | 'nightFraction' | 'holidayFraction' | 'laborCost' | 'fte' | 'm2PerPersonInService' | 'dailySolutionLiters' | 'terminalSolutionLiters' | 'cleaningProductId' | 'cleaningConcentrate' | 'dailyDisinfectantId' | 'dailyDisinfectantConcentrate' | 'terminalDisinfectantId' | 'terminalDisinfectantConcentrate' | 'chemicalsTheoretical' | 'chemicalsWithWaste' | 'eppAndHygiene' | 'utensils' | 'directCost' | 'allocatedIndirect' | 'totalCost' | 'targetPrice' | 'costPerM2' | 'pricePerM2' | 'flatRateRevenue';
 export type ZoneResult = Record<NumericZoneField, number> & {
     zoneId: number | null;
     name: string;
@@ -190,6 +225,8 @@ export interface EngineResult {
         isCustomMargin?: boolean;
         targetPrice: number;
         minimumMargin: number;
+        /** The VAT rate charged: the quote's own or the parameters'. Absent from results calculated before quotes had one. */
+        vatRate?: number;
         minimumPrice: number;
         breakEvenPrice: number;
         offeredPrice: number;
@@ -203,7 +240,17 @@ export interface EngineResult {
         pricePerM2: number;
         negotiationRoom: number;
     };
-    staffing: Record<string, number>;
+    /** The fields absent from results calculated before labor rates, machines and set workers existed are optional. */
+    staffing: {
+        peopleToHire: number;
+        laborHourlyRate?: number;
+        personHours: number;
+        fte: number;
+        supervisors: number;
+        /** The machines of all the zones. */
+        machines?: number;
+        isCustomWorkers?: boolean;
+    };
     chemicals: Record<string, number>;
     flatRate: {
         rate: number;
@@ -228,6 +275,9 @@ export interface EngineResult {
         totalWasteCost: number;
     };
     technicalOffer: TechnicalOfferRow[];
+    /** The parameters with the quote's own values in their place. Absent from older results. */
+    parameters?: QuoteParameterValues;
+    overrides?: QuoteOverrides;
 }
 export interface TechnicalOfferRow {
     zoneId: number | null;
@@ -264,6 +314,8 @@ export interface Quote {
     /** This quote's target margin on sales; null uses the parameters' (only a reference). */
     targetMargin: number | null;
     externalReferencePrice: number | null;
+    /** Its own values in place of the parameters' and the calculated ones, set on the Resumen tab. */
+    overrides: QuoteOverrides;
     notes: string | null;
     status: 'needsReview' | 'simulation' | null;
     calculation: {
@@ -349,7 +401,7 @@ export interface CatalogProps {
 }
 /** One quoting parameter's input, with the note on where its value comes from. */
 /** The unit beside a parameter's input, in `app.quoteSettings.units`. */
-export type ParameterUnit = 'percent' | 'money' | 'moneyPerM2' | 'days' | 'hours' | 'minutes' | 'liters' | 'squareMeters' | 'months';
+export type ParameterUnit = 'percent' | 'money' | 'moneyPerM2' | 'moneyPerHour' | 'squareMetersPerHour' | 'days' | 'hours' | 'minutes' | 'liters' | 'squareMeters' | 'months';
 export interface ParameterSection {
     /** Names the section's title and hint: `app.quoteSettings.parameterSections` and `parameterHints`. */
     id: string;
@@ -388,16 +440,34 @@ export interface OfferZoneProps extends TechnicalOfferRowProps {
     heading?: boolean;
 }
 export type OfferProductKey = 'cleaningProduct' | 'dailyDisinfectant' | 'terminalDisinfectant';
-/** A price of the Resumen tab that can be changed in place. */
-export type PriceDraftField = 'offeredPrice' | 'targetPrice' | 'targetMargin';
-/** The inline price inputs as typed, by field; only the ones changed since the last calculation. */
-export type PriceDraft = Partial<Record<PriceDraftField, string>>;
-/** What applying a price draft saves on the quote before it is recalculated. */
-export type PriceUpdate = Partial<Pick<Quote, 'manualPrice' | 'targetMargin'>>;
+/** A value of the Resumen tab that can be changed in place (the API's EDITABLE_FIELDS). */
+export type SummaryField = 'offeredPrice' | 'vat' | 'totalWithVat' | 'profit' | 'margin' | 'annualProfit' | 'pricePerM2'
+    | 'laborCost' | 'chemicalsTheoretical' | 'chemicalsWaste' | 'eppAndHygiene' | 'utensils' | 'directCost' | 'supervision' | 'equipment' | 'transport' | 'insurance' | 'operatingCost' | 'administration' | 'contingency' | 'totalCost' | 'indirectToAllocate'
+    | 'targetMargin' | 'targetPrice' | 'minimumPrice' | 'breakEvenPrice' | 'negotiationRoom'
+    | 'peopleToHire' | 'laborHourlyRate' | 'personHours' | 'fte' | 'supervisors'
+    | 'withWaste' | 'uncontrolledWasteCost' | 'controlledWasteCost' | 'monthlyWasteSavings' | 'annualWasteSavings' | 'shareOfCost';
+/** The Resumen inputs as typed, by field, in the order they were changed; only the ones changed since the last calculation. */
+export type SummaryDraft = Partial<Record<SummaryField, string>>;
+/** What the API applies: numbers (fractions for percentages), or null to go back to the calculated value. */
+export type SummaryEdits = Partial<Record<SummaryField, number | null>>;
+/** Why the API can't apply an edit. */
+export type SummaryEditError = 'invalid' | 'outOfRange' | 'belowCost' | 'aboveTarget' | 'noBase';
+/** What edits would give: the quote's prices and own values, its whole calculation, and the edits that can't be applied. */
+export interface QuotePreview {
+    manualPrice: number | null;
+    targetMargin: number | null;
+    overrides: QuoteOverrides;
+    result: EngineResult;
+    errors: Partial<Record<SummaryField, SummaryEditError>>;
+}
 export interface PriceInputProps {
-    field: PriceDraftField;
-    /** As typed; a number for a price, a percentage for the margin. */
+    field: SummaryField;
+    /** As typed; a percentage for margins and shares. */
     value: string;
+    /** Typed as a percentage. */
+    percent?: boolean;
+    /** May be below 0, such as a loss. */
+    signed?: boolean;
     onChange: (value: string) => void;
     error?: string;
     helperText?: string;

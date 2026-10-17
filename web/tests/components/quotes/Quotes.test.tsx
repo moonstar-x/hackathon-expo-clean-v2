@@ -10,9 +10,11 @@ import { QuoteList } from '../../../src/quotes/QuoteList';
 import { QuoteEdit } from '../../../src/quotes/QuoteEdit';
 import { CatalogEdit, CatalogList, ParametersEdit } from '../../../src/quotes/Settings';
 import { StateChip } from '../../../src/quotes/Chips';
-import type { Quote, WasteControl, ZoneInput } from '../../../src/types/quotes';
+import type { EngineResult, Quote, QuotePreview, SummaryEdits, WasteControl, ZoneInput } from '../../../src/types/quotes';
 import clinic from '../../fixtures/quotes/clinic.json';
 import apartment from '../../fixtures/quotes/apartment.json';
+import geometry from '../../fixtures/two-room-apartment.geometry.json';
+import { formatCurrency } from '../../../src/utils/format';
 const quote: Quote = clinic as unknown as Quote;
 const parameters: RaRecord = { id: 1, ...quote.snapshot!.parameters, notes: {} };
 function records(resource: string): RaRecord[] {
@@ -52,11 +54,24 @@ describe('quote screens', (): void => {
             expect(screen.getByRole('tabpanel', { name })).toBeInTheDocument();
         }
     });
-    it('changes the target price in place and recalculates this quote at its own margin', async (): Promise<void> => {
+    /** A preview as the API gives it: prices from the target price, staff from the people, the rest as calculated. */
+    const previewOf = (edits: SummaryEdits): QuotePreview => {
+        const result: EngineResult = structuredClone(quote.result!);
+        const errors: QuotePreview['errors'] = {};
+        if (typeof edits.targetPrice === 'number') {
+            if (edits.targetPrice < result.costs.totalCost) errors.targetPrice = 'belowCost';
+            else Object.assign(result.pricing, { targetPrice: edits.targetPrice, offeredPrice: edits.targetPrice, targetMargin: 1 - result.costs.totalCost / edits.targetPrice, margin: 1 - result.costs.totalCost / edits.targetPrice, isCustomMargin: true });
+        }
+        if (typeof edits.peopleToHire === 'number') Object.assign(result.staffing, { peopleToHire: edits.peopleToHire, fte: edits.peopleToHire, isCustomWorkers: true });
+        if (typeof edits.laborHourlyRate === 'number') Object.assign(result.staffing, { laborHourlyRate: edits.laborHourlyRate });
+        return { manualPrice: null, targetMargin: null, overrides: {}, result, errors };
+    };
+    it('changes the target price in place, previews it from the API and recalculates this quote with it', async (): Promise<void> => {
         const sent: Partial<Quote>[] = [];
         const dataProvider: DataProvider = provider();
-        dataProvider.update = <R extends RaRecord>(_resource: string, params: UpdateParams<R>): Promise<UpdateResult<R>> => { sent.push(params.data as Partial<Quote>); return Promise.resolve({ data: { ...quote, ...params.data, id: params.id } as unknown as R }); };
+        dataProvider.update = <R extends RaRecord>(_resource: string, params: UpdateParams<R>): Promise<UpdateResult<R>> => { sent.push(params.data as Partial<Quote>); return Promise.resolve({ data: { ...quote, id: params.id } as unknown as R }); };
         dataProvider.quoteAction = vi.fn();
+        dataProvider.previewQuote = vi.fn((_id: number, edits: SummaryEdits): Promise<QuotePreview> => Promise.resolve(previewOf(edits)));
         renderWithAdmin(<Routes><Route path="/quotes/:id/show" element={<QuoteShow />} /></Routes>, { resource: 'quotes', at: '/quotes/1/show', dataProvider });
         const target: HTMLElement = await screen.findByRole('spinbutton', { name: 'Precio objetivo' });
         expect(target).toHaveValue(9907.39);
@@ -64,23 +79,34 @@ describe('quote screens', (): void => {
         expect(screen.getByText('General: 35,0 %')).toBeInTheDocument();
         fireEvent.change(target, { target: { value: '5000' } });
         expect(await screen.findByText('Bajo el punto de equilibrio.')).toBeInTheDocument();
-        const bar: HTMLElement = screen.getByText(/^Precios modificados/).closest('[role="alert"]')!;
+        expect(dataProvider.previewQuote).toHaveBeenLastCalledWith(1, { targetPrice: 5000 });
+        const bar: HTMLElement = screen.getByText(/^Valores modificados/).closest('[role="alert"]')!;
         expect(within(bar).getByRole('button', { name: 'Recalcular' })).toBeDisabled();
         fireEvent.click(within(bar).getByRole('button', { name: 'Descartar' }));
         expect(screen.getByRole('spinbutton', { name: 'Precio objetivo' })).toHaveValue(9907.39);
         fireEvent.change(screen.getByRole('spinbutton', { name: 'Precio objetivo' }), { target: { value: '12879.61' } });
         // Resultado mensual and the margin follow the new target price before anything is saved.
-        expect(screen.getByRole('spinbutton', { name: 'Margen objetivo sobre venta' })).toHaveValue(50);
+        await waitFor((): void => { expect(screen.getByRole('spinbutton', { name: 'Margen objetivo sobre venta' })).toHaveValue(50); });
         expect(screen.getByRole('spinbutton', { name: 'Precio sin IVA' })).toHaveValue(12879.61);
-        expect(screen.getAllByText('50,0 %').length).toBeGreaterThan(0);
         fireEvent.change(screen.getByRole('spinbutton', { name: 'Precio sin IVA' }), { target: { value: '' } });
-        fireEvent.click(within(screen.getByText(/^Precios modificados/).closest('[role="alert"]')!).getByRole('button', { name: 'Recalcular' }));
+        fireEvent.click(within(screen.getByText(/^Valores modificados/).closest('[role="alert"]')!).getByRole('button', { name: 'Recalcular' }));
         await waitFor((): void => { expect(sent).toHaveLength(1); });
-        expect(Object.keys(sent[0]).sort()).toEqual(['manualPrice', 'targetMargin']);
-        expect(sent[0].manualPrice).toBeNull();
-        expect(sent[0].targetMargin).toBeCloseTo(.5, 6);
+        expect(sent[0]).toEqual({ edits: { targetPrice: 12879.61, offeredPrice: null } });
         expect(dataProvider.quoteAction).not.toHaveBeenCalled();
-        await waitFor((): void => { expect(screen.queryByText(/^Precios modificados/)).not.toBeInTheDocument(); });
+        await waitFor((): void => { expect(screen.queryByText(/^Valores modificados/)).not.toBeInTheDocument(); });
+    });
+    it('makes every Resumen value editable, and sets the people and the price per hour', async (): Promise<void> => {
+        const dataProvider: DataProvider = provider();
+        dataProvider.previewQuote = vi.fn((_id: number, edits: SummaryEdits): Promise<QuotePreview> => Promise.resolve(previewOf(edits)));
+        renderWithAdmin(<Routes><Route path="/quotes/:id/show" element={<QuoteShow />} /></Routes>, { resource: 'quotes', at: '/quotes/1/show', dataProvider });
+        await screen.findByRole('spinbutton', { name: 'Precio objetivo' });
+        for (const name of ['IVA', 'Total con IVA', 'Ganancia mensual', 'Margen', 'Ganancia anual', 'Precio por m²', 'Mano de obra', 'Químicos teóricos', 'Costo directo', 'Supervisión', 'Administración', 'Contingencia', 'Indirectos a distribuir', 'Precio mínimo', 'Punto de equilibrio', 'Margen para negociar', 'Personas que trabajan', 'Horas-persona', 'Personal (FTE)', 'Supervisores equivalentes', 'Merma estimada sin control', 'Fracción del costo'])
+            expect(screen.getAllByRole('spinbutton', { name }).length).toBeGreaterThan(0);
+        expect(screen.queryByRole('switch', { name: 'Máquinas' })).not.toBeInTheDocument();
+        fireEvent.change(screen.getByRole('spinbutton', { name: 'Personas que trabajan' }), { target: { value: '4' } });
+        fireEvent.change(screen.getByRole('spinbutton', { name: 'Precio por hora de mano de obra' }), { target: { value: '5' } });
+        await waitFor((): void => { expect(dataProvider.previewQuote).toHaveBeenLastCalledWith(1, { peopleToHire: 4, laborHourlyRate: 5 }); });
+        await waitFor((): void => { expect(screen.getByRole('spinbutton', { name: 'Personal (FTE)' })).toHaveValue(4); });
     });
     it.each([['quotes', <QuoteList />, '/quotes'], ['quotes', <QuoteEdit />, '/quotes/1'], ['quote-parameters', <ParametersEdit />, '/quote-parameters/1']] as const)('smoke renders %s %s', async (resource: string, view: ReactElement, at: string): Promise<void> => { renderWithAdmin(<Routes><Route path={at.replace('/1','/:id')} element={view} /></Routes>, { resource, at, dataProvider: provider() });  expect(await screen.findByText(resource === 'quotes' && at === '/quotes' ? 'Clínica de prueba' : resource === 'quotes' ? 'Datos del caso' : 'Mano de obra')).toBeInTheDocument(); });
     it.each(['quote-zone-types', 'quote-schedules', 'quote-products', 'quote-location-types'])('smoke renders catalog list and edit %s', async (resource: string): Promise<void> => { const rendered: ReturnType<typeof renderWithAdmin> = renderWithAdmin(<CatalogList resource={resource}/>, { resource, at: `/${resource}`, dataProvider: provider() }); await screen.findAllByRole('row'); rendered.unmount(); renderWithAdmin(<Routes><Route path={`/${resource}/:id`} element={<CatalogEdit resource={resource}/>} /></Routes>, { resource, at: `/${resource}/1`, dataProvider: provider() }); expect(await screen.findByRole('button', { name: /Guardar/ })).toBeInTheDocument(); });
@@ -98,6 +124,41 @@ describe('quote screens', (): void => {
         renderWithAdmin(<Routes><Route path="/quotes/:id" element={<QuoteEdit/>}/><Route path="*" element={<CurrentRoute/>}/></Routes>,{ resource:'quotes',at:'/quotes/1',dataProvider });
         fireEvent.click(await screen.findByRole('button',{ name:label }));
         await waitFor((): void => { expect(sent?.assumptionsConfirmed).toBe(expected); });
+    });
+    it('sets a zone\'s machines and its floor to clean, from the floor without objects up to the whole floor', async (): Promise<void> => {
+        const current: Quote = structuredClone(apartment) as unknown as Quote;
+        current.zones[0] = { ...current.zones[0], floorArea: 20, freeArea: 17.15, cleanedArea: null, machines: 0 };
+        let sent: Partial<Quote> | undefined;
+        const dataProvider: DataProvider = provider(current);
+        dataProvider.update = <R extends RaRecord>(_resource: string, params: UpdateParams<R>): Promise<UpdateResult<R>> => { sent = params.data as Partial<Quote>; return Promise.resolve({ data: { ...current, ...params.data, id: params.id } as unknown as R }); };
+        renderWithAdmin(<Routes><Route path="/quotes/:id/*" element={<QuoteEdit/>}/><Route path="*" element={<CurrentRoute/>}/></Routes>, { resource: 'quotes', at: '/quotes/1', dataProvider });
+        fireEvent.click(await screen.findByRole('tab', { name: 'Zonas' }));
+        expect(await screen.findByText(/^17,15\s\/\s20,00\sm²$/)).toBeInTheDocument();
+        const sliders: HTMLElement[] = screen.getAllByRole('slider', { name: 'Superficie a limpiar (m²)' });
+        expect(sliders[0]).toHaveValue('17.15');
+        fireEvent.change(sliders[0], { target: { value: '12.5' } });
+        expect(screen.getByText(/^12,50\s\/\s20,00\sm²$/)).toBeInTheDocument();
+        fireEvent.change(screen.getAllByRole('spinbutton', { name: 'Máquinas' })[0], { target: { value: '2' } });
+        fireEvent.click(screen.getByRole('button', { name: /Guardar/ }));
+        await waitFor((): void => { expect(sent?.zones?.[0]).toMatchObject({ cleanedArea: 12.5, machines: 2, freeArea: 17.15 }); });
+    });
+    it('shows each room of the plan with its zone\'s monthly cost, and opens the zone chosen', async (): Promise<void> => {
+        const current: Quote = structuredClone(apartment) as unknown as Quote;
+        const fetchMock: ReturnType<typeof vi.fn> = vi.fn((): Promise<Response> => Promise.resolve(new Response(JSON.stringify(geometry), { status: 200 })));
+        vi.stubGlobal('fetch', fetchMock);
+        // Opening a zone scrolls to it, which jsdom doesn't do.
+        Element.prototype.scrollIntoView = vi.fn();
+        renderWithAdmin(<Routes><Route path="/quotes/:id/show" element={<QuoteShow />} /></Routes>, { resource: 'quotes', at: '/quotes/1/show', dataProvider: provider(current) });
+        fireEvent.click(await screen.findByRole('tab', { name: 'Plano' }));
+        const plan: HTMLElement = await screen.findByRole('img', { name: /costo mensual de cada zona/ });
+        for (const [i, zone] of current.zones.entries()) {
+            const room: HTMLElement = within(plan).getByRole('button', { name: new RegExp(`^${zone.name}: `) });
+            expect(room).toHaveAccessibleName(`${zone.name}: ${formatCurrency(current.result!.zones[i].totalCost, 'USD')}`);
+        }
+        expect(screen.getByText('Costo mensual por zona')).toBeInTheDocument();
+        fireEvent.click(within(plan).getByRole('button', { name: new RegExp(`^${current.zones[1].name}: `) }));
+        expect(await screen.findByRole('tabpanel', { name: 'Zonas' })).toBeInTheDocument();
+        vi.unstubAllGlobals();
     });
     it('keeps the singleton parameter route after saving',async (): Promise<void> => {
         let saved: boolean = false;

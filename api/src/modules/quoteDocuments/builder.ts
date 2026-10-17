@@ -52,12 +52,15 @@ export function buildQuoteDocument({ quote, data, settings: s, revision, number,
   const until = new Date(`${issueDate}T00:00:00Z`); until.setUTCDate(until.getUTCDate() + validityDays);
   const validUntil = until.toISOString().slice(0, 10);
   const totalCents = Math.round(round(r.pricing.offeredPrice, 2) * 100);
-  const vatRate = quote.snapshot!.parameters.vatRate;
+  // The quote's own VAT rate; results calculated before quotes had one only have the parameters'.
+  const vatRate = r.pricing.vatRate ?? quote.snapshot!.parameters.vatRate;
   const vatCents = Number((BigInt(totalCents) * BigInt(Math.round(vatRate * 1e6)) + 500000n) / 1000000n);
   const allocated = allocateCents(totalCents, r.zones.map(z => z.totalCost));
-  const floor = area(r.totals.floorArea);
+  // The floor that is cleaned; results calculated before zones had one only have the whole floor.
+  const floor = area(r.totals.cleanedArea ?? r.totals.floorArea);
+  const active = r.zones.filter(z => z.active);
   const countText = `${zones.length} ${zones.length === 1 ? 'zona' : 'zonas'}`;
-  const details = r.technicalOffer.map((t, i) => ({ zone: t.name, zoneType: t.zoneTypeName, risk: risks[t.risk!], floorArea: area(zones[i].floorArea!), schedule: t.scheduleName, daysPerMonth: zones[i].daysPerMonth!, frequency: `Cada ${flexible(t.hoursBetweenCleanings)} h · ${formatted(t.cleaningsPerDay, 0)} por día`, terminalsPerMonth: flexible(t.terminalsPerMonth) }));
+  const details = r.technicalOffer.map((t, i) => ({ zone: t.name, zoneType: t.zoneTypeName, risk: risks[t.risk!], floorArea: area(active[i]?.cleanedArea ?? zones[i].floorArea!), schedule: t.scheduleName, daysPerMonth: zones[i].daysPerMonth!, frequency: `Cada ${flexible(t.hoursBetweenCleanings)} h · ${formatted(t.cleaningsPerDay, 0)} por día`, terminalsPerMonth: flexible(t.terminalsPerMonth) }));
   const products = r.technicalOffer.flatMap(t => [t.cleaningProduct, t.dailyDisinfectant, t.terminalDisinfectant]);
   const productTexts = [...new Map(products.map(p => [`${p.name}|${p.dosePerLiter}|${p.doseUnit}`, p])).values()].sort((a, b) => a.name.localeCompare(b.name, 'es')).map(p => `${p.name} (${flexible(p.dosePerLiter)} ${p.doseUnit} por litro de agua)`);
   const contract = data.contractMonths === null ? null : { months: data.contractMonths, label: `Valor del contrato por ${data.contractMonths} meses (sin IVA)`, subtotal: money(totalCents * data.contractMonths) };
@@ -75,12 +78,12 @@ export function buildQuoteDocument({ quote, data, settings: s, revision, number,
     logo: logo && { sha256: logo.sha256, contentType: logo.contentType, width: logo.width, height: logo.height }, colors: documentColors(s.brandColor),
     issuer: { tradeName: s.tradeName, lines: [s.legalName!, `RUC ${s.taxId}`, joined([s.address, s.city], ', '), joined([s.phone, s.email, s.website])].filter(Boolean) },
     client: { legalName: data.clientLegalName!, lines: [data.clientLegalName!, data.clientTaxId ? `RUC / identificación: ${data.clientTaxId}` : null, `Atención: ${joined([data.clientContactName, data.clientContactTitle], ', ')}`, joined([data.clientEmail, data.clientPhone]), data.clientAddress].filter((v): v is string => !!v) },
-    service: { lines: [`Instalación: ${quote.name}`, quote.installationType ? `Tipo: ${installation[quote.installationType as string]}` : null, quote.city ? `Ciudad: ${quote.city as string}` : null, `Superficie total: ${floor.text} m² en ${countText}`, quote.visitDate ? `Visita técnica: ${dateText(quote.visitDate as string)}` : null].filter((v): v is string => !!v), totalFloorArea: floor, zoneCount: zones.length },
+    service: { lines: [`Instalación: ${quote.name}`, quote.installationType ? `Tipo: ${installation[quote.installationType as string]}` : null, quote.city ? `Ciudad: ${quote.city as string}` : null, `Superficie a limpiar: ${floor.text} m² en ${countText}`, quote.visitDate ? `Visita técnica: ${dateText(quote.visitDate as string)}` : null].filter((v): v is string => !!v), totalFloorArea: floor, zoneCount: zones.length },
     introText: s.introText,
     lines: data.lineMode === 'single' ? [{ position: 1, description: `Servicio de limpieza y desinfección: ${quote.name}`, detail: `${countText} · ${floor.text} m² · Según el alcance del servicio`, quantity: 1, unit: 'Mes', unitPrice: money(totalCents), amount: money(totalCents) }] : details.map((t, i) => ({ position: i + 1, description: `Limpieza y desinfección: ${t.zone}`, detail: `${t.zoneType} · Riesgo ${t.risk} · ${t.floorArea.text} m² · ${t.schedule} · ${flexible(t.daysPerMonth)} días/mes`, quantity: 1, unit: 'Mes', unitPrice: money(allocated[i]), amount: money(allocated[i]) })),
     subtotal: money(totalCents), vatLabel: `IVA ${flexible(vatRate * 100)} %`, vatRate, vat: money(vatCents), total: money(totalCents + vatCents), totalLabel: 'TOTAL MENSUAL',
     amountInWords: `Son: ${numberToSpanishWords(Math.floor((totalCents + vatCents) / 100))} con ${String((totalCents + vatCents) % 100).padStart(2, '0')}/100 dólares`, contract,
-    scope: { columns: ['Zona', 'Tipo de zona', 'Riesgo', 'Superficie (m²)', 'Horario', 'Días por mes', 'Frecuencia', 'Limpiezas terminales por mes'], rows: details, productsText: `Productos: ${productTexts.join(', ')}` }, conditions,
+    scope: { columns: ['Zona', 'Tipo de zona', 'Riesgo', 'Superficie a limpiar (m²)', 'Horario', 'Días por mes', 'Frecuencia', 'Limpiezas terminales por mes'], rows: details, productsText: `Productos: ${productTexts.join(', ')}` }, conditions,
     clientNotes: data.clientNotes ? paragraphs(data.clientNotes) : null,
     acceptance: { issuer: s.signerName ? [s.signerName, s.signerTitle, s.legalName].filter((v): v is string => !!v) : [s.legalName!], client: [`Aceptado por: ${data.clientLegalName}`, 'Nombre, firma y fecha'] },
     footer: `${s.tradeName} · ${number} Rev. ${revision}`,

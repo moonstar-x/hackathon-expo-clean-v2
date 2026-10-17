@@ -17,7 +17,16 @@ interface GeometryRoom {
     }[];
     objects: {
         category: string;
+        /** Width × height × depth, in meters. */
+        dimensions?: number[];
     }[];
+}
+/** The floor not taken by the scanned objects' footprints (width × depth); null without a floor or a valid geometry. */
+export function freeFloorArea(floorArea: number | null, objects: GeometryRoom['objects']) {
+    if (floorArea === null)
+        return null;
+    const taken = objects.reduce((sum, o) => { const footprint = (o.dimensions?.[0] ?? 0) * (o.dimensions?.[2] ?? 0); return sum + (Number.isFinite(footprint) && footprint > 0 ? footprint : 0); }, 0);
+    return round(Math.min(floorArea, Math.max(0, floorArea - taken)), 3);
 }
 export function deriveZones(rooms: MeasurementMetadata['rooms'], quoting: MeasurementMetadata['quoting'], geometryData: Buffer | null, settings: Omit<EngineInput, 'quote' | 'zones'>, equivalences: Record<string, number | null>) {
     const warnings: Issue[] = [];
@@ -70,6 +79,10 @@ export function deriveZones(rooms: MeasurementMetadata['rooms'], quoting: Measur
         for (const key of ['toilets', 'urinals', 'sinks'])
             sources[key] = fixtureSource;
         const count = fixtureValues.toilets + fixtureValues.urinals + fixtureValues.sinks;
+        const freeArea = gr ? freeFloorArea(room.floorArea, gr.objects) : null;
+        if (freeArea !== null)
+            sources.freeArea = 'scan';
+        sources.machines = 'default';
         for (const key of ['name', 'floorArea', 'isFloorApproximate', 'measurementSource'])
             sources[key] = 'scan';
         if (wallArea !== null)
@@ -78,7 +91,7 @@ export function deriveZones(rooms: MeasurementMetadata['rooms'], quoting: Measur
             sources[key] = 'default';
         return { position, origin: 'scan', roomId: room.id.toLowerCase(), name: room.name, zoneTypeId, floorArea: room.floorArea, wallArea, isFloorApproximate: room.isFloorApproximate,
             traffic: choose('traffic', [room.quoting?.traffic, 'app'], [quoting?.traffic, 'app'], [p.defaultTraffic, 'default']), scheduleId: schedule,
-            daysPerMonth: choose('daysPerMonth', [quoting?.daysPerMonth, 'app'], [p.defaultDaysPerMonth, 'default']), terminalsPerMonth: null, fixedPosts: choose('fixedPosts', [room.quoting?.fixedPosts, 'app'], [0, 'default'])!,
+            daysPerMonth: choose('daysPerMonth', [quoting?.daysPerMonth, 'app'], [p.defaultDaysPerMonth, 'default']), terminalsPerMonth: null, fixedPosts: choose('fixedPosts', [room.quoting?.fixedPosts, 'app'], [0, 'default'])!, machines: 0, freeArea, cleanedArea: null,
             measurementSource: 'measured', observation: null, ...fixtureValues, fixtureVisitsPerDay: count ? p.defaultFixtureVisitsPerDay : null, minutesPerFixture: count ? p.defaultMinutesPerFixture : null,
             solutionLitersPerFixture: count ? p.defaultSolutionLitersPerFixture : null, paperSoapMonthly: count ? (p.defaultPaperSoapPerFixtureMonthly === null ? null : p.defaultPaperSoapPerFixtureMonthly * count) : 0,
             fixturesExcludeFloor: count ? p.fixtureDefaultsExcludeFloor : false, sources };

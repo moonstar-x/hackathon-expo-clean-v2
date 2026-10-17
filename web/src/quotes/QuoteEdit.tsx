@@ -9,6 +9,7 @@ import EditHeader from '../components/EditHeader';
 import FormToolbar from '../components/FormToolbar';
 import ResponsiveTabbedFormTabs from '../components/ResponsiveTabbedFormTabs';
 import Section from '../components/Section';
+import CleanedAreaInput from '../components/quotes/CleanedAreaInput';
 import { formPageSx } from '../styles/pages';
 import { parametersGridSx } from '../styles/quotes';
 import type { Measurement, MeasurementRoom } from '../types/api';
@@ -18,7 +19,7 @@ const select = (source: string, values: string[]): ReactElement => <SelectInput 
     id: string;
     name: string;
 } => ({ id, name: quoteEnums[id] }))} translateChoice={false} fullWidth/>;
-const numeric = (source: string): ReactElement => <NumberInput source={source} label={quoteFields[source]} min={0} step={['toilets', 'urinals', 'sinks', 'fixedPosts'].includes(source) ? 1 : 'any'} fullWidth/>;
+const numeric = (source: string): ReactElement => <NumberInput source={source} label={quoteFields[source]} min={0} step={['toilets', 'urinals', 'sinks', 'fixedPosts', 'machines'].includes(source) ? 1 : 'any'} fullWidth/>;
 const reference = (source: string, resource: string): ReactElement => <ReferenceInput source={source} reference={resource} perPage={1000}><SelectInput label={quoteFields[source]} fullWidth/></ReferenceInput>;
 /** A grid cell of a quote form: half the row from `md` unless told otherwise. */
 const Cell = ({ children, size = 6 }: { children: ReactNode; size?: number }): ReactElement => <Grid size={{ xs: 12, md: size }}>{children}</Grid>;
@@ -84,7 +85,9 @@ export function QuoteEdit(): ReactElement {
     </Section>
     <Section title={quoteText.areas}>
     <Cell size={4}>{numeric('floorArea')}</Cell>
+    <Cell size={4}>{numeric('freeArea')}</Cell>
     <Cell size={4}>{numeric('wallArea')}</Cell>
+    <Cell size={12}><CleanedAreaInput /></Cell>
     </Section>
     <Section title={quoteText.operation}>
     <Cell size={4}>{select('traffic', ['low', 'medium', 'high'])}</Cell>
@@ -92,6 +95,7 @@ export function QuoteEdit(): ReactElement {
     <Cell size={4}>{numeric('daysPerMonth')}</Cell>
     <Cell size={4}><SuggestedTerminals /></Cell>
     <Cell size={4}>{numeric('fixedPosts')}</Cell>
+    <Cell size={8}><NumberInput source="machines" label={quoteFields.machines} min={0} step={1} helperText={quoteText.machinesAdvice} fullWidth/></Cell>
     </Section>
     <Section title={quoteText.fixtures}>
     {['toilets', 'urinals', 'sinks', 'fixtureVisitsPerDay', 'minutesPerFixture', 'solutionLitersPerFixture', 'paperSoapMonthly'].map((source: string): ReactElement => <Cell key={source} size={4}>{numeric(source)}</Cell>)}

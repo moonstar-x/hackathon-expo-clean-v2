@@ -16,6 +16,12 @@ export interface QuoteParameterValues {
     nightSurchargeRate: number;
     holidaySurchargeRate: number;
     nationalHolidaysPerYear: number;
+    /** Price of an hour of labor; null works it out from the wage (hourlyCost). */
+    laborHourlyRate: number | null;
+    /** m² of floor a worker cleans in an hour without a machine: the general metric. */
+    manualRateM2PerHour: number;
+    /** m² of floor a worker cleans in an hour with a machine. */
+    machineRateM2PerHour: number;
     supervisorMonthlyCost: number;
     operatorsPerSupervisor: number;
     baseEppPerFte: number;
@@ -62,6 +68,9 @@ export const parameterSchema = z.object({
     nightSurchargeRate: decimal(6).refine((n) => n <= 10, "Must be at most 10"),
     holidaySurchargeRate: decimal(6).refine((n) => n <= 10, "Must be at most 10"),
     nationalHolidaysPerYear: decimal(6).refine((n) => n <= 365, "Must be at most 365"),
+    laborHourlyRate: decimal(6).nullable(),
+    manualRateM2PerHour: decimal(6, { exclusiveMin: true }),
+    machineRateM2PerHour: decimal(6, { exclusiveMin: true }),
     supervisorMonthlyCost: decimal(6),
     operatorsPerSupervisor: decimal(6, { exclusiveMin: true }),
     baseEppPerFte: decimal(6),
