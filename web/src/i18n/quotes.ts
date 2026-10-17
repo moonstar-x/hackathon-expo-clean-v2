@@ -351,6 +351,7 @@ export const quoteText: Record<string,string> = {
   "fixturesGroup": "Aparatos sanitarios predeterminados",
   "editNotes": "Editar notas de origen",
   "realConsumption": "Consumo real de",
+  "realConsumptionShort": "Consumo real",
   "every": "Cada",
   "perDay": "por día",
   "inventorySource": "desde inventario",

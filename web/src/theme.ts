@@ -622,6 +622,15 @@ const buildComponents = (mode: Mode): Components<Omit<Theme, 'components'>> => {
         }),
       },
     },
+    // Detail pages keep to the screen below `md` too, as the lists do: what is wider than the
+    // screen scrolls inside its own box instead of pushing the page sideways.
+    RaShow: {
+      styleOverrides: {
+        root: ({ theme }: StyleArgs) => ({
+          [theme.breakpoints.down('md')]: { '& .RaShow-card': { minWidth: 0 } },
+        }),
+      },
+    },
     RaListToolbar: {
       styleOverrides: {
         root: ({ theme }: StyleArgs) => ({

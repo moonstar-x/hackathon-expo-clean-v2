@@ -34,6 +34,48 @@ export const quoteTabsSx: SxProps<Theme> = { px: { xs: 0.5, sm: 1.5 } };
 
 export const quoteTabPanelSx: SxProps<Theme> = { p: { xs: 2, sm: 3 } };
 
+/**
+ * The card of the quote's tabs never widens the page: inline-size containment keeps its content's
+ * width out of the layout, so a wide table scrolls inside the card at any screen width.
+ */
+export const quoteTabsCardSx: SxProps<Theme> = { contain: 'inline-size' };
+
+/** Label and value pairs of a quote's figures: the labels wrap before the values do. */
+export const valuesGridSx: SxProps<Theme> = {
+  display: 'grid',
+  gridTemplateColumns: 'minmax(0, 1fr) fit-content(60%)',
+  columnGap: 2,
+  rowGap: 1,
+  m: 0,
+};
+
+/** The quote's data tables: tighter columns, so a wide one (the purchase plan has 13) fits a laptop. */
+export const quoteTableSx: SxProps<Theme> = {
+  mb: 2,
+  '& .MuiTableCell-root': { px: 1 },
+  '& .MuiTableCell-root:first-of-type': { pl: 2 },
+  '& .MuiTableCell-root:last-of-type': { pr: 2 },
+};
+
+/** A zone's inputs and where each came from. On phones each input's label goes above its value and source. */
+export const zoneInputsTableSx: SxProps<Theme> = (theme: Theme) => ({
+  mb: 2,
+  [theme.breakpoints.down('sm')]: {
+    '& tr': {
+      display: 'grid',
+      gridTemplateColumns: 'minmax(0, 1fr) auto',
+      alignItems: 'center',
+      columnGap: 1,
+      py: 1,
+      borderBottom: '1px solid',
+      borderColor: 'divider',
+    },
+    '& tr:last-of-type': { borderBottom: 0 },
+    '& .MuiTableCell-root': { p: 0, border: 0 },
+    '& .MuiTableCell-root:first-of-type': { gridColumn: '1 / -1', color: 'text.secondary', fontSize: 13 },
+  },
+});
+
 /** The technical offer: cells read top-down, so they align to the top. */
 export const offerTableSx: SxProps<Theme> = {
   '& .MuiTableCell-root': { verticalAlign: 'top', py: 1.5 },

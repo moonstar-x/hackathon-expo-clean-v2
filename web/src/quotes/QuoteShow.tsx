@@ -1,17 +1,19 @@
 import { useEffect, useState, type ReactElement, type ReactNode, type ChangeEvent, type SyntheticEvent } from 'react';
 import { Accordion, AccordionDetails, AccordionSummary, Alert, Box, Button, Card, CardContent, CircularProgress, Grid, Link, Stack, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tabs, TextField, Typography } from '@mui/material';
+import AutorenewIcon from '@mui/icons-material/Autorenew';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import { DeleteButton, EditButton, Show, useDataProvider, useNotify, useRecordContext, useRedirect, useShowContext, useTranslate, type TranslateFunction } from 'react-admin';
 import { Link as RouterLink } from 'react-router-dom';
 import PageHeader from '../components/PageHeader';
 import KeyFigures from '../components/KeyFigures';
+import ResponsiveSwitch from '../components/ResponsiveSwitch';
 import OutlinedBadge from '../components/list/OutlinedBadge';
 import ShowSection from '../components/show/ShowSection';
 import DocumentButton from '../components/quotes/List/DocumentButton';
 import TechnicalOffer from '../components/quotes/show/TechnicalOffer';
 import { detailPageSx } from '../styles/pages';
-import { quoteMetaSx, quoteTabPanelSx, quoteTabsSx } from '../styles/quotes';
+import { quoteMetaSx, quoteTabPanelSx, quoteTableSx, quoteTabsCardSx, quoteTabsSx, valuesGridSx, zoneInputsTableSx } from '../styles/quotes';
 import ConfirmButton from '../components/ConfirmButton';
 import { useAppConfig } from '../AppConfigContext';
 import { quoteEnums, quoteFields, quoteIssues, quoteText } from '../i18n/quotes';
@@ -52,13 +54,16 @@ const DisplayValue = ({ field, value }: {
     const text: string = typeof value === 'string' ? value : '—';
     return <>{quoteEnums[text] ?? text}</>;
 };
-function Values({ values, title }: {
+function Values({ values, title, children }: {
     values: object;
     title?: string;
+    /** Shown between the title and the values, such as the input the values depend on. */
+    children?: ReactNode;
 }): ReactElement {
     return <Card variant="outlined" sx={{ mb: 2 }}><CardContent>
     {title && <Typography variant="h6" gutterBottom>{title}</Typography>}
-    <Box component="dl" sx={{ display: 'grid', gridTemplateColumns: 'minmax(160px,1fr) 1fr', gap: 1, m: 0 }}>{Object.entries(values).filter(([key]: [
+    {children}
+    <Box component="dl" sx={valuesGridSx}>{Object.entries(values).filter(([key]: [
         string,
         unknown
     ]): boolean => !!quoteFields[key]).map(([key, value]: [
@@ -70,18 +75,20 @@ function Values({ values, title }: {
     </Box>)}</Box>
     </CardContent></Card>;
 }
-function Rows({ rows, fields, footer }: {
+/** A table from md up; below it, one card per row, titled by its first field (its name). */
+function Rows({ rows, fields }: {
     rows: object[];
     fields: string[];
-    footer?: ReactNode;
 }): ReactElement {
-    return <TableContainer sx={{ mb: 2 }}><Table size="small">
+    const [first, ...rest]: string[] = fields;
+    return <ResponsiveSwitch
+    mobile={<>{rows.map((row: object, i: number): ReactElement => <Values key={i} title={((row as Record<string, unknown>)[first] ?? '—') as string} values={subset(row, rest)}/>)}</>}
+    desktop={<TableContainer sx={quoteTableSx}><Table size="small">
     <TableHead><TableRow>{fields.map((k: string): ReactElement => <TableCell key={k}>{quoteFields[k] ?? quoteFields.status}</TableCell>)}</TableRow></TableHead>
     <TableBody>
     {rows.map((row: object, i: number): ReactElement => <TableRow key={i}>{fields.map((k: string): ReactElement => <TableCell key={k}><DisplayValue field={k} value={(row as Record<string, unknown>)[k]}/></TableCell>)}</TableRow>)}
-    {footer}
     </TableBody>
-    </Table></TableContainer>;
+    </Table></TableContainer>}/>;
 }
 export function CalculationProgress({ state, refetch }: {
     state: string;
@@ -145,21 +152,22 @@ function WasteInputs({ quote, data, onSaved }: {
     finally {
         setSaving(false);
     } };
-    return <><TableContainer><Table size="small">
+    // In a card the product's name is already the title above the input: only screen readers hear it again.
+    const input = (row: WasteRow, inCard: boolean = false): ReactElement => <TextField size="small" type="number" fullWidth={inCard} sx={inCard ? { mb: 2 } : undefined} label={inCard ? `${quoteText.realConsumptionShort} (${row.unit})` : `${quoteText.realConsumption} ${row.name} (${row.unit})`} value={actuals[row.productId] ?? ''} slotProps={{ htmlInput: { min: 0, step: 'any', 'aria-label': `${quoteText.realConsumption} ${row.name} (${row.unit})` } }} onChange={(event: ChangeEvent<HTMLInputElement>): void => { const raw: string = event.target.value; setActuals((previous: Record<number, number | null>): Record<number, number | null> => ({ ...previous, [row.productId]: raw === '' ? null : Number(raw) })); }}/>;
+    return <><ResponsiveSwitch
+    mobile={<>{preview.rows.map((row: WasteRow): ReactElement => <Values key={row.productId} title={row.name} values={{ theoretical: `${number(row.theoretical, 3)} ${row.unit}`, realWasteRate: row.realWasteRate, excess: row.excess, excessCost: row.excessCost, status: row.status }}>{input(row, true)}</Values>)}</>}
+    desktop={<TableContainer><Table size="small">
     <TableHead><TableRow>{['name', 'theoretical', 'actual', 'realWasteRate', 'excess', 'excessCost', 'status'].map((key: string): ReactElement => <TableCell key={key}>{quoteFields[key]}</TableCell>)}</TableRow></TableHead>
     <TableBody>{preview.rows.map((row: WasteRow): ReactElement => <TableRow key={row.productId}>
     <TableCell>{row.name}</TableCell>
-    <TableCell>
-    {number(row.theoretical, 3)}
-    {row.unit}
-    </TableCell>
-    <TableCell><TextField size="small" type="number" label={`${quoteText.realConsumption} ${row.name} (${row.unit})`} value={actuals[row.productId] ?? ''} slotProps={{ htmlInput: { min: 0, step: 'any' } }} onChange={(event: ChangeEvent<HTMLInputElement>): void => { const raw: string = event.target.value; setActuals((previous: Record<number, number | null>): Record<number, number | null> => ({ ...previous, [row.productId]: raw === '' ? null : Number(raw) })); }}/></TableCell>
+    <TableCell>{number(row.theoretical, 3)} {row.unit}</TableCell>
+    <TableCell>{input(row)}</TableCell>
     <TableCell>{percent(row.realWasteRate)}</TableCell>
     <TableCell>{number(row.excess, 3)}</TableCell>
     <TableCell><DisplayValue field="excessCost" value={row.excessCost}/></TableCell>
     <TableCell><StateChip value={row.status}/></TableCell>
     </TableRow>)}</TableBody>
-    </Table></TableContainer><Typography sx={{ my: 2 }}>{quoteText.excessTotal} <DisplayValue field="excessCost" value={preview.totalExcessCost}/></Typography><Button variant="contained" disabled={saving} onClick={save}>{quoteText.save}</Button></>;
+    </Table></TableContainer>}/><Typography sx={{ my: 2 }}>{quoteText.excessTotal} <DisplayValue field="excessCost" value={preview.totalExcessCost}/></Typography><Button variant="contained" disabled={saving} onClick={save}>{quoteText.save}</Button></>;
 }
 const zoneGroups: [
     string,
@@ -184,7 +192,7 @@ function ZoneDetails({ quote, openZone }: {
     {result.causes.map((cause: Issue): ReactElement => <Alert key={cause.code} severity="warning">{issueMessage(cause)}</Alert>)}
     <Button onClick={(): void => redirect(`/quotes/${quote.id}/zones`)}>{quoteText.editZone}</Button>
     <Typography variant="h6">{quoteText.inputsSources}</Typography>
-    <Table size="small"><TableBody>{Object.entries(z).filter(([key]: [
+    <TableContainer sx={zoneInputsTableSx}><Table size="small"><TableBody>{Object.entries(z).filter(([key]: [
         string,
         unknown
     ]): boolean => !!quoteFields[key] && !['id', 'position'].includes(key)).map(([key, v]: [
@@ -194,7 +202,7 @@ function ZoneDetails({ quote, openZone }: {
     <TableCell>{quoteFields[key]}</TableCell>
     <TableCell><DisplayValue field={key} value={key === 'zoneTypeId' ? quote.snapshot!.zoneTypes[Number(v)]?.name ?? null : key === 'scheduleId' ? quote.snapshot!.schedules[Number(v)]?.name ?? null : v}/></TableCell>
     <TableCell>{z.sources[key] && <OutlinedBadge label={quoteEnums[z.sources[key]]} dense/>}</TableCell>
-    </TableRow>)}</TableBody></Table>
+    </TableRow>)}</TableBody></Table></TableContainer>
     {zoneGroups.map(([title, keys]: [
         string,
         string[]
@@ -235,7 +243,7 @@ export function QuoteDetail(): ReactElement | null {
     } };
     const result: Quote['result'] = quote.result;
     return <Box>
-    <PageHeader eyebrow={quoteText.quotes} title={quote.name} badge={<QuoteStatus quote={quote}/>} actions={<><DocumentButton variant="outlined"/><Button variant="contained" onClick={recalculate}>{quoteText.recalculate}</Button><EditButton variant="outlined"/><ConfirmButton label={quoteText.regenerate} variant="outlined" disabled={quote.measurementId === null} confirmContent={quoteText.regenerateConfirm} onConfirm={async (): Promise<void> => { await provider.quoteAction(quote.id, 'regenerate'); await refetch(); }}/><DeleteButton mutationMode="pessimistic"/></>}/>
+    <PageHeader eyebrow={quoteText.quotes} title={quote.name} badge={<QuoteStatus quote={quote}/>} actions={<><DocumentButton variant="outlined"/><Button variant="contained" onClick={recalculate}>{quoteText.recalculate}</Button><EditButton variant="outlined"/><ConfirmButton label={quoteText.regenerate} variant="outlined" disabled={quote.measurementId === null} confirmContent={quoteText.regenerateConfirm} onConfirm={async (): Promise<void> => { await provider.quoteAction(quote.id, 'regenerate'); await refetch(); }}><AutorenewIcon/></ConfirmButton><DeleteButton mutationMode="pessimistic"/></>}/>
     <Grid container spacing={2} sx={detailPageSx}>
     <Grid size={12}><ShowSection title={translate('app.quotes.glance')}>
     <KeyFigures items={[
@@ -264,7 +272,7 @@ export function QuoteDetail(): ReactElement | null {
     </Alert>}
     {result?.warnings.map((warning: Issue, i: number): ReactElement => <Alert key={i} severity="warning">{issueMessage(warning)}</Alert>)}
     </Stack></Grid>
-        {result && <Grid size={12}><Card><Tabs value={tab} onChange={(_event: SyntheticEvent, value: number): void => setTab(value)} variant="scrollable" scrollButtons="auto" allowScrollButtonsMobile sx={quoteTabsSx}>{tabs.map((title: string): ReactElement => <Tab key={title} label={title}/>)}</Tabs><Box role="tabpanel" aria-label={tabs[tab]} sx={quoteTabPanelSx}>
+        {result && <Grid size={12}><Card sx={quoteTabsCardSx}><Tabs value={tab} onChange={(_event: SyntheticEvent, value: number): void => setTab(value)} variant="scrollable" scrollButtons="auto" allowScrollButtonsMobile sx={quoteTabsSx}>{tabs.map((title: string): ReactElement => <Tab key={title} label={title}/>)}</Tabs><Box role="tabpanel" aria-label={tabs[tab]} sx={quoteTabPanelSx}>
         {tab === 0 && <><Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: '1fr 1fr' }, gap: 2 }}>
         <Box>
         <Values title={`${quoteText.monthlyResult}${result.pricing.isManualPrice ? ` ${quoteText.manualPriceSuffix}` : ''}`} values={subset(result.pricing, ['offeredPrice', 'vat', 'totalWithVat', 'profit', 'margin', 'marginStatus', 'annualProfit', 'pricePerM2'])}/>
