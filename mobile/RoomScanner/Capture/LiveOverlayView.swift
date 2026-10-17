@@ -27,18 +27,19 @@ struct LiveOverlayView: View {
     @State private var isPlanExpanded = true
 
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: Spacing.s) {
             topBar
             if showsLiveInfo {
-                HStack(alignment: .top, spacing: 8) {
+                HStack(alignment: .top, spacing: Spacing.s) {
                     miniPlan
                     Spacer(minLength: 0)
                     readoutCard
                 }
-                .padding(.horizontal, 12)
+                .padding(.horizontal, Spacing.m)
             }
             Spacer()
         }
+        .tint(Color.brandAccent)
     }
 
     // MARK: Top bar (CAP-3)
@@ -51,7 +52,7 @@ struct LiveOverlayView: View {
             .frame(minWidth: 44, minHeight: 44)
             Spacer()
             Text(.liveOverlayRoomTitle(number: readout.roomNumber))
-                .font(.headline)
+                .font(AppFont.headline)
                 .accessibilityAddTraits(.isHeader)
             Spacer()
             Button(action: onHelp) {
@@ -106,20 +107,21 @@ struct LiveOverlayView: View {
         let formatter = UnitFormatter(unitPreference)
         let current = [Counted.walls(readout.walls), Counted.doors(readout.doors), Counted.windows(readout.windows)]
             .joined(separator: ", ")
-        return VStack(alignment: .leading, spacing: 4) {
+        return VStack(alignment: .leading, spacing: Spacing.xs) {
             Text(.liveOverlayRoomReadout(number: readout.roomNumber, summary: current))
-                .font(.subheadline.weight(.semibold))
+                .font(AppFont.subheadline.weight(.semibold))
             if let liveArea = readout.liveArea {
                 Text(formatter.area(liveArea, approximate: true))
-                    .font(.subheadline.monospacedDigit())
+                    .font(AppFont.subheadline.monospacedDigit())
+                    .foregroundStyle(Color.brandAccent)
             }
             Text(.liveOverlayTotalReadout(rooms: Counted.rooms(readout.completedRooms), area: formatter.area(readout.completedArea)))
-                .font(.footnote)
+                .font(AppFont.footnote)
                 .foregroundStyle(.secondary)
         }
-        .padding(10)
+        .padding(Spacing.m)
         .frame(maxWidth: 200, alignment: .leading)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: Radius.surface, style: .continuous))
         .accessibilityElement(children: .combine)
     }
 }

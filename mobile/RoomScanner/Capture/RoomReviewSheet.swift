@@ -29,6 +29,8 @@ struct RoomReviewSheet: View {
             }
             .padding()
         }
+        .background(Color.brandBackground.ignoresSafeArea())
+        .tint(Color.brandAccent)
         .presentationDetents([.medium])
         .presentationDragIndicator(.hidden)
         .interactiveDismissDisabled()
@@ -38,13 +40,14 @@ struct RoomReviewSheet: View {
 
     private func review(_ room: RoomGeometry) -> some View {
         let formatter = UnitFormatter(unitPreference)
-        return VStack(alignment: .leading, spacing: 16) {
+        return VStack(alignment: .leading, spacing: Spacing.l) {
             Text(.reviewTitle(number: roomNumber))
-                .font(.title2.bold())
+                .font(AppFont.title2)
+                .brandHeadingTracking()
+                .foregroundStyle(Color.brandTextPrimary)
 
             TextField(String(localized: .reviewRoomNamePlaceholder), text: $name)
-                .textFieldStyle(.roundedBorder)
-                .font(.title3)
+                .textFieldStyle(.brand)
                 .submitLabel(.done)
 
             typePicker
@@ -64,23 +67,22 @@ struct RoomReviewSheet: View {
                 metric(.commonObjects, "\(room.objects.count)")
             }
 
-            VStack(spacing: 10) {
+            VStack(spacing: Spacing.s) {
                 Button(action: onScanNext) {
                     Label(.reviewScanNextRoom, systemImage: "arrow.right.circle.fill")
-                        .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
+                .buttonStyle(.brandPrimary)
 
                 Button(action: onFinish) {
-                    Text(.reviewFinish).frame(maxWidth: .infinity)
+                    Text(.reviewFinish)
                 }
-                .buttonStyle(.bordered)
-                .controlSize(.large)
+                .buttonStyle(.brandSecondary)
 
                 Button(.commonRescanRoom, systemImage: "arrow.counterclockwise", action: onRescan)
+                    .font(AppFont.button)
                     .frame(minHeight: 44)
             }
+            .padding(.top, Spacing.xs)
         }
     }
 
@@ -96,7 +98,7 @@ struct RoomReviewSheet: View {
                 Stepper(value: $quoting.fixedPosts, in: 0...20) {
                     LabeledContent(String(localized: .quoteFixedPosts), value: "\(quoting.fixedPosts)")
                 }
-                Text(.quoteFixedPostsHelp).font(.caption).foregroundStyle(.secondary)
+                Text(.quoteFixedPostsHelp).font(AppFont.caption).foregroundStyle(Color.brandTextSecondary)
                 Toggle(String(localized: .quoteCountFixtures), isOn: Binding(
                     get: { quoting.fixtures != nil },
                     set: { quoting.fixtures = $0 ? RoomQuotingInputs.defaults(type: type, room: room).fixtures ?? QuoteFixtures() : nil }))
@@ -140,52 +142,59 @@ struct RoomReviewSheet: View {
 
     private func metric(_ title: LocalizedStringResource, _ value: String) -> some View {
         GridRow {
-            Text(title).foregroundStyle(.secondary)
-            Text(value).monospacedDigit()
+            Text(title).font(AppFont.subheadline).foregroundStyle(Color.brandTextSecondary)
+            Text(value).font(AppFont.subheadline).foregroundStyle(Color.brandTextPrimary).monospacedDigit()
         }
         .accessibilityElement(children: .combine)
     }
 
     private var interruptionWarning: some View {
-        Label(.reviewTrackingInterrupted,
-              systemImage: "exclamationmark.triangle.fill")
-            .font(.footnote)
-            .foregroundStyle(.orange)
-            .padding(10)
-            .background(.orange.opacity(0.12), in: RoundedRectangle(cornerRadius: 10))
+        toneBanner(.reviewTrackingInterrupted, tone: .warning)
+    }
+
+    /// A full-width tone banner: tinted background, tone icon + text.
+    private func toneBanner(_ text: LocalizedStringResource, tone: BrandTone) -> some View {
+        Label(text, systemImage: "exclamationmark.triangle.fill")
+            .font(AppFont.footnote.weight(.medium))
+            .foregroundStyle(tone.color)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(Spacing.m)
+            .background(tone.color.opacity(0.12), in: RoundedRectangle(cornerRadius: Radius.control, style: .continuous))
     }
 
     // MARK: Failure
 
     private func failure(_ issue: CaptureIssue) -> some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: Spacing.l) {
             Label(.reviewFailureTitle(number: roomNumber), systemImage: "exclamationmark.triangle.fill")
-                .font(.title3.bold())
-                .foregroundStyle(.orange)
+                .font(AppFont.title3)
+                .foregroundStyle(Color.brandError)
             Text(issue.message)
+                .font(AppFont.body)
+                .foregroundStyle(Color.brandTextPrimary)
             if issue.isSceneTooLarge {
                 Text(.reviewFailureSceneTooLarge)
-                    .foregroundStyle(.secondary)
+                    .font(AppFont.subheadline)
+                    .foregroundStyle(Color.brandTextSecondary)
             }
-            VStack(spacing: 10) {
+            VStack(spacing: Spacing.s) {
                 Button(action: onRescan) {
                     Label(.commonRescanRoom, systemImage: "arrow.counterclockwise")
-                        .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
+                .buttonStyle(.brandPrimary)
 
                 if completedRoomCount > 0 {
                     Button(action: onFinish) {
-                        Text(.commonFinishWithRooms(rooms: Counted.rooms(completedRoomCount))).frame(maxWidth: .infinity)
+                        Text(.commonFinishWithRooms(rooms: Counted.rooms(completedRoomCount)))
                     }
-                    .buttonStyle(.bordered)
-                    .controlSize(.large)
+                    .buttonStyle(.brandSecondary)
                 }
 
                 Button(.reviewDiscard, role: .destructive, action: onDiscard)
+                    .font(AppFont.button)
                     .frame(minHeight: 44)
             }
+            .padding(.top, Spacing.xs)
         }
     }
 }

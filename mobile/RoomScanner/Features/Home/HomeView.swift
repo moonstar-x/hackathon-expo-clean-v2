@@ -33,12 +33,14 @@ struct HomeView: View {
         NavigationStack(path: $path) {
             list
                 .navigationTitle(.homeTitle)
+                .navigationBarTitleDisplayMode(.inline)
                 .navigationDestination(for: UUID.self) { id in
                     LocationDetailView(locationID: id)
                 }
                 .toolbar { toolbar }
                 .safeAreaInset(edge: .bottom) { newScanBar }
         }
+        .tint(Color.brandAccent)
         #if DEBUG
         .task { await applyDebugLaunchArguments() }
         #endif
@@ -90,16 +92,22 @@ struct HomeView: View {
         List {
             ForEach(locations, id: \.objectID) { location in
                 if let id = location.id {
-                    NavigationLink(value: id) {
+                    Button {
+                        path.append(id)
+                    } label: {
                         LocationRow(location: location)
                     }
+                    .buttonStyle(.plain)
+                    .listRowInsets(EdgeInsets(top: Spacing.s, leading: Spacing.l, bottom: Spacing.s, trailing: Spacing.l))
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(Color.clear)
                     .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                         Button {
                             pendingDeletion = reference(for: location)
                         } label: {
                             Label(.commonDelete, systemImage: "trash")
                         }
-                        .tint(.red)
+                        .tint(Color.brandError)
                     }
                     .contextMenu {
                         Button {
@@ -116,42 +124,46 @@ struct HomeView: View {
                 }
             }
         }
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
+        .background(Color.brandBackground.ignoresSafeArea())
         .overlay {
             if locations.isEmpty {
-                ContentUnavailableView {
-                    Label(.homeEmptyTitle, systemImage: "square.dashed")
-                } description: {
-                    Text(.homeEmptyMessage)
-                }
+                EmptyStateView(systemImage: "square.dashed",
+                               title: .homeEmptyTitle,
+                               message: .homeEmptyMessage)
             }
         }
     }
 
     private var newScanBar: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: Spacing.s) {
             Button(action: startScan) {
                 Label(.homeNewScan, systemImage: "plus.circle.fill")
-                    .font(.headline)
-                    .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
+            .buttonStyle(.brandPrimary)
             .disabled(!canScan)
 
             if !canScan {
                 Text(.homeLidarRequired)
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
+                    .font(AppFont.footnote)
+                    .foregroundStyle(Color.brandTextSecondary)
                     .multilineTextAlignment(.center)
             }
         }
-        .padding(.horizontal)
-        .padding(.vertical, 12)
+        .padding(.horizontal, Spacing.l)
+        .padding(.top, Spacing.m)
+        .padding(.bottom, Spacing.s)
         .background(.bar)
     }
 
     @ToolbarContentBuilder
     private var toolbar: some ToolbarContent {
+        ToolbarItem(placement: .principal) {
+            BrandLogo()
+                .frame(height: 26)
+                .frame(maxWidth: 150)
+        }
         ToolbarItem(placement: .topBarTrailing) {
             Button {
                 isSettingsPresented = true

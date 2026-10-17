@@ -23,8 +23,10 @@ struct LocationDetailView: View {
             LocationDetailContent(location: location, rooms: Array(rooms),
                                   repository: persistence.repository)
         } else {
-            ContentUnavailableView(.detailNotFoundTitle, systemImage: "questionmark.folder",
-                                   description: Text(.detailNotFoundMessage))
+            EmptyStateView(systemImage: "questionmark.folder",
+                           title: .detailNotFoundTitle, message: .detailNotFoundMessage)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color.brandBackground.ignoresSafeArea())
         }
     }
 }
@@ -49,6 +51,9 @@ private struct LocationDetailContent: View {
 
     var body: some View {
         content
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color.brandBackground.ignoresSafeArea())
+            .tint(Color.brandAccent)
             .navigationTitle(location.displayName)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { toolbar }
@@ -100,7 +105,7 @@ private struct LocationDetailContent: View {
 
     private func loadedView(_ geometry: ScanGeometry) -> some View {
         VStack(spacing: 0) {
-            VStack(spacing: 10) {
+            VStack(alignment: .leading, spacing: Spacing.l) {
                 header(geometry)
                 SyncStatusView(location: location).frame(maxWidth: .infinity, alignment: .leading)
                 Picker(.detailTabPicker, selection: $model.selectedTab) {
@@ -111,13 +116,14 @@ private struct LocationDetailContent: View {
                 .pickerStyle(.segmented)
                 if geometry.merged == nil, geometry.rooms.count > 1 {
                     Label(.detailNotMerged, systemImage: "info.circle")
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
+                        .font(AppFont.footnote)
+                        .foregroundStyle(Color.brandTextSecondary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
             .padding(.horizontal)
-            .padding(.bottom, 8)
+            .padding(.top, Spacing.m)
+            .padding(.bottom, Spacing.m)
 
             switch model.selectedTab {
             case .plan:
@@ -139,8 +145,8 @@ private struct LocationDetailContent: View {
                                   approximate: LocationMetrics.isAreaApproximate(geometry))
         let date = (location.createdAt ?? .now).formatted(date: .abbreviated, time: .omitted)
         return Text(.detailHeader(area: area, rooms: Counted.rooms(geometry.rooms.count), date: date))
-            .font(.subheadline)
-            .foregroundStyle(.secondary)
+            .font(AppFont.subheadline)
+            .foregroundStyle(Color.brandTextSecondary)
             .frame(maxWidth: .infinity, alignment: .leading)
             .accessibilityLabel(Text(.detailHeaderA11Y(area: formatter.spokenArea(LocationMetrics.totalFloorArea(of: geometry)), rooms: Counted.rooms(geometry.rooms.count), date: date)))
     }
@@ -149,44 +155,51 @@ private struct LocationDetailContent: View {
 
     private var draftView: some View {
         let count = rooms.count
-        return ContentUnavailableView {
-            Label(.detailDraftTitle, systemImage: "exclamationmark.triangle")
-        } description: {
-            if model.canRebuild {
-                Text(.detailDraftScanned(rooms: Counted.rooms(count)))
-            } else {
-                Text(.detailDraftMissingData(rooms: Counted.rooms(count)))
-            }
-        } actions: {
+        return brandedState(
+            icon: "exclamationmark.triangle",
+            title: .detailDraftTitle,
+            message: model.canRebuild ? .detailDraftScanned(rooms: Counted.rooms(count))
+                                      : .detailDraftMissingData(rooms: Counted.rooms(count))
+        ) {
             if model.canRebuild {
                 Button(.commonFinishWithRooms(rooms: Counted.rooms(count))) {
                     Task { await model.rebuild(reuseStructure: false) }
                 }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(.brandPrimary)
             }
             Button(.commonDelete, role: .destructive) { isDeleteConfirmationPresented = true }
+                .buttonStyle(.brandSecondary)
         }
     }
 
     // MARK: Unreadable (§11)
 
     private var unreadableView: some View {
-        ContentUnavailableView {
-            Label(.detailCorruptTitle, systemImage: "exclamationmark.triangle")
-        } description: {
-            if model.canRebuild {
-                Text(.detailCorruptRebuildable)
-            } else {
-                Text(.detailCorruptMessage)
-            }
-        } actions: {
+        brandedState(
+            icon: "exclamationmark.triangle",
+            title: .detailCorruptTitle,
+            message: model.canRebuild ? .detailCorruptRebuildable : .detailCorruptMessage
+        ) {
             if model.canRebuild {
                 Button(.detailCorruptRebuild) {
                     Task { await model.rebuild(reuseStructure: true) }
                 }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(.brandPrimary)
             }
         }
+    }
+
+    /// A branded status screen: mist-circle icon, title, message and a stack of actions.
+    private func brandedState<Actions: View>(icon: String, title: LocalizedStringResource,
+                                             message: LocalizedStringResource,
+                                             @ViewBuilder actions: () -> Actions) -> some View {
+        VStack(spacing: Spacing.xl) {
+            EmptyStateView(systemImage: icon, title: title, message: message)
+            VStack(spacing: Spacing.s) { actions() }
+                .frame(maxWidth: 320)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(.horizontal, Spacing.xl)
     }
 
     // MARK: Toolbar (DET-3, §7.7.4)

@@ -104,17 +104,19 @@ struct FloorPlanTab: View {
         let formatter = UnitFormatter(unitPreference)
         let room = selected.room
         let defaultName = RoomNaming.defaultNames(for: geometry.rooms.map(\.detectedType))[selected.index]
-        return VStack(alignment: .leading, spacing: 4) {
+        return VStack(alignment: .leading, spacing: Spacing.xs) {
             Text(roomNames[room.id] ?? defaultName)
-                .font(.headline)
+                .font(AppFont.headline)
+                .foregroundStyle(Color.brandTextPrimary)
             Text(.planCalloutArea(area: formatter.area(RoomMetrics.floorArea(of: room), approximate: room.isFloorApproximate)))
             Text(.planCalloutPerimeter(perimeter: formatter.length(RoomMetrics.perimeter(of: room))))
             Text(.planCalloutCeilingHeight(height: RoomMetrics.ceilingHeight(of: room).map { formatter.length($0) } ?? "—"))
         }
-        .font(.subheadline)
-        .padding(12)
+        .font(AppFont.subheadline)
+        .foregroundStyle(Color.brandTextSecondary)
+        .monospacedDigit()
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+        .floatingCardStyle()
         .accessibilityElement(children: .combine)
     }
 }
