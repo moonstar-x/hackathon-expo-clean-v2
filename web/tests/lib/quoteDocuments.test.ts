@@ -11,7 +11,7 @@ describe('document contracts', (): void => {
   });
   it('translates every blocker, warning and document API error', (): void => {
     for (const code of ['QUOTE_NOT_CALCULATED', 'QUOTE_NOT_CURRENT', 'QUOTE_NEEDS_REVIEW', 'PRICE_ZERO', 'ISSUER_FIELD_MISSING', 'PAYMENT_TERMS_MISSING', 'CLIENT_FIELD_MISSING', 'PARAMETERS_CHANGED', 'MARGIN_BELOW_MINIMUM', 'FLOOR_AREA_APPROXIMATE']) expect(documentMessages[code]).toBeTruthy();
-    expect(documentIssueMessage({ code: 'ISSUER_FIELD_MISSING', params: { field: 'taxId' } })).toBe('Falta RUC en los datos de la empresa.');
+    expect(documentIssueMessage({ code: 'ISSUER_FIELD_MISSING', params: { field: 'taxId' } })).toBe('Falta RUC de tu empresa (Empresa y plantilla).');
     expect(translateApiError('', 'DOCUMENT_CHANGED')).toContain('Revisa la vista previa');
     expect(translateApiError('', 'DOCUMENT_NOT_READY')).toContain('Falta información');
   });
