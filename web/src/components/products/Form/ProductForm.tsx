@@ -47,9 +47,17 @@ const ProductForm = ({ mode }: ProductFormProps): ReactElement => {
   const translate: TranslateFunction = useTranslate();
   return (
     <SimpleForm toolbar={<FormToolbar withDelete={mode === 'edit'} />}>
-      <Section title={translate('app.products.sections.general')}>
+      <Section title={translate('app.products.sections.general')} hint={translate('app.products.hints.general')}>
         <Grid size={{ xs: 12, md: 4 }}>
-          <TextInput source="sku" validate={validateSku} helperText="app.products.help.sku" parse={toUpperCase} fullWidth />
+          <TextInput
+            source="sku"
+            validate={validateSku}
+            helperText="app.products.help.sku"
+            parse={toUpperCase}
+            // A code, not words: no spellcheck squiggles, no autocorrect.
+            slotProps={{ htmlInput: { spellCheck: false, autoCorrect: 'off' } }}
+            fullWidth
+          />
         </Grid>
         <Grid size={{ xs: 12, md: 8 }}>
           <TextInput source="name" validate={validateName} fullWidth />
@@ -69,7 +77,7 @@ const ProductForm = ({ mode }: ProductFormProps): ReactElement => {
         </Grid>
       </Section>
       <SectionDivider />
-      <Section title={translate('app.products.sections.stock')}>
+      <Section title={translate('app.products.sections.stock')} hint={translate('app.products.hints.stock')}>
         <Grid size={{ xs: 12, md: 4 }}>
           <SelectInput
             source="unit"
@@ -114,7 +122,7 @@ const ProductForm = ({ mode }: ProductFormProps): ReactElement => {
         </Grid>
       </Section>
       <SectionDivider />
-      <Section title={translate('app.products.sections.safety')}>
+      <Section title={translate('app.products.sections.safety')} hint={translate('app.products.hints.safety')}>
         <Grid size={{ xs: 12, md: 4 }}>
           <BooleanInput source="hazardous" defaultValue={false} helperText="app.products.help.hazardous" />
         </Grid>

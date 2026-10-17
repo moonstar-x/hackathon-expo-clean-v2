@@ -5,6 +5,7 @@ import { PRODUCT_DEFAULT_FILTER, PRODUCT_PER_PAGE, PRODUCT_SORT } from '../../..
 import { listRowSx } from '../../../styles/list';
 import { lowStockRowSx } from '../../../styles/products';
 import type { Product } from '../../../types/api';
+import EmptyState from '../../list/EmptyState';
 import MobileActions from './MobileActions';
 import ProductPrimary from './ProductPrimary';
 import ProductSecondary from './ProductSecondary';
@@ -21,12 +22,14 @@ const MobileList = (): ReactElement => {
       sort={PRODUCT_SORT}
       perPage={PRODUCT_PER_PAGE}
       actions={<MobileActions />}
+      empty={<EmptyState variant="page" />}
     >
       <SimpleList<Product>
         rowClick="show"
         primaryText={<ProductPrimary />}
         secondaryText={<ProductSecondary />}
         rowSx={rowSx}
+        empty={<EmptyState defaultFilters={PRODUCT_DEFAULT_FILTER} />}
         sx={listRowSx()}
       />
     </InfiniteList>

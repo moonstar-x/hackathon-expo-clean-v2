@@ -90,6 +90,9 @@ const buildComponents = (mode: Mode): Components<Omit<Theme, 'components'>> => {
 
     MuiCssBaseline: {
       styleOverrides: {
+        // A form's toolbar stays at the bottom of the screen (formPageSx), and on phones react-admin
+        // pins it there: keep a field focused from the keyboard clear of it.
+        html: { scrollPaddingBottom: 88 },
         body: {
           WebkitFontSmoothing: 'antialiased',
           MozOsxFontSmoothing: 'grayscale',
@@ -299,7 +302,6 @@ const buildComponents = (mode: Mode): Components<Omit<Theme, 'components'>> => {
           transition: 'background-color 140ms ease, border-color 140ms ease',
         },
         outlined: ({ theme }: StyleArgs) => ({ borderColor: theme.palette.divider }),
-        label: ({ theme }: StyleArgs) => ({ color: theme.palette.text.primary }),
       },
     },
 
@@ -609,12 +611,25 @@ const buildComponents = (mode: Mode): Components<Omit<Theme, 'components'>> => {
       styleOverrides: { root: { '& .RaSimpleFormIterator-form': { paddingTop: '8px' } } },
     },
 
-    // Lists shrink with the page instead of stretching it: the table scrolls inside its card and
-    // the toolbar's filters and actions wrap onto more lines on narrow screens.
-    // The card clips its rows: react-admin leaves it unclipped, so row hover tints and the expand
-    // toggle spilled past its rounded corners.
+    // From `md` up a wide table widens the page (the window scrolls sideways) instead of being cut
+    // at its card's edge; below it the lists are cards and shrink with the screen (see layoutSx).
+    // The card itself stays unclipped: the bulk-actions bar slides up out of it, over the results
+    // toolbar, when rows are selected. The table's scroller clips the rows instead (RaDataTable).
     RaList: {
-      styleOverrides: { root: { minWidth: 0, '& .RaList-main': { minWidth: 0 }, '& .RaList-content': { overflow: 'hidden' } } },
+      styleOverrides: {
+        root: ({ theme }: StyleArgs) => ({
+          [theme.breakpoints.down('md')]: { minWidth: 0, '& .RaList-main': { minWidth: 0 } },
+        }),
+      },
+    },
+    // Detail pages keep to the screen below `md` too, as the lists do: what is wider than the
+    // screen scrolls inside its own box instead of pushing the page sideways.
+    RaShow: {
+      styleOverrides: {
+        root: ({ theme }: StyleArgs) => ({
+          [theme.breakpoints.down('md')]: { '& .RaShow-card': { minWidth: 0 } },
+        }),
+      },
     },
     RaListToolbar: {
       styleOverrides: {
@@ -630,15 +645,49 @@ const buildComponents = (mode: Mode): Components<Omit<Theme, 'components'>> => {
       },
     },
 
-    // react-admin lays the filter bar out with align-items: flex-end, so inputs of different
-    // heights (a search box next to labeled selects) end up at different levels; center them.
-    RaFilterForm: { styleOverrides: { root: { '& .RaFilterForm-filterFormInput': { alignItems: 'center' } } } },
+    // react-admin lays the filter bar out with align-items: flex-end and a top margin on the inputs
+    // only (a switch has none), so filters of different kinds sat at different levels. Every filter
+    // control is FILTER_CONTROL_HEIGHT tall instead, centered on one line, spaced by the gap.
+    RaFilterForm: {
+      styleOverrides: {
+        root: {
+          alignItems: 'center',
+          columnGap: 12,
+          rowGap: 8,
+          '& .RaFilterForm-filterFormInput .MuiFormControl-root': { marginTop: 0, marginBottom: 0 },
+        },
+      },
+    },
+    // Only the root slot of a filter input is styled by react-admin, so its parts go through it.
+    RaFilterFormInput: {
+      styleOverrides: {
+        root: ({ theme }: StyleArgs) => ({
+          alignItems: 'center',
+          '& .RaFilterFormInput-spacer': { display: 'none' },
+          // The "remove filter" button: quiet until pointed at.
+          '& .RaFilterFormInput-hideButton': {
+            marginBottom: 0,
+            marginLeft: 2,
+            color: theme.palette.text.disabled,
+            '&:hover': { color: theme.palette.error.main, backgroundColor: alpha(theme.palette.error.main, 0.08) },
+          },
+        }),
+      },
+    },
 
     RaAutocompleteInput: { styleOverrides: { root: { minWidth: '240px' } } },
     RaTextInput: { styleOverrides: { root: { minWidth: 240 } } },
     RaNumberInput: { styleOverrides: { root: { minWidth: 240 } } },
     RaSelectInput: { styleOverrides: { root: { minWidth: 240 } } },
-    RaLabeled: { styleOverrides: { root: { marginBottom: '14px' } } },
+    // A field's label: a quiet 13px line over its value (react-admin draws it at 0.75em).
+    RaLabeled: {
+      styleOverrides: {
+        root: {
+          marginBottom: '14px',
+          '& .RaLabeled-label': { fontSize: 13, fontWeight: 500, lineHeight: 1.4, marginBottom: 2 },
+        },
+      },
+    },
     RaTopToolbar: {
       styleOverrides: {
         root: ({ theme }: StyleArgs) => ({
@@ -660,7 +709,7 @@ const buildComponents = (mode: Mode): Components<Omit<Theme, 'components'>> => {
             backgroundColor: tableHeaderGlass,
             backdropFilter: 'saturate(180%) blur(8px)',
             WebkitBackdropFilter: 'saturate(180%) blur(8px)',
-            // Match the card's 14px radius so the corner cells follow its rounded clip.
+            // Match the card's 14px radius so the corner cells follow the scroller's rounded clip.
             '&:first-of-type': { borderTopLeftRadius: 14 },
             '&:last-child': { borderTopRightRadius: 14 },
           },
@@ -672,6 +721,10 @@ const buildComponents = (mode: Mode): Components<Omit<Theme, 'components'>> => {
           // An expanded panel lays itself out from the card edge.
           '& .RaDataTable-expandRow > td': { paddingLeft: 0, paddingRight: 0 },
           ...tableWrapperScroll,
+          // The scroller clips the rows (hover and low-stock tints, the expand toggle) to the card's
+          // rounded corners, inside its 1px border; the card itself stays unclipped so the
+          // bulk-actions bar can rise out of it. Pagination sits outside the card.
+          '& .RaDataTable-tableWrapper': { borderRadius: 13 },
         }),
       },
     },

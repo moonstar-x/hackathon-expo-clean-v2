@@ -1,5 +1,9 @@
 import type { SortPayload } from 'react-admin';
 import type { Unit } from '../types/api';
+import type { FigureSize } from '../types/components';
+
+/** Thickness of the stock meter's bar, in px. */
+export const STOCK_METER_HEIGHT: Record<FigureSize, number> = { medium: 10, small: 6 };
 
 /** Every unit the API accepts (SPEC-002 §5). */
 export const UNITS: Unit[] = ['unit', 'box', 'pack', 'roll', 'pair', 'L', 'mL', 'gal', 'kg', 'g'];

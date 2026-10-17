@@ -1,5 +1,4 @@
 // Props of the inventory fields and badges (components/fields) and the movement shortcut.
-import type { ReactElement } from 'react';
 import type { FieldProps } from 'react-admin';
 import type { MovementType } from './api';
 
@@ -24,14 +23,10 @@ export interface QuantityLabel {
   helperText: string;
 }
 
-export interface MovementPreset {
-  label: string;
-  icon: ReactElement;
-}
-
 export interface MovementButtonProps {
   productId: number;
   type: MovementType;
+  /** Translation key; "Recibir existencias", "Registrar consumo" or "Ajustar cantidad" by default. */
   label?: string;
   variant?: 'text' | 'outlined' | 'contained';
 }

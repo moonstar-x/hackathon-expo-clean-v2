@@ -35,7 +35,7 @@ describe('Documento page', (): void => {
   it('lists all blockers with fix links and disables downloads', async (): Promise<void> => {
     vi.mocked(provider.getDocumentState).mockResolvedValue({ ...state(), ready: false, document: null, blockers: [{ code: 'ISSUER_FIELD_MISSING', params: { field: 'taxId' } }, { code: 'CLIENT_FIELD_MISSING', params: { field: 'clientLegalName' } }, { code: 'QUOTE_NEEDS_REVIEW' }] });
     renderPage(); expect(await screen.findByText('Falta información para generar la cotización')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Falta RUC en los datos de la empresa.' })).toHaveAttribute('href', '/quote-document-settings/1');
+    expect(screen.getByRole('link', { name: 'Falta RUC de tu empresa (Empresa y plantilla).' })).toHaveAttribute('href', '/quote-document-settings/1');
     expect(screen.getByRole('link', { name: /Falta Razón social del cliente/ })).toHaveAttribute('href', '#document-data');
     expect(screen.getByRole('button', { name: 'Descargar PDF' })).toBeDisabled(); expect(provider.fetchDocumentFile).not.toHaveBeenCalled();
     HTMLElement.prototype.scrollIntoView = vi.fn<() => void>();

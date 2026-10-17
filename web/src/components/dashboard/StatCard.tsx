@@ -1,47 +1,47 @@
 import type { ReactElement } from 'react';
+import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardActionArea from '@mui/material/CardActionArea';
 import CardContent from '@mui/material/CardContent';
-import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { Link } from 'react-router-dom';
-import { statCardSx, statIconSx, statValueSx } from '../../styles/dashboard';
+import {
+  statActionSx,
+  statCardSx,
+  statContentSx,
+  statHeadSx,
+  statHintSx,
+  statIconSx,
+  statLabelSx,
+  statValueSx,
+} from '../../styles/dashboard';
 import type { StatCardProps } from '../../types/dashboard';
 
-/** One number of the dashboard, with its icon on a tile of its colour; the whole card links when `to` is set. */
-const StatCard = ({ title, value, icon, color = 'primary', to, hint }: StatCardProps): ReactElement => {
-  const content: ReactElement = (
-    <CardContent>
-      <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
-        <Stack sx={statIconSx(color)}>{icon}</Stack>
-        <div>
-          <Typography variant="body2" color="text.secondary">
+/**
+ * One number of the dashboard: its label and icon tile, the value, and a line saying what it counts.
+ * The whole card is the link to the matching list, so hover and focus cover all of it.
+ */
+const StatCard = ({ title, value, icon, color = 'primary', to, hint }: StatCardProps): ReactElement => (
+  <Card sx={statCardSx}>
+    <CardActionArea component={Link} to={to} sx={statActionSx}>
+      <CardContent sx={statContentSx}>
+        <Box sx={statHeadSx}>
+          <Typography component="p" sx={statLabelSx}>
             {title}
           </Typography>
-          <Typography variant="h5" component="p" sx={statValueSx}>
-            {value}
-          </Typography>
-          {hint ? (
-            <Typography variant="caption" color="text.secondary">
-              {hint}
-            </Typography>
-          ) : null}
-        </div>
-      </Stack>
-    </CardContent>
-  );
-
-  return (
-    <Card sx={statCardSx}>
-      {to ? (
-        <CardActionArea component={Link} to={to}>
-          {content}
-        </CardActionArea>
-      ) : (
-        content
-      )}
-    </Card>
-  );
-};
+          <Box sx={statIconSx(color)} aria-hidden>
+            {icon}
+          </Box>
+        </Box>
+        <Typography component="p" sx={statValueSx}>
+          {value}
+        </Typography>
+        <Typography component="p" sx={statHintSx}>
+          {hint}
+        </Typography>
+      </CardContent>
+    </CardActionArea>
+  </Card>
+);
 
 export default StatCard;

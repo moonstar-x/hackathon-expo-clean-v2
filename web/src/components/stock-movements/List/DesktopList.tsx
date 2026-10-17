@@ -4,6 +4,7 @@ import { NONE } from '../../../constants/components';
 import { MOVEMENT_PER_PAGE, MOVEMENT_SORT } from '../../../constants/stockMovements';
 import type { StockMovement } from '../../../types/api';
 import AppPagination from '../../AppPagination';
+import EmptyState from '../../list/EmptyState';
 import MovementQuantityField from '../../fields/MovementQuantityField';
 import MovementReasonField from '../../fields/MovementReasonField';
 import MovementTypeBadge from '../../fields/MovementTypeBadge';
@@ -18,8 +19,9 @@ const DesktopList = (): ReactElement => (
     perPage={MOVEMENT_PER_PAGE}
     actions={<DesktopActions />}
     pagination={<AppPagination />}
+    empty={<EmptyState variant="page" />}
   >
-    <DataTable<StockMovement> rowClick="show" bulkActionButtons={false}>
+    <DataTable<StockMovement> rowClick="show" bulkActionButtons={false} empty={<EmptyState />}>
       <DataTable.Col source="createdAt">
         <DateField source="createdAt" showTime />
       </DataTable.Col>

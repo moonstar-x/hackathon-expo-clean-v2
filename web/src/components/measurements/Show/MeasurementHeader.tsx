@@ -1,4 +1,3 @@
-import { MeasurementQuoteLink } from '../../../quotes/MeasurementQuoteLink';
 import type { ReactElement } from 'react';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import {
@@ -12,6 +11,7 @@ import {
 import type { Measurement } from '../../../types/api';
 import { formatDateTime } from '../../../utils/dates';
 import PageHeader from '../../PageHeader';
+import QuoteButton from './QuoteButton';
 
 /** The measurement page's heading: when the space was scanned, over its name, then what can be done with it. */
 const MeasurementHeader = (): ReactElement | null => {
@@ -25,9 +25,9 @@ const MeasurementHeader = (): ReactElement | null => {
       actions={
         <>
           <ListButton label="ra.action.back" icon={<ArrowBackIcon />} />
-          <MeasurementQuoteLink />
+          <QuoteButton />
           <EditButton variant="outlined" />
-          <DeleteButton mutationMode="pessimistic" confirmContent="La cotización se conserva." />
+          <DeleteButton mutationMode="pessimistic" confirmContent="app.measurements.deleteKeepsQuote" />
         </>
       }
     />

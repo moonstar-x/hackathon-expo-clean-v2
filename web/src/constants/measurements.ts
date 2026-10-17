@@ -6,6 +6,13 @@ import type { RoomPart, SceneMaterial, Vec3 } from '../types/geometry';
 export const MEASUREMENT_SORT: SortPayload = { field: 'createdAt', order: 'DESC' };
 export const MEASUREMENT_PER_PAGE: number = 25;
 
+/** How a measurement gets here, taught by the empty list: scan, save, and the app uploads it (SPEC-004 SYNC-1). */
+export const MEASUREMENT_EMPTY_STEPS: string[] = [
+  'app.empty.measurements.steps.scan',
+  'app.empty.measurements.steps.save',
+  'app.empty.measurements.steps.upload',
+];
+
 /** Fields the API can sort measurements by that the phone list offers (api/src/modules/measurements). */
 export const MEASUREMENT_SORT_FIELDS: string[] = ['createdAt', 'scannedAt', 'name', 'totalFloorArea', 'roomCount'];
 

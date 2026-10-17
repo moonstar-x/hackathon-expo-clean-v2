@@ -41,6 +41,12 @@ export const formatCurrency = (value: number | null | undefined, currency: strin
   return new Intl.NumberFormat(locale, { style: 'currency', currency }).format(value);
 };
 
+/** The currency's symbol as Spanish formatting writes it: `US$` for USD. */
+export const currencySymbol = (currency: string, locale: string = APP_LOCALE): string =>
+  new Intl.NumberFormat(locale, { style: 'currency', currency })
+    .formatToParts(0)
+    .find((part: Intl.NumberFormatPart): boolean => part.type === 'currency')?.value ?? currency;
+
 const fixedFormatters: Map<string, Intl.NumberFormat> = new Map<string, Intl.NumberFormat>();
 
 /** Always `decimals` decimals, so a column of measurements lines up: `3,40`, `12,05`. */

@@ -1,40 +1,11 @@
 // Props of the shared components in src/components.
 import type { ComponentType, ReactElement, ReactNode } from 'react';
-import type { BoxProps } from '@mui/material/Box';
 import type { IconButtonProps } from '@mui/material/IconButton';
 import type { ButtonProps } from 'react-admin';
 
 export interface ResponsiveSwitchProps {
   mobile: ReactElement;
   desktop: ReactElement;
-}
-
-export type RibbonColor = 'primary' | 'secondary' | 'error' | 'warning' | 'info' | 'success';
-export type RibbonSize = 'small' | 'medium' | 'large';
-export type RibbonVariant = 'filled' | 'outlined';
-export type RibbonSide = 'left' | 'right';
-
-export interface RibbonSizeConfig {
-  py: string;
-  px: string;
-  fontSize: string;
-  fold: number;
-}
-
-export interface RibbonColors {
-  main: string;
-  dark: string;
-  contrastText: string;
-}
-
-export interface RibbonProps extends Omit<BoxProps, 'color'> {
-  children: ReactNode;
-  /** A palette key (primary, success, warning…) or any CSS color. */
-  color?: string;
-  size?: RibbonSize;
-  variant?: RibbonVariant;
-  /** The card edge the ribbon hangs from. */
-  side?: RibbonSide;
 }
 
 export interface ConfirmButtonProps extends Omit<ButtonProps, 'onClick'> {
@@ -57,11 +28,45 @@ export interface PageHeaderProps {
 }
 
 export interface SectionProps {
-  title: ReactNode;
+  /** Left out when the section is a form's or tab's only one: its hint then introduces it. */
+  title?: ReactNode;
   children: ReactNode;
   /** Muted line under the title. */
   hint?: ReactNode;
   /** Button or link aligned with the title. */
+  action?: ReactNode;
+}
+
+/** A palette color that carries a status: a stock level, a movement type. */
+export type StatusColor = 'success' | 'warning' | 'error' | 'info';
+
+/** `small` for narrow cards (a room) and list rows; `medium` for a page's summary. */
+export type FigureSize = 'medium' | 'small';
+
+export interface KeyFigure {
+  /** Already translated. */
+  label: string;
+  value: ReactNode;
+  /** Muted line under the value. */
+  hint?: ReactNode;
+}
+
+export interface KeyFiguresProps {
+  items: KeyFigure[];
+  size?: FigureSize;
+}
+
+export interface FieldsBesideNoteProps {
+  /** The short inputs, stacked in the left half. */
+  fields: ReactNode;
+  /** The multiline input, in the right half, as tall as the fields. */
+  note: ReactNode;
+}
+
+export interface ShowSectionProps {
+  title: ReactNode;
+  children: ReactNode;
+  /** Button or link at the right of the title. */
   action?: ReactNode;
 }
 
@@ -103,6 +108,8 @@ export interface QuickFilterProps {
 export interface FormToolbarProps {
   /** Adds a Delete button (pessimistic, with a confirmation) on the right. */
   withDelete?: boolean;
+  /** A short line beside Save about what saving does. */
+  note?: ReactNode;
 }
 
 export interface FormHeaderProps {

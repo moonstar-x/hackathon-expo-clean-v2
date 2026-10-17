@@ -1,3 +1,9 @@
+/** Whether two flat objects (a list's filter values) hold the same keys with the same values. */
+export const sameValues = (a: Record<string, unknown>, b: Record<string, unknown>): boolean => {
+  const keys: string[] = Object.keys(a);
+  return keys.length === Object.keys(b).length && keys.every((key: string): boolean => Object.is(a[key], b[key]));
+};
+
 /** A copy of `values` without `key`. */
 export const without = (values: Record<string, unknown>, key: string): Record<string, unknown> =>
   Object.fromEntries(Object.entries(values).filter(([name]: [string, unknown]): boolean => name !== key));

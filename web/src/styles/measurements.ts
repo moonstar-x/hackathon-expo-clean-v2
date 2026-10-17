@@ -34,9 +34,12 @@ export const thumbnailPlaceholderSx: SxProps<Theme> = {
 /** A phone row's thumbnail, top-aligned with the name beside it. */
 export const thumbnailRowSx: SxProps<Theme> = { '& .MuiListItemIcon-root': { minWidth: 0, mr: 1.75, mt: 0.25 } };
 
-export const emptyListSx: SxProps<Theme> = { display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 1 };
-
-export const emptyIconSx: SxProps<Theme> = { ...tile, display: 'grid', placeItems: 'center', bgcolor: 'action.hover', mb: 1 };
+/** The quote's badge in the measurements table, a link with a focus ring that follows the badge's shape. */
+export const quoteCellLinkSx: SxProps<Theme> = {
+  display: 'inline-flex',
+  borderRadius: '11px',
+  '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.main', outlineOffset: 2 },
+};
 
 /** Notes keep the line breaks they were written with. */
 export const notesSx: SxProps<Theme> = { whiteSpace: 'pre-wrap', wordBreak: 'break-word', maxWidth: '72ch' };

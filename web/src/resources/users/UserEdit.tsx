@@ -2,7 +2,6 @@ import type { ReactElement } from 'react';
 import { Edit, useGetIdentity, useNotify, useRedirect, type UseGetIdentityResult } from 'react-admin';
 import EditHeader from '../../components/EditHeader';
 import UserForm from '../../components/users/Form/UserForm';
-import { FORM_MAX_WIDTH } from '../../constants/components';
 import { updateStoredUser } from '../../providers/authStorage';
 import { formPageSx } from '../../styles/pages';
 import type { User } from '../../types/api';
@@ -28,7 +27,7 @@ const UserEdit = (): ReactElement => {
       mutationMode="pessimistic"
       mutationOptions={{ onSuccess }}
       actions={<EditHeader />}
-      sx={formPageSx(FORM_MAX_WIDTH)}
+      sx={formPageSx}
     >
       <UserForm isEdit />
     </Edit>

@@ -66,7 +66,9 @@ describe('quote screens', (): void => {
         const dataProvider: DataProvider = provider();
         dataProvider.update = <R extends RaRecord>(_resource: string,params: UpdateParams<R>): Promise<UpdateResult<R>> => { saved = true;return Promise.resolve({ data:{ ...parameters,...params.data,id:params.id } as R }); };
         renderWithAdmin(<Routes><Route path="/quote-parameters/:id" element={<><ParametersEdit/><CurrentRoute/></>}/><Route path="*" element={<CurrentRoute/>}/></Routes>,{ resource:'quote-parameters',at:'/quote-parameters/1',dataProvider });
-        const margin: HTMLElement = await screen.findByRole('spinbutton',{ name:'Margen objetivo sobre venta (%)' });
+        // The margin lives in its own tab; the other tabs' inputs are hidden until theirs is open.
+        fireEvent.click(await screen.findByRole('tab',{ name:'Margen e impuestos' }));
+        const margin: HTMLElement = await screen.findByRole('spinbutton',{ name:'Margen objetivo sobre venta' });
         fireEvent.change(margin,{ target:{ value:'40' } });
         fireEvent.click(screen.getByRole('button',{ name:/Guardar/ }));
         await waitFor((): void => { expect(saved).toBe(true); });

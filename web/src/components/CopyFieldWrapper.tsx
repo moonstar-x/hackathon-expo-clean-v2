@@ -37,7 +37,11 @@ const CopyFieldWrapper = ({ source, label, field: Field = TextField }: CopyField
     <Labeled label={label}>
       <Box className="RaCopyFieldWrapper" sx={{ display: 'flex', alignItems: 'center' }}>
         <Field source={source} />
-        <Button onClick={copy} sx={{ minWidth: 'auto', p: 0, ml: 1 }}>
+        <Button
+          onClick={copy}
+          aria-label={translate('app.copy.action', { label: label ? translate(label) : source })}
+          sx={{ minWidth: 'auto', p: 0, ml: 1 }}
+        >
           <FileCopyOutlined fontSize="small" />
         </Button>
       </Box>

@@ -40,7 +40,7 @@ describe('UserMenu', () => {
     expect(within(trigger).queryByText('Ana Pérez')).not.toBeInTheDocument();
     await user.click(trigger);
     const menu: HTMLElement = await screen.findByRole('menu');
-    expect(within(menu).getByText(/^[a-zé]{3}, \d{1,2} [a-z]{3,4}$/)).toBeInTheDocument();
+    expect(within(menu).getByText(/^[a-záé]{3}, \d{1,2} [a-z]{3,4}$/)).toBeInTheDocument();
     expect(within(menu).getByRole('button', { name: 'Actualizar' })).toBeInTheDocument();
   });
 });

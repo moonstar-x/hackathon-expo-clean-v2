@@ -27,3 +27,19 @@ export const formatTime = (date: Date): string => timeFormatter.format(date);
 
 /** The clock's day, e.g. "jue, 15 oct". */
 export const formatDay = (date: Date): string => dayFormatter.format(date);
+
+const monthFormatter: Intl.DateTimeFormat = new Intl.DateTimeFormat(APP_LOCALE, { month: 'long', year: 'numeric' });
+
+/** A `YYYY-MM` period as Spanish writes it, capitalized to start a line: "Octubre de 2026". */
+export const formatPeriod = (period: string): string => {
+  const [year, month]: number[] = period.split('-').map(Number);
+  const label: string = monthFormatter.format(new Date(year, month - 1, 1));
+  return label.charAt(0).toUpperCase() + label.slice(1);
+};
+
+/** The `YYYY-MM` periods of the last `count` months, this one first. */
+export const recentPeriods = (count: number, today: Date = new Date()): string[] =>
+  Array.from({ length: count }, (_value: unknown, index: number): string => {
+    const date: Date = new Date(today.getFullYear(), today.getMonth() - index, 1);
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+  });

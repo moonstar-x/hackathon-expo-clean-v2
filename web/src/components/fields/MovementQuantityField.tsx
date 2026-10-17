@@ -1,16 +1,11 @@
 import type { ReactElement } from 'react';
 import Typography from '@mui/material/Typography';
 import { useFieldValue, useRecordContext } from 'react-admin';
+import { DELTA_COLOR } from '../../constants/stockMovements';
 import useProductUnit from '../../hooks/useProductUnit';
 import type { StockMovement, Unit } from '../../types/api';
 import type { MovementQuantityFieldProps } from '../../types/fields';
 import { deltaTone, formatDelta, formatQuantity } from '../../utils/format';
-
-const TONE_COLOR: Record<ReturnType<typeof deltaTone>, string> = {
-  positive: 'success.main',
-  negative: 'error.main',
-  zero: 'text.disabled',
-};
 
 /** A movement quantity with its product's unit; `signed` shows a delta: +10 green, −3 red, 0 grey. */
 const MovementQuantityField = ({ signed = false, ...props }: MovementQuantityFieldProps): ReactElement | null => {
@@ -30,7 +25,7 @@ const MovementQuantityField = ({ signed = false, ...props }: MovementQuantityFie
     <Typography
       component="span"
       variant="body2"
-      sx={{ color: TONE_COLOR[tone], fontWeight: tone === 'zero' ? undefined : 600, whiteSpace: 'nowrap' }}
+      sx={{ color: DELTA_COLOR[tone], fontWeight: tone === 'zero' ? undefined : 600, whiteSpace: 'nowrap' }}
     >
       {formatDelta(value, unit)}
     </Typography>

@@ -1,14 +1,15 @@
 import type { ReactElement } from 'react';
+import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import { Authenticated, Title, useTranslate, type TranslateFunction } from 'react-admin';
 import { useAppConfig } from '../../AppConfigContext';
-import { tablesRowSx } from '../../styles/dashboard';
+import { panelsSx } from '../../styles/dashboard';
 import PageHeader from '../PageHeader';
-import LowStockTable from './LowStockTable';
-import RecentMovements from './RecentMovements';
+import ActivityPanel from './ActivityPanel';
+import RestockPanel from './RestockPanel';
 import StatCards from './StatCards';
 
-/** Home: the four stock numbers, then what needs restocking beside what moved last. */
+/** Home: the four stock numbers, then what needs restocking beside what moved last, level with each other. */
 const DashboardContent = (): ReactElement => {
   const translate: TranslateFunction = useTranslate();
   const { appTitle } = useAppConfig();
@@ -18,10 +19,10 @@ const DashboardContent = (): ReactElement => {
       <PageHeader eyebrow={appTitle} title={translate('ra.page.dashboard')} />
       <Stack spacing={2} sx={{ pb: 3 }}>
         <StatCards />
-        <Stack direction="row" useFlexGap sx={tablesRowSx}>
-          <LowStockTable />
-          <RecentMovements />
-        </Stack>
+        <Box sx={panelsSx}>
+          <RestockPanel />
+          <ActivityPanel />
+        </Box>
       </Stack>
     </>
   );

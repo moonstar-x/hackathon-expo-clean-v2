@@ -18,7 +18,7 @@ const validateQuantity: Validator[] = [required(), minValue(0), maxDecimals(3), 
 const QuantityInput = (): ReactElement => {
   const type: MovementType = (useWatch({ name: 'type' }) as MovementType | undefined) ?? 'IN';
   const { label, helperText }: QuantityLabel = QUANTITY_LABELS[type];
-  return <NumberInput source="quantity" label={label} helperText={helperText} min={0} validate={validateQuantity} />;
+  return <NumberInput source="quantity" label={label} helperText={helperText} min={0} validate={validateQuantity} fullWidth />;
 };
 
 export default QuantityInput;

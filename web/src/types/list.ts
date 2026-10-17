@@ -30,13 +30,29 @@ export interface PrimaryRowProps {
   end?: ReactNode;
 }
 
-export interface StatItem {
-  label: string;
-  value: ReactNode;
-}
+/**
+ * Where an empty state sits: `page` stands alone in its own card (a List's `empty`), `inline` fills
+ * a list's card (a DataTable's or SimpleList's `empty`), `compact` fits a dashboard panel.
+ */
+export type EmptyStateVariant = 'page' | 'inline' | 'compact';
 
-export interface StatBarProps {
-  items: StatItem[];
+export interface EmptyStateProps {
+  variant?: EmptyStateVariant;
+  /** Whose icon and copy (`app.empty.<resource>`) to show; the surrounding resource by default. */
+  resource?: string;
+  /** Replaces the create button; `false` shows no action. */
+  action?: ReactNode | false;
+  /** Translation keys of the steps that fill this list, for empty states that teach a sequence. */
+  steps?: string[];
+  /** Replaces the resource's icon. */
+  icon?: SvgIconComponent;
+  /** Translation key prefix replacing `app.empty.<resource>`, for an empty state of its own. */
+  messages?: string;
+  /**
+   * The list's own default filters (Productos shows active ones): with only these set the list
+   * counts as unfiltered, and clearing the filters goes back to them.
+   */
+  defaultFilters?: Record<string, unknown>;
 }
 
 export interface ListTotalProps {
