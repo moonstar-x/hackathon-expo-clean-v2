@@ -21,8 +21,6 @@ export const stockMeterFillSx = (color: StatusColor, ratio: number): SxProps<The
   minWidth: ratio > 0 ? 6 : 0,
   borderRadius: 'inherit',
   bgcolor: `${color}.main`,
-  transition: 'width 200ms cubic-bezier(0.23, 1, 0.32, 1)',
-  '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
 });
 
 /** The reorder line: a tick standing a little proud of the track. */

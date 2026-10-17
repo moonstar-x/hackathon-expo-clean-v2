@@ -49,7 +49,15 @@ const ProductForm = ({ mode }: ProductFormProps): ReactElement => {
     <SimpleForm toolbar={<FormToolbar withDelete={mode === 'edit'} />}>
       <Section title={translate('app.products.sections.general')} hint={translate('app.products.hints.general')}>
         <Grid size={{ xs: 12, md: 4 }}>
-          <TextInput source="sku" validate={validateSku} helperText="app.products.help.sku" parse={toUpperCase} fullWidth />
+          <TextInput
+            source="sku"
+            validate={validateSku}
+            helperText="app.products.help.sku"
+            parse={toUpperCase}
+            // A code, not words: no spellcheck squiggles, no autocorrect.
+            slotProps={{ htmlInput: { spellCheck: false, autoCorrect: 'off' } }}
+            fullWidth
+          />
         </Grid>
         <Grid size={{ xs: 12, md: 8 }}>
           <TextInput source="name" validate={validateName} fullWidth />

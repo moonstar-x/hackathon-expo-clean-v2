@@ -90,6 +90,9 @@ const buildComponents = (mode: Mode): Components<Omit<Theme, 'components'>> => {
 
     MuiCssBaseline: {
       styleOverrides: {
+        // A form's toolbar stays at the bottom of the screen (formPageSx), and on phones react-admin
+        // pins it there: keep a field focused from the keyboard clear of it.
+        html: { scrollPaddingBottom: 88 },
         body: {
           WebkitFontSmoothing: 'antialiased',
           MozOsxFontSmoothing: 'grayscale',
