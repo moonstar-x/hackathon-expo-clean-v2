@@ -108,7 +108,9 @@ export function computeZone(z: ZoneInput, input: EngineInput, labor: ReturnType<
     r.directCost = r.laborCost + r.chemicalsWithWaste + r.eppAndHygiene + r.utensils;
     return r;
 }
-export function marginStatus(margin: number, p: QuoteParameterValues) { return margin < 0 ? 'loss' : margin < p.minimumMargin - .00001 ? 'belowMinimum' : margin < p.targetMargin - .00001 ? 'acceptable' : 'healthy'; }
+export function marginStatus(margin: number, p: QuoteParameterValues, targetMargin: number = p.targetMargin) { return margin < 0 ? 'loss' : margin < p.minimumMargin - .00001 ? 'belowMinimum' : margin < targetMargin - .00001 ? 'acceptable' : 'healthy'; }
+/** The quote's own target margin when it has one; the parameters' is only the default. */
+export const targetMarginOf = (p: QuoteParameterValues, quote: EngineInput['quote']) => quote.targetMargin ?? p.targetMargin;
 type Sum = (key: typeof numericZoneFields[number]) => number;
 const sumZones = (zones: ZoneResult[]): Sum => (key) => zones.reduce((n,z) => n+z[key],0);
 
@@ -147,18 +149,19 @@ export function computeCosts(p: QuoteParameterValues, sum: Sum) {
 
 export function computePricing(p: QuoteParameterValues, quote: EngineInput['quote'], costs: ReturnType<typeof computeCosts>, sum: Sum) {
     const {totalCost}=costs;
-    const targetPrice = divide(totalCost, 1 - p.targetMargin), minimumPrice = divide(totalCost, 1 - p.minimumMargin);
+    const targetMargin = targetMarginOf(p, quote);
+    const targetPrice = divide(totalCost, 1 - targetMargin), minimumPrice = divide(totalCost, 1 - p.minimumMargin);
     const offeredPrice = quote.manualPrice ?? targetPrice, profit = offeredPrice - totalCost, margin = divide(profit, offeredPrice), vat = offeredPrice * p.vatRate;
-    return { targetMargin: p.targetMargin, targetPrice, minimumMargin: p.minimumMargin, minimumPrice, breakEvenPrice: totalCost, offeredPrice, isManualPrice: quote.manualPrice !== null, profit, margin, marginStatus: marginStatus(margin, p), vat, totalWithVat: offeredPrice + vat, annualProfit: profit * p.monthsPerYear, pricePerM2: divide(offeredPrice, sum('floorArea')), negotiationRoom: Math.max(0, offeredPrice - minimumPrice) };
+    return { targetMargin, isCustomMargin: quote.targetMargin != null, targetPrice, minimumMargin: p.minimumMargin, minimumPrice, breakEvenPrice: totalCost, offeredPrice, isManualPrice: quote.manualPrice !== null, profit, margin, marginStatus: marginStatus(margin, p, targetMargin), vat, totalWithVat: offeredPrice + vat, annualProfit: profit * p.monthsPerYear, pricePerM2: divide(offeredPrice, sum('floorArea')), negotiationRoom: Math.max(0, offeredPrice - minimumPrice) };
 }
 
-export function allocateZone(zone: ZoneResult, p: QuoteParameterValues, costs: ReturnType<typeof computeCosts>) {
+export function allocateZone(zone: ZoneResult, p: QuoteParameterValues, costs: ReturnType<typeof computeCosts>, targetMargin: number = p.targetMargin) {
     const {directCost,indirectToAllocate}=costs;
     const rate = p.flatRatePerM2 !== null && p.flatRatePerM2 > 0 ? p.flatRatePerM2 : 0;
     const z = { ...zone };
         z.allocatedIndirect = divide(z.directCost, directCost) * indirectToAllocate;
         z.totalCost = z.directCost + z.allocatedIndirect;
-        z.targetPrice = divide(z.totalCost, 1 - p.targetMargin);
+        z.targetPrice = divide(z.totalCost, 1 - targetMargin);
         z.costPerM2 = divide(z.totalCost, z.floorArea);
         z.pricePerM2 = divide(z.targetPrice, z.floorArea);
         z.flatRateRevenue = z.floorArea * rate;
@@ -251,7 +254,7 @@ export function computeQuote(input: EngineInput) {
     const sum=sumZones(preliminary.filter((z)=>z.active));
     const costs=computeCosts(p,sum);
     const pricing=computePricing(p,input.quote,costs,sum);
-    const zones=preliminary.map((z)=>z.active ? allocateZone(z,p,costs) : z);
+    const zones=preliminary.map((z)=>z.active ? allocateZone(z,p,costs,pricing.targetMargin) : z);
     const active=zones.filter((z)=>z.active);
     const totalsSum=sumZones(active);
     const flatRate=flatRateComparison(active,p,costs.totalCost);

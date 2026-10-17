@@ -120,8 +120,9 @@ describe('rendered files', () => {
     const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'spec006-migrate-')), db = openDatabase(':memory:');
     try {
       for (const file of fs.readdirSync(MIGRATIONS_DIR).filter(f => /^00[1-5]_/.test(f))) fs.copyFileSync(path.join(MIGRATIONS_DIR, file), path.join(directory, file));
-      migrate(db, directory); seed(db, { createdBy: 'fixture@example.test' }); const before = quotesRepository(db).get(1);
-      expect(migrate(db)).toEqual(['006_quote_documents']); expect(quotesRepository(db).get(1)).toEqual(before);
+      // Raw rows: the repository already reads columns that later migrations add.
+      migrate(db, directory); seed(db, { createdBy: 'fixture@example.test' }); const before = db.prepare('SELECT * FROM quotes WHERE id = 1').get() as object;
+      expect(migrate(db)).toEqual(['006_quote_documents', '007_quote_target_margin']); expect(db.prepare('SELECT * FROM quotes WHERE id = 1').get()).toEqual({ ...before, target_margin: null }); expect(quotesRepository(db).get(1).targetMargin).toBeNull();
       expect(db.prepare('SELECT legal_name, payment_terms FROM quote_document_settings').get()).toEqual({ legal_name: null, payment_terms: null });
     } finally { db.close(); fs.rmSync(directory, { recursive: true, force: true }); }
   });

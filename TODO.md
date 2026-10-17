@@ -1,11 +1,2 @@
-- Revise integration iOS and API.
-    - Test login on iOS.
-- [x] Implement quoting logic.
-- [x] Implement quoting export as PDF.
-- [x] Implement quoting export as XLSX.
-- Improve web UI.
-- Improve iOS UI.
-- Remove unnecessary features in the UI.
-- Clear database items and re-upload them in Spanish.
 - Add a manual way to create the floor plan dimensions.
-- Add a way to process a document and generate a quote from it.2
+- Add a way to process a document and generate a quote from it.
