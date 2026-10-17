@@ -95,47 +95,6 @@ export const compactActionsTheme = (outer: Theme): Theme => ({
 export const metaTextSx: SxProps<Theme> = { fontSize: 12.5, lineHeight: 1.4, color: 'text.secondary' };
 export const metaIconSx: SxProps<Theme> = { fontSize: 15, color: 'text.disabled', flexShrink: 0 };
 
-/** The StatBar strip: a tinted, bordered band that wraps on narrow screens and clips the hairlines at its edges. */
-export const statBarSx: SxProps<Theme> = {
-  display: 'inline-flex',
-  flexWrap: 'wrap',
-  maxWidth: '100%',
-  alignItems: 'stretch',
-  borderRadius: '10px',
-  border: '1px solid',
-  borderColor: 'divider',
-  bgcolor: (theme: Theme): string => (theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.035)' : 'rgba(15,23,42,0.025)'),
-  overflow: 'hidden',
-};
-
-/** Hairlines above and to the left of every item; the strip's padding box clips those on its outer edges. */
-export const statBarItemSx: SxProps<Theme> = {
-  display: 'inline-flex',
-  flexDirection: 'column',
-  flex: '1 0 auto',
-  px: 1.25,
-  py: 0.5,
-  boxShadow: (theme: Theme): string => `-1px 0 0 ${theme.palette.divider}, 0 -1px 0 ${theme.palette.divider}`,
-};
-
-export const statBarLabelSx: SxProps<Theme> = {
-  fontSize: 9.5,
-  fontWeight: 700,
-  letterSpacing: '0.06em',
-  textTransform: 'uppercase',
-  color: 'text.disabled',
-  lineHeight: 1.5,
-  whiteSpace: 'nowrap',
-};
-
-export const statBarValueSx: SxProps<Theme> = {
-  fontSize: 14,
-  fontWeight: 600,
-  color: 'text.primary',
-  lineHeight: 1.3,
-  whiteSpace: 'nowrap',
-};
-
 /** A table cell kept on one line, for short codes (a SKU) that read wrong when broken at a hyphen. */
 export const noWrapCellSx = (): SxProps => ({ whiteSpace: 'nowrap' });
 

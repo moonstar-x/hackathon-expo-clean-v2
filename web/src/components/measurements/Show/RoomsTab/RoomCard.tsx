@@ -11,8 +11,8 @@ import type { RoomPart as Part } from '../../../../types/geometry';
 import type { RoomCardProps } from '../../../../types/measurements';
 import { formatArea, formatLength } from '../../../../utils/format';
 import { roomTypeKey } from '../../../../utils/measurements';
+import KeyFigures from '../../../KeyFigures';
 import OutlinedBadge from '../../../list/OutlinedBadge';
-import StatBar from '../../../list/StatBar';
 import RoomPart from './RoomPart';
 
 const sameName = (a: string, b: string): boolean =>
@@ -36,7 +36,8 @@ const RoomCard = ({ room, geometryRoom }: RoomCardProps): ReactElement => {
         </Typography>
         {typeName && !sameName(typeName, room.name) ? <OutlinedBadge label={typeName} /> : null}
       </Stack>
-      <StatBar
+      <KeyFigures
+        size="small"
         items={[
           { label: translate('app.measurements.room.area'), value: formatArea(room.floorArea, room.isFloorApproximate) },
           { label: translate('app.measurements.room.perimeter'), value: formatLength(room.perimeter) },

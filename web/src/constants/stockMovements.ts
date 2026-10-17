@@ -9,6 +9,13 @@ import type { QuantityLabel } from '../types/fields';
 
 export const MOVEMENT_TYPES: MovementType[] = ['IN', 'OUT', 'ADJUSTMENT'];
 
+/** A stock change's colour by sign: +10 green, −3 red, 0 grey (SPEC-002 §7.4). */
+export const DELTA_COLOR: Record<'positive' | 'negative' | 'zero', string> = {
+  positive: 'success.main',
+  negative: 'error.main',
+  zero: 'text.disabled',
+};
+
 /** One icon per movement type, on the product's actions and in the dashboard's feed alike. */
 export const MOVEMENT_TYPE_ICON: Record<MovementType, SvgIconComponent> = {
   IN: AddShoppingCartIcon,

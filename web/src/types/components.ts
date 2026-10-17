@@ -1,40 +1,11 @@
 // Props of the shared components in src/components.
 import type { ComponentType, ReactElement, ReactNode } from 'react';
-import type { BoxProps } from '@mui/material/Box';
 import type { IconButtonProps } from '@mui/material/IconButton';
 import type { ButtonProps } from 'react-admin';
 
 export interface ResponsiveSwitchProps {
   mobile: ReactElement;
   desktop: ReactElement;
-}
-
-export type RibbonColor = 'primary' | 'secondary' | 'error' | 'warning' | 'info' | 'success';
-export type RibbonSize = 'small' | 'medium' | 'large';
-export type RibbonVariant = 'filled' | 'outlined';
-export type RibbonSide = 'left' | 'right';
-
-export interface RibbonSizeConfig {
-  py: string;
-  px: string;
-  fontSize: string;
-  fold: number;
-}
-
-export interface RibbonColors {
-  main: string;
-  dark: string;
-  contrastText: string;
-}
-
-export interface RibbonProps extends Omit<BoxProps, 'color'> {
-  children: ReactNode;
-  /** A palette key (primary, success, warning…) or any CSS color. */
-  color?: string;
-  size?: RibbonSize;
-  variant?: RibbonVariant;
-  /** The card edge the ribbon hangs from. */
-  side?: RibbonSide;
 }
 
 export interface ConfirmButtonProps extends Omit<ButtonProps, 'onClick'> {

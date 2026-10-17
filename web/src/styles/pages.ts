@@ -13,10 +13,13 @@ export const sectionGridSx: SxProps<Theme> = {
   '& .MuiFormGroup-root > .MuiFormControlLabel-root': { minHeight: FILTER_CONTROL_HEIGHT },
 };
 
-/** Key figures: as many columns as fit, each a label over its value; no boxes, no rules. */
+/**
+ * Key figures: each a label over its value, no boxes, no rules. Columns of a natural width as many as
+ * fit (auto-fill, not auto-fit): three figures stay together on the left of a wide card.
+ */
 export const keyFiguresSx = (size: FigureSize): SxProps<Theme> => ({
   display: 'grid',
-  gridTemplateColumns: `repeat(auto-fit, minmax(min(100%, ${size === 'small' ? 96 : 160}px), 1fr))`,
+  gridTemplateColumns: `repeat(auto-fill, minmax(min(100%, ${size === 'small' ? 96 : 180}px), 1fr))`,
   columnGap: size === 'small' ? 2 : 3,
   rowGap: 2,
   m: 0,
@@ -74,11 +77,8 @@ export const formToolbarSx: SxProps<Theme> = {
   borderColor: 'divider',
 };
 
-/** The cards of a detail page, stacked; wide enough for the stock history table. */
-export const detailStackSx: SxProps<Theme> = { pb: 3, maxWidth: 1080 };
-
-/** Room on the summary card's right for its ribbon, so the stats never run under it. */
-export const ribbonContentSx: SxProps<Theme> = { pr: { xs: 15, sm: 20 } };
+/** A detail page's section cards, on a Grid that spans the page. */
+export const detailPageSx: SxProps<Theme> = { pb: 3 };
 
 /** A muted note under a field, such as "Registra un movimiento para modificar las existencias". */
 export const fieldNoteSx: SxProps<Theme> = { display: 'block', color: 'text.secondary' };

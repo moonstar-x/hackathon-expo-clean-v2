@@ -1,19 +1,30 @@
 import type { ReactElement } from 'react';
-import Stack from '@mui/material/Stack';
-import { detailStackSx } from '../../../styles/pages';
-import { ribbonGutterSx } from '../../../styles/ribbon';
-import { mergeSx } from '../../../styles/sx';
-import DetailsCard from './DetailsCard';
+import Grid from '@mui/material/Grid';
+import { detailPageSx } from '../../../styles/pages';
+import DetailsSection from './DetailsSection';
+import RecordSection from './RecordSection';
 import StockHistory from './StockHistory';
-import SummaryCard from './SummaryCard';
+import StockSection from './StockSection';
 
-/** The product page under its heading: stock at a glance, what the product is, and its movements. */
+/**
+ * The product page under its heading, across the whole page: the stock against its reorder line,
+ * what the product is beside its record, then its movements.
+ */
 const ProductDetail = (): ReactElement => (
-  <Stack spacing={2} sx={mergeSx(ribbonGutterSx, detailStackSx)}>
-    <SummaryCard />
-    <DetailsCard />
-    <StockHistory />
-  </Stack>
+  <Grid container spacing={2} sx={detailPageSx}>
+    <Grid size={12}>
+      <StockSection />
+    </Grid>
+    <Grid size={{ xs: 12, lg: 8 }}>
+      <DetailsSection />
+    </Grid>
+    <Grid size={{ xs: 12, lg: 4 }}>
+      <RecordSection />
+    </Grid>
+    <Grid size={12}>
+      <StockHistory />
+    </Grid>
+  </Grid>
 );
 
 export default ProductDetail;

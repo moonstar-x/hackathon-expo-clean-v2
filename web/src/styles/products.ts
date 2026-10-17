@@ -48,3 +48,14 @@ export const stockMeterLegendTickSx: SxProps<Theme> = { width: 2, height: 10, bo
  */
 export const lowStockRowSx = (theme: Theme, record: Product): SxProps =>
   record.isLowStock ? { backgroundColor: alpha(theme.palette.warning.main, 0.08) } : {};
+
+/** The product's stock section: the stock and its meter beside the numbers behind it, stacked on phones. */
+export const stockSummarySx: SxProps<Theme> = {
+  display: 'grid',
+  gap: { xs: 3, md: 5 },
+  gridTemplateColumns: { xs: 'minmax(0, 1fr)', md: 'minmax(0, 5fr) minmax(0, 7fr)' },
+  alignItems: 'start',
+};
+
+/** The stock on hand, the figure the page is opened for. */
+export const stockFigureSx: SxProps<Theme> = { fontSize: 30, fontWeight: 700, lineHeight: 1.2, letterSpacing: '-0.02em', mt: 0.25, mb: 1.5 };

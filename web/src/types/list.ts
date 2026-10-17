@@ -30,15 +30,6 @@ export interface PrimaryRowProps {
   end?: ReactNode;
 }
 
-export interface StatItem {
-  label: string;
-  value: ReactNode;
-}
-
-export interface StatBarProps {
-  items: StatItem[];
-}
-
 /**
  * Where an empty state sits: `page` stands alone in its own card (a List's `empty`), `inline` fills
  * a list's card (a DataTable's or SimpleList's `empty`), `compact` fits a dashboard panel.

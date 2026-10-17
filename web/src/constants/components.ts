@@ -1,7 +1,7 @@
 // Values used by the shared components in src/components.
 import type { PopoverOrigin } from '@mui/material/Popover';
 import type { MovementType, StockStatus } from '../types/api';
-import type { RibbonColor, RibbonSize, RibbonSizeConfig, StatusColor } from '../types/components';
+import type { StatusColor } from '../types/components';
 import type { Tone } from '../types/list';
 
 /** Shown where a value is missing. */
@@ -13,33 +13,11 @@ export const ROWS_PER_PAGE: number[] = [10, 25, 50, 100];
 /** Height of every control in a list's filter bar: a small filled input with its label and border. */
 export const FILTER_CONTROL_HEIGHT: number = 50;
 
-export const RIBBON_SIZES: Record<RibbonSize, RibbonSizeConfig> = {
-  small: { py: '4px', px: '10px', fontSize: '0.75rem', fold: 8 },
-  medium: { py: '6px', px: '16px', fontSize: '0.875rem', fold: 10 },
-  large: { py: '8px', px: '20px', fontSize: '1rem', fold: 12 },
-};
-
-export const PALETTE_COLORS: ReadonlySet<RibbonColor> = new Set<RibbonColor>([
-  'primary',
-  'secondary',
-  'error',
-  'warning',
-  'info',
-  'success',
-]);
-
 /** Badge tone per stock status, shared by desktop tables and mobile rows (SPEC-002 §7.2). */
 export const STOCK_STATUS_TONE: Record<StockStatus, Tone> = {
   outOfStock: 'red',
   lowStock: 'orange',
   inStock: 'green',
-};
-
-/** Ribbon color per stock status, for the product detail card. */
-export const STOCK_STATUS_RIBBON: Record<StockStatus, RibbonColor> = {
-  outOfStock: 'error',
-  lowStock: 'warning',
-  inStock: 'success',
 };
 
 /** Palette color per stock status: the stock meter's fill (red empty, orange at the reorder line or below). */
@@ -61,13 +39,6 @@ export const MOVEMENT_TYPE_TONE: Record<MovementType, Tone> = {
   IN: 'green',
   OUT: 'red',
   ADJUSTMENT: 'blue',
-};
-
-/** Ribbon color per movement type, for the movement detail card. */
-export const MOVEMENT_TYPE_RIBBON: Record<MovementType, RibbonColor> = {
-  IN: 'success',
-  OUT: 'error',
-  ADJUSTMENT: 'info',
 };
 
 /** The user menu hangs from the right edge of its trigger. */

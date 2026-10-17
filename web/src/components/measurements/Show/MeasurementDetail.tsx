@@ -1,21 +1,27 @@
 import type { ReactElement } from 'react';
-import Stack from '@mui/material/Stack';
-import { detailStackSx } from '../../../styles/pages';
-import DetailsCard from './DetailsCard';
+import Grid from '@mui/material/Grid';
+import { detailPageSx } from '../../../styles/pages';
+import DetailsSection from './DetailsSection';
 import MeasurementTabs from './MeasurementTabs';
-import SummaryCard from './SummaryCard';
+import SummarySection from './SummarySection';
 
 /**
- * The measurement page under its heading: the space at a glance, its plan, model, rooms and files,
- * then where it came from. The plan comes before the fields card other detail pages lead with,
- * because seeing the space is what a measurement is opened for.
+ * The measurement page under its heading, across the whole page: the space at a glance, its plan,
+ * model, rooms and files, then where it came from. The plan comes before the details other detail
+ * pages lead with, because seeing the space is what a measurement is opened for.
  */
 const MeasurementDetail = (): ReactElement => (
-  <Stack spacing={2} sx={detailStackSx}>
-    <SummaryCard />
-    <MeasurementTabs />
-    <DetailsCard />
-  </Stack>
+  <Grid container spacing={2} sx={detailPageSx}>
+    <Grid size={12}>
+      <SummarySection />
+    </Grid>
+    <Grid size={12}>
+      <MeasurementTabs />
+    </Grid>
+    <Grid size={12}>
+      <DetailsSection />
+    </Grid>
+  </Grid>
 );
 
 export default MeasurementDetail;

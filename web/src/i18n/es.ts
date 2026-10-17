@@ -108,7 +108,7 @@ const appSpanish: StringMap = {
       hint: 'Usa el correo y la contraseña de tu cuenta.',
       submit: 'Entrar',
     },
-    copy: { copied: '%{label} copiado', failed: 'No se pudo copiar' },
+    copy: { action: 'Copiar %{label}', copied: '%{label} copiado', failed: 'No se pudo copiar' },
     // What each list says before it has anything in it (components/list/EmptyState), by resource.
     empty: {
       default: { title: 'Todavía no hay registros', body: 'Lo que añadas aparecerá aquí.' },
@@ -179,6 +179,7 @@ const appSpanish: StringMap = {
       scannedOn: 'Escaneada el %{date}',
       rooms: '1 habitación |||| %{smart_count} habitaciones',
       areaAndRooms: '%{area}, %{rooms}',
+      summary: 'Resumen',
       details: 'Detalles',
       roomsUnjoined: 'Las habitaciones no se pudieron unir, así que se muestran tal como se escanearon.',
       deleteKeepsQuote: 'La medición se elimina; su cotización se conserva.',
@@ -290,7 +291,9 @@ const appSpanish: StringMap = {
       reorderLine: 'Nivel de reposición: %{reorder}',
       history: 'Historial de inventario',
       historyEmpty: 'Todavía no hay movimientos.',
-      sections: { general: 'General', stock: 'Inventario', safety: 'Seguridad', details: 'Detalles' },
+      sections: { general: 'General', stock: 'Inventario', safety: 'Seguridad', details: 'Detalles', record: 'Registro' },
+      hazardous: 'Peligroso',
+      stockValueHint: 'Existencias por costo unitario',
       help: {
         sku: 'Se guarda en mayúsculas',
         supplier: 'Opcional',
@@ -310,6 +313,7 @@ const appSpanish: StringMap = {
       create: 'Registrar movimiento',
       createTitle: 'Registrar movimiento de inventario',
       title: 'Movimiento n.º %{id}',
+      summary: 'Resumen',
       details: 'Detalles',
       openProduct: 'Ver producto',
       recorded: 'Movimiento de inventario registrado',
