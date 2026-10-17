@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatDateTime, formatDay, formatTime } from '../../src/utils/dates';
+import { formatDateTime, formatDay, formatPeriod, formatTime, recentPeriods } from '../../src/utils/dates';
 
 describe('formatDateTime', () => {
   it('formats an ISO timestamp and ignores bad input', (): void => {
@@ -22,5 +22,16 @@ describe('clock', () => {
   it('tells the day in Spanish', (): void => {
     expect(formatDay(new Date(2026, 9, 15, 12))).toBe('jue, 15 oct');
     expect(formatDay(new Date(2025, 11, 31, 12))).toBe('mié, 31 dic');
+  });
+});
+
+describe('waste control months', () => {
+  it('names a month in Spanish, capitalized to start a line', (): void => {
+    expect(formatPeriod('2026-10')).toBe('Octubre de 2026');
+    expect(formatPeriod('2025-01')).toBe('Enero de 2025');
+  });
+
+  it('lists the last months, this one first, across the turn of the year', (): void => {
+    expect(recentPeriods(3, new Date(2026, 0, 15))).toEqual(['2026-01', '2025-12', '2025-11']);
   });
 });

@@ -42,3 +42,6 @@ export const OFFER_PRODUCTS: [string, OfferProductKey][] = [
   ['daily', 'dailyDisinfectant'],
   ['terminal', 'terminalDisinfectant'],
 ];
+
+/** How many months back the waste control's month picker reaches, this one included. */
+export const WASTE_PERIODS: number = 24;

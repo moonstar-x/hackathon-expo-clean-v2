@@ -368,6 +368,9 @@ const appSpanish: StringMap = {
       document: 'Documento',
       marginLine: 'Margen: %{margin}',
       glance: 'De un vistazo',
+      flatRateHint: 'Configúrala en Parámetros, en la pestaña Comparación, para comparar el precio por zona con una tarifa por m².',
+      configureFlatRate: 'Configurar tarifa plana',
+      noReference: 'Sin referencia externa',
       // The Oferta técnica tab: a zone's cleaning plan in five groups.
       offer: {
         zone: 'Zona',

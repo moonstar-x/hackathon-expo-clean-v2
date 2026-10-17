@@ -1,7 +1,8 @@
 import { useEffect, useState, type ReactElement, type ReactNode, type ChangeEvent, type SyntheticEvent } from 'react';
-import { Accordion, AccordionDetails, AccordionSummary, Alert, Box, Button, Card, CardContent, CircularProgress, Grid, Link, Stack, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tabs, TextField, Typography } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Alert, Box, Button, Card, CardContent, CircularProgress, Grid, Link, MenuItem, Stack, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tabs, TextField, Typography } from '@mui/material';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import { DeleteButton, EditButton, Show, useDataProvider, useNotify, useRecordContext, useRedirect, useShowContext, useTranslate, type TranslateFunction } from 'react-admin';
 import { Link as RouterLink } from 'react-router-dom';
@@ -13,14 +14,15 @@ import ShowSection from '../components/show/ShowSection';
 import DocumentButton from '../components/quotes/List/DocumentButton';
 import TechnicalOffer from '../components/quotes/show/TechnicalOffer';
 import { detailPageSx } from '../styles/pages';
-import { quoteMetaSx, quoteTabPanelSx, quoteTableSx, quoteTabsCardSx, quoteTabsSx, valuesGridSx, zoneInputsTableSx } from '../styles/quotes';
+import { quoteMetaSx, quoteTabPanelSx, emptyFiguresSx, quoteTableSx, quoteTabsCardSx, quoteTabsSx, valuesGridSx, valuesRibbonSx, wastePeriodSx, zoneInputsTableSx } from '../styles/quotes';
 import ConfirmButton from '../components/ConfirmButton';
 import { useAppConfig } from '../AppConfigContext';
 import { quoteEnums, quoteFields, quoteIssues, quoteText } from '../i18n/quotes';
 import type { InventoryDataProvider } from '../types/providers';
 import type { Issue, ParameterSection, ParameterTab, PurchasePlanRow, Quote, TechnicalProduct, WasteControl, WasteRow, ZoneInput, ZoneResult, ZoneTypeValues } from '../types/quotes';
 import { formatCurrency } from '../utils/format';
-import { formatDateTime } from '../utils/dates';
+import { formatDateTime, formatPeriod, recentPeriods } from '../utils/dates';
+import { WASTE_PERIODS } from '../constants/quotes';
 import { QuoteStatus, StateChip } from './Chips';
 import { PARAMETER_TABS } from '../constants/quoteSettings';
 import { parameterFields } from './parameterFields';
@@ -54,11 +56,13 @@ const DisplayValue = ({ field, value }: {
     const text: string = typeof value === 'string' ? value : '—';
     return <>{quoteEnums[text] ?? text}</>;
 };
-function Values({ values, title, children }: {
+function Values({ values, title, children, ribbon }: {
     values: object;
     title?: string;
     /** Shown between the title and the values, such as the input the values depend on. */
     children?: ReactNode;
+    /** A note on the whole card, as a band along its foot. */
+    ribbon?: ReactNode;
 }): ReactElement {
     return <Card variant="outlined" sx={{ mb: 2 }}><CardContent>
     {title && <Typography variant="h6" gutterBottom>{title}</Typography>}
@@ -73,7 +77,7 @@ function Values({ values, title, children }: {
     <Typography component="dt" variant="body2" color="text.secondary">{quoteFields[key]}</Typography>
     <Typography component="dd" variant="body2" sx={{ m: 0, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}><DisplayValue field={key} value={value}/></Typography>
     </Box>)}</Box>
-    </CardContent></Card>;
+    </CardContent>{ribbon && <Box sx={valuesRibbonSx}><InfoOutlinedIcon/>{ribbon}</Box>}</Card>;
 }
 /** A table from md up; below it, one card per row, titled by its first field (its name). */
 function Rows({ rows, fields }: {
@@ -115,7 +119,7 @@ function WasteEditor({ quote }: {
     const provider: InventoryDataProvider = useDataProvider<InventoryDataProvider>();
     const query: UseQueryResult<WasteControl> = useQuery<WasteControl>({ queryKey: ['waste', quote.id, period], queryFn: (): Promise<WasteControl> => provider.getWaste(quote.id, period), enabled: /^\d{4}-(0[1-9]|1[0-2])$/.test(period) });
     return <Box>
-    <TextField type="month" label={quoteText.wasteMonth} value={period} onChange={(e: ChangeEvent<HTMLInputElement>): void => setPeriod(e.target.value)} slotProps={{ inputLabel: { shrink: true } }} sx={{ mb: 2 }}/>
+    <TextField select label={quoteText.wasteMonth} value={period} onChange={(e: ChangeEvent<HTMLInputElement>): void => setPeriod(e.target.value)} sx={wastePeriodSx}>{recentPeriods(WASTE_PERIODS).map((month: string): ReactElement => <MenuItem key={month} value={month}>{formatPeriod(month)}</MenuItem>)}</TextField>
     {query.isPending ? <CircularProgress /> : query.error ? <Alert severity="error">{quoteText.wasteLoadError}</Alert> : query.data && <WasteInputs key={`${period}/${query.dataUpdatedAt}`} quote={quote} data={query.data} onSaved={(): void => { void query.refetch(); }}/>}
     </Box>;
 }
@@ -280,12 +284,9 @@ export function QuoteDetail(): ReactElement | null {
         
         </Box>
         <Box>
-        <Values title={quoteText.negotiation} values={subset(result.pricing, ['targetPrice', 'minimumPrice', 'breakEvenPrice', 'negotiationRoom'])}/>
-        <Alert severity="info">{quoteText.minimumAdvice}</Alert>
-        <Values title={quoteText.staffing} values={result.staffing}/>
-        <Typography variant="caption">{quoteText.shiftAdvice}</Typography>
-        <Values title={quoteText.chemicalsGroup} values={result.chemicals}/>
-        <Typography variant="caption">{quoteText.wasteHypothetical}</Typography>
+        <Values title={quoteText.negotiation} values={subset(result.pricing, ['targetPrice', 'minimumPrice', 'breakEvenPrice', 'negotiationRoom'])} ribbon={quoteText.minimumAdvice}/>
+        <Values title={quoteText.staffing} values={result.staffing} ribbon={quoteText.shiftAdvice}/>
+        <Values title={quoteText.chemicalsGroup} values={result.chemicals} ribbon={quoteText.wasteHypothetical}/>
         </Box>
         </Box><Typography variant="h6">{quoteText.dollarBreakdown}</Typography><Rows fields={['name', 'totalCost', 'share']} rows={result.breakdown.map((r: {
             key: string;
@@ -295,7 +296,12 @@ export function QuoteDetail(): ReactElement | null {
         {tab === 1 && <ZoneDetails quote={quote} openZone={openZone}/>}
         {tab === 2 && <TechnicalOffer rows={result.technicalOffer} totalFte={result.totals.fte}/>}
         {tab === 3 && <><Rows fields={['name', 'unit', 'presentationSize', 'pricePerContainer', 'pricePerUnit', 'theoretical', 'waste', 'total', 'containers', 'stock', 'toBuy', 'purchaseCost', 'wasteCost']} rows={result.purchasePlan.rows.map((r: PurchasePlanRow): object => ({ ...r, stock: quote.snapshot!.products[r.productId]?.inventoryProductId ? `${number(r.stock, 0)} · ${quoteText.inventorySource}` : r.stock }))}/><Values title={quoteText.totals} values={{ purchaseCost: result.purchasePlan.totalPurchaseCost, wasteCost: result.purchasePlan.totalWasteCost }}/></>}
-        {tab === 4 && <>{result.flatRate.rate > 0 ? <Values title={quoteText.flatRate} values={result.flatRate}/> : <Alert severity="info">{quoteText.noFlatRate}</Alert>}<Rows fields={['name', 'floorArea', 'totalCost', 'flatRateRevenue', 'flatRateMargin', 'status']} rows={result.zones.map((z: ZoneResult): object => ({ ...z, status: z.flatRateStatus }))}/>{result.reference.price ? <Values title={quoteFields.externalReferencePrice} values={result.reference}/> : <Alert severity="info">{quoteText.referencePrompt}</Alert>}</>}
+        {tab === 4 && <>{result.flatRate.rate > 0
+            ? <><Values title={quoteText.flatRate} values={result.flatRate}/><Rows fields={['name', 'floorArea', 'totalCost', 'flatRateRevenue', 'flatRateMargin', 'status']} rows={result.zones.map((z: ZoneResult): object => ({ ...z, status: z.flatRateStatus }))}/></>
+            : <Values title={quoteText.flatRate} values={{}}><Typography fontWeight={500}>{quoteText.noFlatRate}</Typography><Typography variant="body2" sx={emptyFiguresSx}>{translate('app.quotes.flatRateHint')}</Typography><Button size="small" variant="outlined" component={RouterLink} to="/quote-parameters/1">{translate('app.quotes.configureFlatRate')}</Button></Values>}
+        {result.reference.price
+            ? <Values title={quoteFields.externalReferencePrice} values={result.reference}/>
+            : <Values title={quoteFields.externalReferencePrice} values={{}}><Typography fontWeight={500}>{translate('app.quotes.noReference')}</Typography><Typography variant="body2" sx={emptyFiguresSx}>{quoteText.referencePrompt}</Typography><Button size="small" variant="outlined" component={RouterLink} to={`/quotes/${quote.id}`}>{translate('ra.action.edit')}</Button></Values>}</>}
         {tab === 5 && <WasteEditor quote={quote}/>}
         {tab === 6 && quote.snapshot && <><Typography variant="h6">{quoteText.snapshot}</Typography>{Object.values(quote.snapshot.zoneTypes).map((type: ZoneTypeValues): ReactElement => <Values key={type.id} title={type.name} values={{ ...type,cleaningProductId:quote.snapshot!.products[type.cleaningProductId]?.name,dailyDisinfectantId:quote.snapshot!.products[type.dailyDisinfectantId]?.name,terminalDisinfectantId:quote.snapshot!.products[type.terminalDisinfectantId]?.name,hoursBetweenLow:type.hoursBetweenCleanings.low,hoursBetweenMedium:type.hoursBetweenCleanings.medium,hoursBetweenHigh:type.hoursBetweenCleanings.high }} />)}{PARAMETER_TABS.map((group: ParameterTab): ReactElement => <Values key={group.title} title={group.title} values={subset(quote.snapshot!.parameters, group.sections.flatMap((section: ParameterSection): string[] => section.fields.map((f: typeof parameterFields[number]): string => f.name)))} />)}<Rows rows={Object.values(quote.snapshot.zoneTypes)} fields={['name', 'risk', 'dailyRateM2PerHour', 'terminalRateM2PerHour', 'solutionLitersPerM2']}/><Rows rows={Object.values(quote.snapshot.schedules)} fields={['name', 'serviceHoursPerDay', 'nightHoursFraction', 'includesHolidays']}/><Rows rows={Object.values(quote.snapshot.products)} fields={['name', 'presentationSize', 'unit', 'publishedPrice', 'dosePerLiter', 'effectiveStock']}/></>}
         </Box></Card></Grid>}

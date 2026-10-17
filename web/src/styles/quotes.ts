@@ -1,5 +1,5 @@
 // Styles of the quote screens (quotes/, components/quotes).
-import type { SxProps, Theme } from '@mui/material/styles';
+import { alpha, type SxProps, type Theme } from '@mui/material/styles';
 import { sectionGridSx } from './pages';
 
 /** A parameter tab's inputs: aligned like a form section's, across the whole tab. */
@@ -151,3 +151,28 @@ export const offerCardStaffSx: SxProps<Theme> = {
 };
 
 export const offerTotalSx: SxProps<Theme> = [offerCardStaffSx, { px: 2, fontWeight: 600, borderTop: 0 }] as SxProps<Theme>;
+
+/**
+ * A note on a whole card of figures ("Precio mínimo: no bajar de aquí."), as a band along its foot: a
+ * faint step of the brand colour, so it reads as part of the card, not as an alert beside it.
+ */
+export const valuesRibbonSx: SxProps<Theme> = (theme: Theme) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: 1,
+  px: 2,
+  py: 1.25,
+  borderTop: '1px solid',
+  borderColor: alpha(theme.palette.primary.main, 0.2),
+  bgcolor: alpha(theme.palette.primary.main, theme.palette.mode === 'dark' ? 0.1 : 0.05),
+  fontSize: 13,
+  lineHeight: 1.4,
+  color: 'text.primary',
+  '& .MuiSvgIcon-root': { fontSize: 18, color: 'primary.main', flexShrink: 0 },
+});
+
+/** A card with nothing to show yet: what is missing, then where to set it. */
+export const emptyFiguresSx: SxProps<Theme> = { m: 0, mb: 1.5, maxWidth: '70ch', color: 'text.secondary' };
+
+/** The waste control's month picker. */
+export const wastePeriodSx: SxProps<Theme> = { mb: 2, minWidth: 240 };
