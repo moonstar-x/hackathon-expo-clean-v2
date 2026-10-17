@@ -25,8 +25,9 @@ const settings = (overrides: Record<string, unknown> = {}): RaRecord => ({
 });
 const json = (status: number, body: unknown): Response => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
 
-/** The logo endpoint: GET answers the logo or a 404, PUT answers `putStatus`, DELETE removes it. */
-const logoApi = (_url: string | URL | Request, init?: RequestInit): Promise<Response> => {
+/** The logo endpoint: GET answers the logo or a 404, PUT answers `putStatus`, DELETE removes it. The company has no signature. */
+const logoApi = (url: string | URL | Request, init?: RequestInit): Promise<Response> => {
+  if ((url instanceof Request ? url.url : url.toString()).endsWith('/signature')) return Promise.resolve(json(404, { code: 'NOT_FOUND', message: 'Signature not found' }));
   const method: string = init?.method ?? 'GET';
   if (method === 'PUT') {
     if (putStatus !== 200) return Promise.resolve(json(putStatus, { code: 'PAYLOAD_TOO_LARGE', message: 'Request body is too large' }));

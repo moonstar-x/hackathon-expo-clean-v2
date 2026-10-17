@@ -5,7 +5,7 @@ import { hasAtMostDecimals, MAX_NUMBER } from './numbers.ts';
 // Shared zod building blocks so every resource reports errors the same way.
 
 const tooLong = (max: number) => `Must be at most ${max} characters`;
-const requiredOr = (message: string) => (iss: { input?: unknown }) =>
+export const requiredOr = (message: string) => (iss: { input?: unknown }) =>
   iss.input === undefined || iss.input === null ? 'Required' : message;
 
 /** Required, trimmed, non-empty string. */

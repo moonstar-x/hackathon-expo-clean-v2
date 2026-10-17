@@ -4,6 +4,7 @@ import type { quotesRepository } from '../quotes/repository.ts';
 import { documentColors } from './colors.ts';
 import type { LogoInfo } from './logo.ts';
 import type { QuoteDocumentData, QuoteDocumentSettings } from './schemas.ts';
+import type { SignatureInfo } from './signature.ts';
 import type { Money, QuoteDocument } from './types.ts';
 import { numberToSpanishWords } from './words.ts';
 
@@ -44,7 +45,7 @@ export function allocateCents(total: number, weights: number[]): number[] {
   for (let i = 0, remaining = total - cents.reduce((a, b) => a + b, 0); i < remaining; i++) cents[order[i].i]++;
   return cents;
 }
-export function buildQuoteDocument({ quote, data, settings: s, revision, number, timezone, logo }: { quote: QuoteRecord; data: QuoteDocumentData; settings: QuoteDocumentSettings; revision: number; number: string; timezone: string; logo: LogoInfo | null }): QuoteDocument {
+export function buildQuoteDocument({ quote, data, settings: s, revision, number, timezone, logo, signature = null }: { quote: QuoteRecord; data: QuoteDocumentData; settings: QuoteDocumentSettings; revision: number; number: string; timezone: string; logo: LogoInfo | null; signature?: SignatureInfo | null }): QuoteDocument {
   if (readiness(quote, data, s).blockers.length) throw new Error('Document is not ready');
   const r = quote.result!, zones = quote.zones!;
   const issueDate = data.issueDate ?? dateInZone(quote.calculation.calculatedAt as string, timezone);
@@ -83,6 +84,7 @@ export function buildQuoteDocument({ quote, data, settings: s, revision, number,
     scope: { columns: ['Zona', 'Tipo de zona', 'Riesgo', 'Superficie (m²)', 'Horario', 'Días por mes', 'Frecuencia', 'Limpiezas terminales por mes'], rows: details, productsText: `Productos: ${productTexts.join(', ')}` }, conditions,
     clientNotes: data.clientNotes ? paragraphs(data.clientNotes) : null,
     acceptance: { issuer: s.signerName ? [s.signerName, s.signerTitle, s.legalName].filter((v): v is string => !!v) : [s.legalName!], client: [`Aceptado por: ${data.clientLegalName}`, 'Nombre, firma y fecha'] },
+    ...(signature ? { signature: { signerName: signature.signerName, certificateSha256: signature.certificateSha256, reason: `Cotización ${number}`, location: s.city } } : {}),
     footer: `${s.tradeName} · ${number} Rev. ${revision}`,
     fileBaseName: `Cotizacion-${number}-${Array.from(quote.name.replace(/\s+/g, '-').replace(/[^\p{L}\p{N}-]/gu, '')).slice(0, 60).join('')}${revision > 1 ? `-Rev${revision}` : ''}`,
   };

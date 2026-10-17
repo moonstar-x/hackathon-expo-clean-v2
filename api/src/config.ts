@@ -141,7 +141,7 @@ export function loadConfig(source: Record<string, string | undefined> = process.
     trustProxy: e.TRUST_PROXY,
     uploadMaxFileBytes: e.UPLOAD_MAX_FILE_MB * 1024 * 1024,
     databasePath,
-    /** Folder for uploaded files kept outside the database (the company logo). */
+    /** Folder for uploaded files kept outside the database (the company logo and electronic signature). */
     filesPath: path.resolve(API_ROOT, e.FILES_PATH),
     corsOrigins: Object.freeze(e.CORS_ORIGIN),
     jwtSecret: e.JWT_SECRET,
