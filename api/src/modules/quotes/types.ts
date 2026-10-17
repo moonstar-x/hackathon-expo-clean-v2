@@ -88,6 +88,8 @@ export interface EngineInput {
     quote: {
         assumptionsConfirmed: boolean;
         manualPrice: number | null;
+        /** This quote's own target margin; null or absent uses parameters.targetMargin. */
+        targetMargin?: number | null;
         externalReferencePrice: number | null;
     };
     zones: ZoneInput[];

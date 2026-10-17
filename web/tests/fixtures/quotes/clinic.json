@@ -7,7 +7,7 @@
   "visitDate": "2026-10-16",
   "measurementOrigin": "siteVisit",
   "assumptionsConfirmed": true,
-  "manualPrice": null,
+  "manualPrice": null, "targetMargin": null,
   "externalReferencePrice": 3500,
   "notes": null,
   "status": "simulation",

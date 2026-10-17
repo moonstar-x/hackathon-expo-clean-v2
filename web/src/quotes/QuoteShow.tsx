@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactElement, type ReactNode, type ChangeEvent, type SyntheticEvent } from 'react';
+import { useEffect, useState, type Dispatch, type ReactElement, type ReactNode, type ChangeEvent, type SetStateAction, type SyntheticEvent } from 'react';
 import { Accordion, AccordionDetails, AccordionSummary, Alert, Box, Button, Card, CardContent, CircularProgress, Grid, Link, MenuItem, Stack, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tabs, TextField, Typography } from '@mui/material';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -13,13 +13,14 @@ import OutlinedBadge from '../components/list/OutlinedBadge';
 import ShowSection from '../components/show/ShowSection';
 import DocumentButton from '../components/quotes/List/DocumentButton';
 import TechnicalOffer from '../components/quotes/show/TechnicalOffer';
+import PriceInput from '../components/quotes/show/PriceInput';
 import { detailPageSx } from '../styles/pages';
 import { quoteMetaSx, quoteTabPanelSx, emptyFiguresSx, quoteTableSx, quoteTabsCardSx, quoteTabsSx, valuesGridSx, valuesRibbonSx, wastePeriodSx, zoneInputsTableSx } from '../styles/quotes';
 import ConfirmButton from '../components/ConfirmButton';
 import { useAppConfig } from '../AppConfigContext';
 import { quoteEnums, quoteFields, quoteIssues, quoteText } from '../i18n/quotes';
 import type { InventoryDataProvider } from '../types/providers';
-import type { Issue, ParameterSection, ParameterTab, PurchasePlanRow, Quote, TechnicalProduct, WasteControl, WasteRow, ZoneInput, ZoneResult, ZoneTypeValues } from '../types/quotes';
+import type { EngineResult, Issue, ParameterSection, ParameterTab, PriceDraft, PriceDraftField, PurchasePlanRow, Quote, TechnicalProduct, WasteControl, WasteRow, ZoneInput, ZoneResult, ZoneTypeValues } from '../types/quotes';
 import { formatCurrency } from '../utils/format';
 import { formatDateTime, formatPeriod, recentPeriods } from '../utils/dates';
 import { WASTE_PERIODS } from '../constants/quotes';
@@ -27,6 +28,7 @@ import { QuoteStatus, StateChip } from './Chips';
 import { PARAMETER_TABS } from '../constants/quoteSettings';
 import { parameterFields } from './parameterFields';
 import { number, percent, previewWaste } from './format';
+import { editDraft, previewPricing, priceDraftErrors, priceUpdate } from './priceDraft';
 const tabs: string[] = [quoteText.summary, quoteText.zones, quoteText.technicalOffer, quoteText.purchasePlan, quoteText.flatRate, quoteText.wasteControl, quoteText.assumptions];
 const moneyFields: Set<string> = new Set(['supervision','equipment','transport','insurance','operatingCost','administration','contingency','indirectToAllocate','monthlyWage','basicWage','supervisorMonthlyCost','baseEppPerFte','criticalEppPerFte','mopCost','equipmentMonthly','transportMonthly','insuranceMonthly','flatRatePerM2','paperSoapMonthly','defaultPaperSoapPerFixtureMonthly','offeredPrice', 'totalCost', 'profit', 'vat', 'totalWithVat', 'annualProfit', 'pricePerM2', 'targetPrice', 'minimumPrice', 'breakEvenPrice', 'negotiationRoom', 'laborCost', 'chemicalsTheoretical', 'chemicalsWaste', 'chemicalsWithWaste', 'eppAndHygiene', 'utensils', 'directCost', 'allocatedIndirect', 'costPerM2', 'purchaseCost', 'wasteCost', 'excessCost', 'withWaste', 'uncontrolledWasteCost', 'controlledWasteCost', 'monthlyWasteSavings', 'annualWasteSavings', 'revenue', 'price', 'difference', 'pricePerContainer', 'pricePerUnit']);
 const percentageFields: Set<string> = new Set([...parameterFields.filter((f: typeof parameterFields[number]): boolean => f.percentage).map((f: typeof parameterFields[number]): string => f.name),'nightHoursFraction','margin', 'share', 'realWasteRate', 'relativeDifference', 'flatRateMargin', 'nightFraction', 'holidayFraction', 'shareOfCost']);
@@ -56,9 +58,11 @@ const DisplayValue = ({ field, value }: {
     const text: string = typeof value === 'string' ? value : '—';
     return <>{quoteEnums[text] ?? text}</>;
 };
-function Values({ values, title, children, ribbon }: {
+function Values({ values, title, children, ribbon, editors }: {
     values: object;
     title?: string;
+    /** Inputs shown in place of some values, by field, to change them here. */
+    editors?: Partial<Record<string, ReactNode>>;
     /** Shown between the title and the values, such as the input the values depend on. */
     children?: ReactNode;
     /** A note on the whole card, as a band along its foot. */
@@ -75,7 +79,7 @@ function Values({ values, title, children, ribbon }: {
         unknown
     ]): ReactElement => <Box key={key} sx={{ display: 'contents' }}>
     <Typography component="dt" variant="body2" color="text.secondary">{quoteFields[key]}</Typography>
-    <Typography component="dd" variant="body2" sx={{ m: 0, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}><DisplayValue field={key} value={value}/></Typography>
+    <Typography component="dd" variant="body2" sx={{ m: 0, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{editors?.[key] ?? <DisplayValue field={key} value={value}/>}</Typography>
     </Box>)}</Box>
     </CardContent>{ribbon && <Box sx={valuesRibbonSx}><InfoOutlinedIcon/>{ribbon}</Box>}</Card>;
 }
@@ -221,6 +225,10 @@ export function QuoteDetail(): ReactElement | null {
         number,
         (v: number) => void
     ] = useState<number>(0);
+    const [draft, setDraft]: [
+        PriceDraft,
+        Dispatch<SetStateAction<PriceDraft>>
+    ] = useState<PriceDraft>({});
     const [openZone, setOpenZone]: [
         number | undefined,
         (v: number | undefined) => void
@@ -238,16 +246,33 @@ export function QuoteDetail(): ReactElement | null {
         setTab(1);
         requestAnimationFrame((): void => { document.getElementById(`zone-${position}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
     };
+    const result: Quote['result'] = quote.result;
+    // Prices changed in place: Recalcular saves them on this quote only, then recalculates everything they affect.
+    const totalCost: number = result?.costs.totalCost ?? 0;
+    const draftErrors: Partial<Record<PriceDraftField, string>> = priceDraftErrors(draft, totalCost);
+    const edited: boolean = Object.keys(draft).length > 0;
+    const invalid: boolean = Object.keys(draftErrors).length > 0;
+    const calculating: boolean = quote.calculation.state === 'pending' || quote.calculation.state === 'running';
+    // While a valid draft is open, both pricing cards and the untouched inputs show what it will give.
+    const pricing: EngineResult['pricing'] | undefined = result && quote.snapshot && edited && !invalid ? previewPricing(result.pricing, draft, { totalCost, floorArea: result.totals.floorArea, parameters: quote.snapshot.parameters }) : result?.pricing;
     const recalculate = async (): Promise<void> => { try {
-        await provider.quoteAction(quote.id, 'recalculate');
+        if (edited && result) {
+            await provider.update<Quote>('quotes', { id: quote.id, data: priceUpdate(draft, totalCost), previousData: quote });
+            setDraft({});
+        }
+        else
+            await provider.quoteAction(quote.id, 'recalculate');
         await refetch();
     }
     catch {
-        notify(quoteText.recalculateError, { type: 'error' });
+        notify(edited ? quoteText.priceApplyError : quoteText.recalculateError, { type: 'error' });
     } };
-    const result: Quote['result'] = quote.result;
+    const figure = (value: number): string => String(Number(value.toFixed(2)));
+    // A cleared input shows what it falls back to: the target price, or the margin (and its price) in Parámetros.
+    const globalMargin: number | undefined = quote.snapshot?.parameters.targetMargin;
+    const priceEditor = (field: PriceDraftField, current: number, fallback?: number, helperText?: string): ReactElement => <PriceInput field={field} value={draft[field] ?? figure(current)} placeholder={fallback === undefined ? undefined : figure(fallback)} onChange={(value: string): void => setDraft((previous: PriceDraft): PriceDraft => editDraft(previous, field, value))} error={draftErrors[field]} helperText={helperText} disabled={calculating}/>;
     return <Box>
-    <PageHeader eyebrow={quoteText.quotes} title={quote.name} badge={<QuoteStatus quote={quote}/>} actions={<><DocumentButton variant="outlined"/><Button variant="contained" onClick={recalculate}>{quoteText.recalculate}</Button><EditButton variant="outlined"/><ConfirmButton label={quoteText.regenerate} variant="outlined" disabled={quote.measurementId === null} confirmContent={quoteText.regenerateConfirm} onConfirm={async (): Promise<void> => { await provider.quoteAction(quote.id, 'regenerate'); await refetch(); }}><AutorenewIcon/></ConfirmButton><DeleteButton mutationMode="pessimistic"/></>}/>
+    <PageHeader eyebrow={quoteText.quotes} title={quote.name} badge={<QuoteStatus quote={quote}/>} actions={<><DocumentButton variant="outlined"/><Button variant="contained" disabled={edited && invalid} onClick={recalculate}>{quoteText.recalculate}</Button><EditButton variant="outlined"/><ConfirmButton label={quoteText.regenerate} variant="outlined" disabled={quote.measurementId === null} confirmContent={quoteText.regenerateConfirm} onConfirm={async (): Promise<void> => { await provider.quoteAction(quote.id, 'regenerate'); await refetch(); }}><AutorenewIcon/></ConfirmButton><DeleteButton mutationMode="pessimistic"/></>}/>
     <Grid container spacing={2} sx={detailPageSx}>
     <Grid size={12}><ShowSection title={translate('app.quotes.glance')}>
     <KeyFigures items={[
@@ -276,14 +301,14 @@ export function QuoteDetail(): ReactElement | null {
     {result?.warnings.map((warning: Issue, i: number): ReactElement => <Alert key={i} severity="warning">{issueMessage(warning)}</Alert>)}
     </Stack></Grid>
         {result && <Grid size={12}><Card sx={quoteTabsCardSx}><Tabs value={tab} onChange={(_event: SyntheticEvent, value: number): void => setTab(value)} variant="scrollable" scrollButtons="auto" allowScrollButtonsMobile sx={quoteTabsSx}>{tabs.map((title: string): ReactElement => <Tab key={title} label={title}/>)}</Tabs><Box role="tabpanel" aria-label={tabs[tab]} sx={quoteTabPanelSx}>
-        {tab === 0 && <><Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: '1fr 1fr' }, gap: 2 }}>
+        {tab === 0 && <>{edited && <Alert severity="info" sx={{ mb: 2 }} action={<Stack direction="row" spacing={1}><Button color="inherit" size="small" onClick={(): void => setDraft({})}>{quoteText.discard}</Button><Button variant="contained" size="small" disabled={invalid || calculating} onClick={recalculate}>{quoteText.recalculate}</Button></Stack>}>{quoteText.priceDraftAdvice}</Alert>}<Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: '1fr 1fr' }, gap: 2 }}>
         <Box>
-        <Values title={`${quoteText.monthlyResult}${result.pricing.isManualPrice ? ` ${quoteText.manualPriceSuffix}` : ''}`} values={subset(result.pricing, ['offeredPrice', 'vat', 'totalWithVat', 'profit', 'margin', 'marginStatus', 'annualProfit', 'pricePerM2'])}/>
+        <Values title={`${quoteText.monthlyResult}${pricing!.isManualPrice ? ` ${quoteText.manualPriceSuffix}` : ''}`} values={subset(pricing!, ['offeredPrice', 'vat', 'totalWithVat', 'profit', 'margin', 'marginStatus', 'annualProfit', 'pricePerM2'])} editors={{ offeredPrice: priceEditor('offeredPrice', pricing!.offeredPrice, pricing!.targetPrice) }}/>
         <Values title={quoteFields.totalCost} values={result.costs}/>
         
         </Box>
         <Box>
-        <Values title={quoteText.negotiation} values={subset(result.pricing, ['targetPrice', 'minimumPrice', 'breakEvenPrice', 'negotiationRoom'])} ribbon={quoteText.minimumAdvice}/>
+        <Values title={`${quoteText.negotiation}${pricing!.isCustomMargin ? ` ${quoteText.customMarginSuffix}` : ''}`} values={subset(pricing!, ['targetMargin', 'targetPrice', 'minimumPrice', 'breakEvenPrice', 'negotiationRoom'])} editors={{ targetMargin: priceEditor('targetMargin', pricing!.targetMargin * 100, globalMargin === undefined ? undefined : globalMargin * 100, globalMargin === undefined ? undefined : quoteText.globalMargin.replace('{margin}', percent(globalMargin))), targetPrice: priceEditor('targetPrice', pricing!.targetPrice, globalMargin === undefined || globalMargin >= 1 ? undefined : totalCost / (1 - globalMargin)) }} ribbon={quoteText.minimumAdvice}/>
         <Values title={quoteText.staffing} values={result.staffing} ribbon={quoteText.shiftAdvice}/>
         <Values title={quoteText.chemicalsGroup} values={result.chemicals} ribbon={quoteText.wasteHypothetical}/>
         </Box>

@@ -134,6 +134,8 @@ export interface EngineInput {
     quote: {
         assumptionsConfirmed: boolean;
         manualPrice: number | null;
+        /** This quote's own target margin; null or absent uses parameters.targetMargin. */
+        targetMargin?: number | null;
         externalReferencePrice: number | null;
     };
     zones: ZoneInput[];
@@ -182,7 +184,10 @@ export interface EngineResult {
     totals: Record<string, number>;
     costs: Record<string, number>;
     pricing: {
+        /** The margin this quote was priced at: its own, or the parameters' when it has none. */
         targetMargin: number;
+        /** The quote has its own target margin. Absent from results calculated before it existed. */
+        isCustomMargin?: boolean;
         targetPrice: number;
         minimumMargin: number;
         minimumPrice: number;
@@ -256,6 +261,8 @@ export interface Quote {
     measurementOrigin: string;
     assumptionsConfirmed: boolean;
     manualPrice: number | null;
+    /** This quote's target margin on sales; null uses the parameters' (only a reference). */
+    targetMargin: number | null;
     externalReferencePrice: number | null;
     notes: string | null;
     status: 'needsReview' | 'simulation' | null;
@@ -381,3 +388,20 @@ export interface OfferZoneProps extends TechnicalOfferRowProps {
     heading?: boolean;
 }
 export type OfferProductKey = 'cleaningProduct' | 'dailyDisinfectant' | 'terminalDisinfectant';
+/** A price of the Resumen tab that can be changed in place. */
+export type PriceDraftField = 'offeredPrice' | 'targetPrice' | 'targetMargin';
+/** The inline price inputs as typed, by field; only the ones changed since the last calculation. */
+export type PriceDraft = Partial<Record<PriceDraftField, string>>;
+/** What applying a price draft saves on the quote before it is recalculated. */
+export type PriceUpdate = Partial<Pick<Quote, 'manualPrice' | 'targetMargin'>>;
+export interface PriceInputProps {
+    field: PriceDraftField;
+    /** As typed; a number for a price, a percentage for the margin. */
+    value: string;
+    onChange: (value: string) => void;
+    error?: string;
+    helperText?: string;
+    /** What a cleared input falls back to. */
+    placeholder?: string;
+    disabled?: boolean;
+}

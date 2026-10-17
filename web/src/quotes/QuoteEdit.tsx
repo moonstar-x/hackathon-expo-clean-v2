@@ -13,7 +13,7 @@ import { formPageSx } from '../styles/pages';
 import { parametersGridSx } from '../styles/quotes';
 import type { Measurement, MeasurementRoom } from '../types/api';
 import type { Quote, ZoneTypeValues } from '../types/quotes';
-import { number } from './format';
+import { fractionToPercent, number, percentToFraction } from './format';
 const select = (source: string, values: string[]): ReactElement => <SelectInput source={source} label={quoteFields[source]} choices={values.map((id: string): {
     id: string;
     name: string;
@@ -67,6 +67,7 @@ export function QuoteEdit(): ReactElement {
     <Cell size={4}><DateInput source="visitDate" label={quoteFields.visitDate} fullWidth/></Cell>
     <Cell size={4}>{select('measurementOrigin', ['siteVisit', 'plans', 'estimate'])}</Cell>
     <Cell size={4}><NumberInput source="manualPrice" label={quoteFields.manualPrice} min={0} helperText={quoteText.manualPriceAdvice} fullWidth/></Cell>
+    <Cell size={4}><NumberInput source="targetMargin" label={`${quoteFields.targetMargin} (%)`} min={0} max={99.99} step="any" format={fractionToPercent} parse={percentToFraction} helperText={quoteText.targetMarginAdvice} fullWidth/></Cell>
     <Cell size={4}><NumberInput source="externalReferencePrice" label={quoteFields.externalReferencePrice} min={0} helperText={quoteText.referenceAdvice} fullWidth/></Cell>
     <Cell size={12}><TextInput source="notes" label={quoteFields.notes} multiline minRows={2} fullWidth/></Cell>
     </Grid>

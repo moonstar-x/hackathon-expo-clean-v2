@@ -52,6 +52,8 @@ export const valuesGridSx: SxProps<Theme> = {
   gridTemplateColumns: 'minmax(0, 1fr) fit-content(60%)',
   columnGap: 2,
   rowGap: 1,
+  // A label lines up with its value's first line, also when the value is an input with a note below.
+  alignItems: 'baseline',
   m: 0,
 };
 
@@ -61,6 +63,27 @@ export const quoteTableSx: SxProps<Theme> = {
   '& .MuiTableCell-root': { px: 1 },
   '& .MuiTableCell-root:first-of-type': { pl: 2 },
   '& .MuiTableCell-root:last-of-type': { pr: 2 },
+};
+
+/**
+ * A price changed in place in a figures card: an underlined figure in the card's own type, its digits
+ * flush with the values above and below it, and its note right-aligned under it.
+ */
+export const priceInputSx: SxProps<Theme> = {
+  alignItems: 'flex-end',
+  maxWidth: '100%',
+  verticalAlign: 'baseline',
+  '& .MuiInputBase-root': { width: 112, font: 'inherit' },
+  '& .MuiInputBase-input': {
+    p: '0 0 2px',
+    height: 'auto',
+    textAlign: 'right',
+    fontVariantNumeric: 'tabular-nums',
+    MozAppearance: 'textfield',
+    '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button': { WebkitAppearance: 'none', m: 0 },
+  },
+  '& .MuiInputAdornment-root': { ml: 0.5, '& .MuiTypography-root': { font: 'inherit', color: 'inherit' } },
+  '& .MuiFormHelperText-root': { mt: 0.25, mx: 0, textAlign: 'right' },
 };
 
 /** A zone's inputs and where each came from. On phones each input's label goes above its value and source. */

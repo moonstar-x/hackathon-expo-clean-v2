@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
-import { act, fireEvent, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi, type Mock } from 'vitest';
 import { testDataProvider, type DataProvider, type RaRecord, type GetOneParams, type GetOneResult, type GetListResult, type GetManyResult, type UpdateParams, type UpdateResult } from 'react-admin';
 import { renderWithAdmin } from '../../renderWithAdmin';
@@ -51,6 +51,36 @@ describe('quote screens', (): void => {
             fireEvent.click(screen.getByRole('tab', { name }));
             expect(screen.getByRole('tabpanel', { name })).toBeInTheDocument();
         }
+    });
+    it('changes the target price in place and recalculates this quote at its own margin', async (): Promise<void> => {
+        const sent: Partial<Quote>[] = [];
+        const dataProvider: DataProvider = provider();
+        dataProvider.update = <R extends RaRecord>(_resource: string, params: UpdateParams<R>): Promise<UpdateResult<R>> => { sent.push(params.data as Partial<Quote>); return Promise.resolve({ data: { ...quote, ...params.data, id: params.id } as unknown as R }); };
+        dataProvider.quoteAction = vi.fn();
+        renderWithAdmin(<Routes><Route path="/quotes/:id/show" element={<QuoteShow />} /></Routes>, { resource: 'quotes', at: '/quotes/1/show', dataProvider });
+        const target: HTMLElement = await screen.findByRole('spinbutton', { name: 'Precio objetivo' });
+        expect(target).toHaveValue(9907.39);
+        expect(screen.getByRole('spinbutton', { name: 'Margen objetivo sobre venta' })).toHaveValue(35);
+        expect(screen.getByText('General: 35,0 %')).toBeInTheDocument();
+        fireEvent.change(target, { target: { value: '5000' } });
+        expect(await screen.findByText('Bajo el punto de equilibrio.')).toBeInTheDocument();
+        const bar: HTMLElement = screen.getByText(/^Precios modificados/).closest('[role="alert"]')!;
+        expect(within(bar).getByRole('button', { name: 'Recalcular' })).toBeDisabled();
+        fireEvent.click(within(bar).getByRole('button', { name: 'Descartar' }));
+        expect(screen.getByRole('spinbutton', { name: 'Precio objetivo' })).toHaveValue(9907.39);
+        fireEvent.change(screen.getByRole('spinbutton', { name: 'Precio objetivo' }), { target: { value: '12879.61' } });
+        // Resultado mensual and the margin follow the new target price before anything is saved.
+        expect(screen.getByRole('spinbutton', { name: 'Margen objetivo sobre venta' })).toHaveValue(50);
+        expect(screen.getByRole('spinbutton', { name: 'Precio sin IVA' })).toHaveValue(12879.61);
+        expect(screen.getAllByText('50,0 %').length).toBeGreaterThan(0);
+        fireEvent.change(screen.getByRole('spinbutton', { name: 'Precio sin IVA' }), { target: { value: '' } });
+        fireEvent.click(within(screen.getByText(/^Precios modificados/).closest('[role="alert"]')!).getByRole('button', { name: 'Recalcular' }));
+        await waitFor((): void => { expect(sent).toHaveLength(1); });
+        expect(Object.keys(sent[0]).sort()).toEqual(['manualPrice', 'targetMargin']);
+        expect(sent[0].manualPrice).toBeNull();
+        expect(sent[0].targetMargin).toBeCloseTo(.5, 6);
+        expect(dataProvider.quoteAction).not.toHaveBeenCalled();
+        await waitFor((): void => { expect(screen.queryByText(/^Precios modificados/)).not.toBeInTheDocument(); });
     });
     it.each([['quotes', <QuoteList />, '/quotes'], ['quotes', <QuoteEdit />, '/quotes/1'], ['quote-parameters', <ParametersEdit />, '/quote-parameters/1']] as const)('smoke renders %s %s', async (resource: string, view: ReactElement, at: string): Promise<void> => { renderWithAdmin(<Routes><Route path={at.replace('/1','/:id')} element={view} /></Routes>, { resource, at, dataProvider: provider() });  expect(await screen.findByText(resource === 'quotes' && at === '/quotes' ? 'Clínica de prueba' : resource === 'quotes' ? 'Datos del caso' : 'Mano de obra')).toBeInTheDocument(); });
     it.each(['quote-zone-types', 'quote-schedules', 'quote-products', 'quote-location-types'])('smoke renders catalog list and edit %s', async (resource: string): Promise<void> => { const rendered: ReturnType<typeof renderWithAdmin> = renderWithAdmin(<CatalogList resource={resource}/>, { resource, at: `/${resource}`, dataProvider: provider() }); await screen.findAllByRole('row'); rendered.unmount(); renderWithAdmin(<Routes><Route path={`/${resource}/:id`} element={<CatalogEdit resource={resource}/>} /></Routes>, { resource, at: `/${resource}/1`, dataProvider: provider() }); expect(await screen.findByRole('button', { name: /Guardar/ })).toBeInTheDocument(); });
