@@ -4,6 +4,7 @@ import { migrate } from '../src/db/migrate.ts';
 import { allSettings } from '../src/modules/quotes/settings.ts';
 import { computeQuote } from '../src/modules/quotes/engine/index.ts';
 import { type QuoteRecord } from '../src/modules/quoteDocuments/builder.ts';
+import { readLogo, type LogoInfo } from '../src/modules/quoteDocuments/logo.ts';
 import { documentRepository } from '../src/modules/quoteDocuments/repository.ts';
 import { emptyData, type QuoteDocumentData, type QuoteDocumentSettings } from '../src/modules/quoteDocuments/schemas.ts';
 import type { ZoneInput } from '../src/modules/quotes/types.ts';
@@ -17,6 +18,8 @@ export function documentFixture(manualPrice: number | null = null) {
   const parties = JSON.parse(fs.readFileSync(new URL('./fixtures/quote-document/parties.json', import.meta.url), 'utf8'));
   const settings: QuoteDocumentSettings = { ...documentRepository(db).settings(), ...parties.issuer };
   const data: QuoteDocumentData = { ...emptyData, ...parties.client };
+  // The fixture company's logo; set both to null for a company without one.
+  const logoData = fs.readFileSync(new URL('./fixtures/quote-document/logo.png', import.meta.url));
   db.close();
-  return { quote, settings, data, number: 'COT-00007', revision: 1, timezone: 'America/Guayaquil' };
+  return { quote, settings, data, number: 'COT-00007', revision: 1, timezone: 'America/Guayaquil', logo: readLogo(logoData) as LogoInfo | null, logoData: logoData as Buffer | null };
 }

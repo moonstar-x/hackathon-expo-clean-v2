@@ -99,6 +99,29 @@ const measurement: Record<string, unknown> = {
     }),
   ),
 };
+// The quote documents' settings record behind Empresa and Plantilla; the company has no logo yet.
+const documentSettings: Record<string, unknown> = {
+  id: 1,
+  tradeName: 'CleanCode',
+  legalName: 'CleanCode S.A.',
+  taxId: '0991234567001',
+  address: 'Av. de prueba 123',
+  city: 'Guayaquil',
+  phone: null,
+  email: 'ventas@example.com',
+  website: null,
+  signerName: 'Ana Pérez',
+  signerTitle: 'Gerente general',
+  numberPrefix: 'COT',
+  validityDays: 30,
+  paperSize: 'A4',
+  paymentTerms: 'Mensual',
+  introText: null,
+  termsText: null,
+  brandColor: '#4F46E5',
+  updatedBy: null,
+  updatedAt: '2026-10-16T14:00:00Z',
+};
 const config: AppConfig ={ apiUrl: 'http://api.test/api', appTitle: 'Inventario de limpieza', currency: 'USD' };
 
 const fakeApi = (input: string | URL | Request): Promise<Response> => {
@@ -115,6 +138,13 @@ const fakeApi = (input: string | URL | Request): Promise<Response> => {
   if (resource === 'stats') {
     return Promise.resolve(
       jsonResponse({ products: { total: 1, active: 1, lowStock: 1, outOfStock: 0 }, stockValue: 3 }),
+    );
+  }
+  if (resource === 'quote-document-settings') {
+    return Promise.resolve(
+      url.pathname.endsWith('/logo')
+        ? jsonResponse({ code: 'NOT_FOUND', message: 'Logo not found' }, { status: 404 })
+        : jsonResponse(documentSettings),
     );
   }
   if (resource === 'users') {
@@ -165,6 +195,11 @@ it.each([
   ['/users/create', ['Crear Usuario', 'Correo electrónico', 'Contraseña', 'Activo', 'Guardar']],
   ['/users/2', ['Nueva contraseña', 'Déjala en blanco', 'Eliminar']],
   ['/users/1', ['Nueva contraseña', 'No puedes desactivar tu propia cuenta.']],
+  [
+    '/company',
+    ['Administración', 'Logo y colores', 'Subir logo', 'Color principal', 'Datos de la empresa', 'Razón social', 'Representante legal', 'Cargo', 'Guardar'],
+  ],
+  ['/template', ['Administración', 'Plantilla', 'Numeración y validez', 'Tamaño de papel (PDF)', 'Textos', 'Términos generales', 'Guardar']],
 ])('renders %s in Spanish', async (path: string, labels: string[]): Promise<void> => {
   vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
   // jsdom has no object URLs; the measurement images and downloads ask for them.

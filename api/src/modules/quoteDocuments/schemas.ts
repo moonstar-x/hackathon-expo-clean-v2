@@ -3,12 +3,14 @@ import { nullableText, nullableEmail, nullableHttpUrl, requiredText } from '../.
 
 const phone = () => nullableText(30).refine(v => v === null || /^[0-9+() -]+$/.test(v), 'Must be a valid phone');
 const days = z.number().int().min(1).max(365);
+const hexColor = 'Must be a hex color like #4F46E5';
 export const settingsSchema = z.object({
   tradeName: requiredText(100), legalName: nullableText(150),
   taxId: nullableText(13).refine(v => v === null || /^\d{13}$/.test(v), 'Must be exactly 13 digits'),
   address: nullableText(200), city: nullableText(100), phone: phone(), email: nullableEmail(), website: nullableHttpUrl(200),
   signerName: nullableText(100), signerTitle: nullableText(100), numberPrefix: z.string().regex(/^[A-Z0-9]{1,10}$/),
   validityDays: days, paymentTerms: nullableText(500), introText: nullableText(1000), termsText: nullableText(4000), paperSize: z.enum(['A4', 'LETTER']),
+  brandColor: z.string({ error: hexColor }).regex(/^#[0-9a-fA-F]{6}$/, hexColor).transform(v => v.toUpperCase()),
 });
 export const dataSchema = z.object({
   clientLegalName: nullableText(150), clientTaxId: nullableText(20).refine(v => v === null || /^[A-Za-z0-9-]+$/.test(v), 'Must be a valid identification'),

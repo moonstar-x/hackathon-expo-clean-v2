@@ -2,9 +2,11 @@ import ExcelJS from 'exceljs';
 import type { QuoteDocument } from './types.ts';
 import { brand } from './brand.ts';
 import { labels } from './labels.ts';
+import { documentLogo } from './logo.ts';
 
 export const numberFormats = ['#,##0.00', '0', 'dd/mm/yyyy', '@'] as const;
-export async function renderXlsx(d: QuoteDocument): Promise<Buffer> {
+export async function renderXlsx(d: QuoteDocument, logoData: Buffer | null): Promise<Buffer> {
+  const { accent, onAccent, ink, tint } = d.colors, logo = documentLogo(d, logoData);
   const book = new ExcelJS.Workbook();
   book.title = `Cotización ${d.number}`; book.creator = d.issuer.tradeName; book.lastModifiedBy = d.issuer.tradeName;
   book.created = new Date(d.metadata.issueInstant); book.modified = new Date(d.metadata.issueInstant);
@@ -17,11 +19,18 @@ export async function renderXlsx(d: QuoteDocument): Promise<Buffer> {
   }
   function heading(sheet: ExcelJS.Worksheet, text: string, width = 6) {
     sheet.addRow([]); merged(sheet, [text], 1, width, true);
-    const row = sheet.lastRow!; row.height = 26; row.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: color(brand.indigo) } }; row.getCell(1).font = { name: 'Arial', size: 12, bold: true, color: { argb: 'FFFFFF' } };
+    const row = sheet.lastRow!; row.height = 26; row.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: color(accent) } }; row.getCell(1).font = { name: 'Arial', size: 12, bold: true, color: { argb: color(onAccent) } };
   }
-  const image = book.addImage({ filename: new URL('../../../assets/brand/logo-horizontal.png', import.meta.url).pathname, extension: 'png' });
-  main.addImage(image, { tl: { col: 0, row: 0 }, ext: { width: 208, height: 208 * 250 / 1326.5 } });
-  main.addRow([]).height = 44; main.addRow([]).height = 14;
+  if (logo && d.logo) {
+    // ext is in pixels and row heights in points.
+    const scale = Math.min(208 / d.logo.width, 80 / d.logo.height), height = d.logo.height * scale;
+    main.addImage(book.addImage({ buffer: logo as unknown as ExcelJS.Buffer, extension: d.logo.contentType === 'image/png' ? 'png' : 'jpeg' }), { tl: { col: 0, row: 0 }, ext: { width: d.logo.width * scale, height } });
+    main.addRow([]).height = Math.max(44, Math.ceil(height * 0.75) + 4);
+  } else {
+    merged(main, [d.issuer.tradeName]); const cell = main.lastRow!.getCell(1);
+    main.lastRow!.height = 44; cell.font = { name: 'Arial', size: 16, bold: true, color: { argb: color(ink) } }; cell.alignment = { vertical: 'middle', wrapText: false };
+  }
+  main.addRow([]).height = 14;
   merged(main, [d.title, d.numberText], 1, 6, true);
   for (const [label, date] of [[labels.issueDate, d.issueDate], [labels.validUntil, d.validUntil]]) {
     const row = main.addRow([]); main.mergeCells(row.number, 1, row.number, 4); row.getCell(1).value = label; main.mergeCells(row.number, 5, row.number, 6); row.getCell(5).value = new Date(`${date}T00:00:00Z`); row.getCell(5).numFmt = 'dd/mm/yyyy';
@@ -35,12 +44,12 @@ export async function renderXlsx(d: QuoteDocument): Promise<Buffer> {
   for (const l of d.lines) {
     const row = main.addRow([l.position, l.description, l.quantity, l.unit, l.unitPrice.value, l.amount.value]);
     row.height = Math.max(30, Math.ceil(l.description.length / 45) * 15); row.getCell(5).numFmt = row.getCell(6).numFmt = '#,##0.00'; row.getCell(1).numFmt = row.getCell(3).numFmt = '0';
-    if (l.position % 2 === 0) row.eachCell(cell => { cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: color(brand.mist) } }; });
+    if (l.position % 2 === 0) row.eachCell(cell => { cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: color(tint) } }; });
     merged(main, [l.detail], 2, 6); main.lastRow!.getCell(2).font = { name: 'Arial', size: 9, color: { argb: '475569' } };
   }
   main.addRow([]);
   for (const [label, money] of [[labels.subtotal, d.subtotal], [d.vatLabel, d.vat], [d.totalLabel, d.total]] as const) {
-    const row = main.addRow([]); main.mergeCells(row.number, 1, row.number, 5); row.getCell(1).value = `${label} ${labels.currency}`; row.getCell(1).alignment = { horizontal: 'right' }; row.getCell(6).value = money.value; row.getCell(6).numFmt = '#,##0.00'; row.eachCell(cell => { cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: color(brand.mist) } }; cell.font = { name: 'Arial', size: 10, bold: true }; }); row.height = 24;
+    const row = main.addRow([]); main.mergeCells(row.number, 1, row.number, 5); row.getCell(1).value = `${label} ${labels.currency}`; row.getCell(1).alignment = { horizontal: 'right' }; row.getCell(6).value = money.value; row.getCell(6).numFmt = '#,##0.00'; row.eachCell(cell => { cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: color(tint) } }; cell.font = { name: 'Arial', size: 10, bold: true }; }); row.height = 24;
   }
   if (d.amountInWords) merged(main, [d.amountInWords]);
   if (d.contract) { merged(main, [`${d.contract.label} ${labels.currency}`], 1, 5); main.lastRow!.getCell(6).value = d.contract.subtotal.value; main.lastRow!.getCell(6).numFmt = '#,##0.00'; }
@@ -65,7 +74,7 @@ export async function renderXlsx(d: QuoteDocument): Promise<Buffer> {
       cell.alignment = { vertical: 'middle', wrapText: true, ...(typeof cell.value === 'number' ? { horizontal: 'right' as const } : {}), ...cell.alignment };
       if (!numberFormats.includes(cell.numFmt as typeof numberFormats[number])) cell.numFmt = typeof cell.value === 'number' ? '0' : '@';
     }));
-    sheet.getRow(titleRow).eachCell(cell => { cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: color(brand.indigo) } }; cell.font = { name: 'Arial', size: 10, bold: true, color: { argb: 'FFFFFF' } }; });
+    sheet.getRow(titleRow).eachCell(cell => { cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: color(accent) } }; cell.font = { name: 'Arial', size: 10, bold: true, color: { argb: color(onAccent) } }; });
   }
   return Buffer.from(await book.xlsx.writeBuffer());
 }

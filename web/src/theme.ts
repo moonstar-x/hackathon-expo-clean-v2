@@ -69,6 +69,11 @@ const buildShadows = (mode: Mode): Shadows => {
 
 const shape: { borderRadius: number } = { borderRadius: 10 };
 
+// Open, wide enough for the longest menu name at 14 px ("Productos de cotización", about 175 px of
+// the 184 px a row leaves beside its icon). Collapsed, react-admin's 50 px strip of icons, which
+// the items' 8 px left padding centres.
+const sidebar: { width: number; closedWidth: number } = { width: 256, closedWidth: 50 };
+
 const buildComponents = (mode: Mode): Components<Omit<Theme, 'components'>> => {
   const dark: boolean = mode === 'dark';
   // Colors for overrides written as plain objects (no theme in scope).
@@ -568,17 +573,30 @@ const buildComponents = (mode: Mode): Components<Omit<Theme, 'components'>> => {
     // it. Like MUI's own Menu, the list draws no focus ring; its items show their own.
     RaMenu: { styleOverrides: { root: { paddingTop: 12, outline: 0 } } },
 
+    // Menu entries: 14 px names in full ink beside muted icons, so they read apart from the quieter
+    // section names (SectionLabel). From `sm` up a row is the 24 px icon plus MUI's 6 px padding,
+    // 36 px; phones keep MUI's 48 px touch targets. Names never wrap: the sidebar is wide enough
+    // for the longest one (`sidebar` below), and a wrapping name would change height mid-animation.
     RaMenuItemLink: {
       styleOverrides: {
-        root: {
+        root: ({ theme }: StyleArgs) => ({
           // Keep the icon centered when the sidebar is collapsed.
           paddingLeft: 8,
+          fontSize: 14,
+          fontWeight: 500,
+          lineHeight: 1.5,
+          color: theme.palette.text.primary,
           '& .RaMenuItemLink-icon': { color: mutedText, fill: mutedText },
+          // MUI marks keyboard focus with a tint alone, which the current page's own tint would hide.
+          '&.Mui-focusVisible': { boxShadow: `inset 0 0 0 2px ${accent}` },
+          // The current page: accent name and icon on a tinted pill, a step stronger on hover or focus.
           '&.RaMenuItemLink-active': {
             color: accent,
+            backgroundColor: alpha(accent, 0.12),
+            '&:hover, &.Mui-focusVisible': { backgroundColor: alpha(accent, 0.18) },
             '& .RaMenuItemLink-icon': { color: accent, fill: accent },
           },
-        },
+        }),
       },
     },
 
@@ -784,6 +802,7 @@ const lightThemeOptions: RaThemeOptions = {
     },
   },
   shape,
+  sidebar,
   shadows: buildShadows('light'),
   typography,
   components: buildComponents('light'),
@@ -815,6 +834,7 @@ const darkThemeOptions: RaThemeOptions = {
     },
   },
   shape,
+  sidebar,
   shadows: buildShadows('dark'),
   typography,
   components: buildComponents('dark'),
