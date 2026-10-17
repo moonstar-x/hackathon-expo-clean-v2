@@ -6,7 +6,7 @@ import type { Product } from '../../../types/api';
 import type { RecordFieldProps } from '../../../types/fields';
 import OutlinedBadge from '../../list/OutlinedBadge';
 
-/** Whether the product needs safe handling: a red "Peligroso" badge when it does, "No" when it doesn't. */
+/** Whether the product needs safe handling: a red "Peligroso" badge when it does, "No es peligroso" when it doesn't. */
 const HazardousField = (props: RecordFieldProps): ReactElement | null => {
   const record: Product | undefined = useRecordContext(props) as Product | undefined;
   const translate: TranslateFunction = useTranslate();
@@ -15,7 +15,7 @@ const HazardousField = (props: RecordFieldProps): ReactElement | null => {
     <OutlinedBadge label={translate('app.products.hazardous')} tone="red" icon={<WarningAmberIcon />} />
   ) : (
     <Typography component="span" variant="body2">
-      {translate('ra.boolean.false')}
+      {translate('app.products.notHazardous')}
     </Typography>
   );
 };

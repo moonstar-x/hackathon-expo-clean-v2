@@ -1,5 +1,6 @@
 import { alpha, type SxProps, type Theme } from '@mui/material/styles';
 import { STOCK_METER_HEIGHT } from '../constants/products';
+import { detailGridSx } from './pages';
 import type { Product } from '../types/api';
 import type { FigureSize, StatusColor } from '../types/components';
 
@@ -75,3 +76,27 @@ export const movementPreviewSx: SxProps<Theme> = {
 export const previewLineSx: SxProps<Theme> = { display: 'flex', flexDirection: 'column' };
 
 export const previewFigureSx: SxProps<Theme> = { fontSize: 22, fontWeight: 600, lineHeight: 1.25, mt: 0.25, mb: 1.25 };
+
+/** The product's description, leading its details as a sentence would. */
+export const productDescriptionSx: SxProps<Theme> = { m: 0, mb: 2.5, maxWidth: '70ch' };
+
+/**
+ * The product's details: what it is in a row of four, then where it is kept and how to handle it in a
+ * row whose three line up under the first three. Two columns on phones.
+ */
+export const productDetailsGridSx: SxProps<Theme> = [
+  detailGridSx,
+  {
+    gridTemplateColumns: { xs: 'repeat(2, minmax(0, 1fr))', md: 'repeat(4, minmax(0, 1fr))' },
+    // A badge keeps its own width instead of stretching across its column.
+    '& .MuiChip-root': { alignSelf: 'flex-start' },
+  },
+] as SxProps<Theme>;
+
+export const productDetailsDividerSx: SxProps<Theme> = { my: 2.5 };
+
+/** The safety data sheet's link, with the icon that says it opens elsewhere. */
+export const sdsLinkSx: SxProps<Theme> = { display: 'inline-flex', alignItems: 'center', gap: 0.5 };
+
+/** The stock history's table, inset from the card's sides as it is from the title above it. */
+export const historyTableSx: SxProps<Theme> = { px: 2 };

@@ -295,6 +295,10 @@ const appSpanish: StringMap = {
       historyEmpty: 'Todavía no hay movimientos.',
       sections: { general: 'General', stock: 'Inventario', safety: 'Seguridad', details: 'Detalles', record: 'Registro' },
       hazardous: 'Peligroso',
+      notHazardous: 'No es peligroso',
+      sds: 'Ficha de seguridad',
+      openSds: 'Abrir la ficha',
+      noSds: 'Sin ficha',
       stockValueHint: 'Existencias por costo unitario',
       hints: {
         general: 'Cómo se identifica el producto y en qué parte del catálogo está.',
