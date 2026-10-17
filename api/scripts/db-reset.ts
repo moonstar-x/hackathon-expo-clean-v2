@@ -4,6 +4,7 @@ import { openDatabase } from '../src/db/connection.ts';
 import { migrate } from '../src/db/migrate.ts';
 import { seed } from '../src/db/seed.ts';
 import { LOGO_FOLDER } from '../src/modules/quoteDocuments/logo.ts';
+import { SIGNATURE_FOLDER } from '../src/modules/quoteDocuments/signature.ts';
 import { ensureInitialUser } from '../src/modules/users/initialUser.ts';
 import { loadScriptConfig } from './common.ts';
 
@@ -14,10 +15,12 @@ if (config.databasePath !== ':memory:') {
     fs.rmSync(`${config.databasePath}${suffix}`, { force: true });
   }
   console.log(`Deleted ${config.databasePath}`);
-  // The files the deleted rows pointed to. Only the API's own folder: FILES_PATH itself may hold more.
-  const logos = path.join(config.filesPath, LOGO_FOLDER);
-  fs.rmSync(logos, { recursive: true, force: true });
-  console.log(`Deleted ${logos}`);
+  // The files the deleted rows pointed to. Only the API's own folders: FILES_PATH itself may hold more.
+  for (const folder of [LOGO_FOLDER, SIGNATURE_FOLDER]) {
+    const files = path.join(config.filesPath, folder);
+    fs.rmSync(files, { recursive: true, force: true });
+    console.log(`Deleted ${files}`);
+  }
 }
 
 const db = openDatabase(config.databasePath);

@@ -9,6 +9,14 @@ export const formatDateTime = (iso: string | null | undefined, locale: string = 
   return date.toLocaleString(locale, { dateStyle: 'medium', timeStyle: 'short' });
 };
 
+/** A day, e.g. "16 oct 2026"; empty for a missing or invalid value. */
+export const formatDate = (iso: string | null | undefined, locale: string = APP_LOCALE): string => {
+  if (!iso) return '';
+  const date: Date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toLocaleDateString(locale, { dateStyle: 'medium' });
+};
+
 const timeFormatter: Intl.DateTimeFormat = new Intl.DateTimeFormat(APP_LOCALE, {
   hour: '2-digit',
   minute: '2-digit',

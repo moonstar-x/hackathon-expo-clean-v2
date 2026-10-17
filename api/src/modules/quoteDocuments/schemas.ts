@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import { nullableText, nullableEmail, nullableHttpUrl, requiredText } from '../../lib/validation.ts';
+import { nullableText, nullableEmail, nullableHttpUrl, requiredOr, requiredText } from '../../lib/validation.ts';
+import { NOT_P12, SIGNATURE_MAX_BYTES } from './signature.ts';
 
 const phone = () => nullableText(30).refine(v => v === null || /^[0-9+() -]+$/.test(v), 'Must be a valid phone');
 const days = z.number().int().min(1).max(365);
@@ -17,6 +18,11 @@ export const dataSchema = z.object({
   clientContactName: nullableText(100), clientContactTitle: nullableText(100), clientEmail: nullableEmail(), clientPhone: phone(), clientAddress: nullableText(200),
   issueDate: nullableText(10).refine(v => v === null || (/^\d{4}-\d{2}-\d{2}$/.test(v) && !Number.isNaN(Date.parse(v)) && new Date(v).toISOString().slice(0, 10) === v), 'Must be a valid date'),
   validityDays: days.nullable(), paymentTerms: nullableText(500), clientNotes: nullableText(2000), lineMode: z.enum(['perZone', 'single']), contractMonths: z.number().int().min(1).max(60).nullable(),
+});
+// The .p12 travels as base64 in JSON beside its password; at most SIGNATURE_MAX_BYTES (64 KB) once decoded.
+export const signatureUploadSchema = z.object({
+  file: z.string({ error: requiredOr(NOT_P12) }).max(Math.ceil(SIGNATURE_MAX_BYTES / 3) * 4, 'Must be at most 64 KB').regex(/^[A-Za-z0-9+/]+={0,2}$/, NOT_P12),
+  password: z.string({ error: requiredOr('Must be a string') }).max(256, 'Must be at most 256 characters'),
 });
 export type QuoteDocumentSettings = z.infer<typeof settingsSchema> & { id: 1; updatedBy: string | null; updatedAt: string };
 export type QuoteDocumentData = z.infer<typeof dataSchema> & { number: string | null };

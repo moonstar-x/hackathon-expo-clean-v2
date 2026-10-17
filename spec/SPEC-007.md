@@ -7,6 +7,7 @@
 | **Builds on** | [SPEC-002](SPEC-002.md) (API and admin UI), [SPEC-006](SPEC-006.md) (quote documents) |
 | **Supersedes** | SPEC-006 §2 "Issuer data" (the bundled logo), §3.1 (the header's logo), §3.6 (the issuer's acceptance box), §4 (the signer labels; adds `brandColor`), §6 (the fix link of `ISSUER_FIELD_MISSING`), §7.1 (`templateVersion`, adds `logo` and `colors`), §8.1 and §8.2 (logo source and colors), §10.1 (menu entry), §10.5 (the settings screen) and §15 ("custom logos"). Everything else in SPEC-006 stands. |
 | **Deliverables** | `api/`: a brand color setting, the company logo (storage, validation, routes), PDF and XLSX in the company's logo and color · `web/`: **Empresa** and **Plantilla** screens under Administración, the branding section with a live preview, a redesigned menu |
+| **Superseded in part by** | [SPEC-008](SPEC-008.md): the acceptance box gains the electronic signature's stamp when the company signs (§5.4), and Empresa a **Firma electrónica** section before Logo y colores (§6) |
 
 The keywords **MUST**, **MUST NOT**, **SHOULD** and **MAY** are used as in RFC 2119.
 
