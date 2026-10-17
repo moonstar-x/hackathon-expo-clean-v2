@@ -1,0 +1,31 @@
+{
+  "pricing": {
+    "offeredPrice": 3000,
+    "profit": -3439.803479,
+    "margin": -1.146601,
+    "marginStatus": "loss",
+    "vat": 450,
+    "totalWithVat": 3450,
+    "annualProfit": -41277.641748,
+    "pricePerM2": 12.096774,
+    "negotiationRoom": 0
+  },
+  "reference": {
+    "difference": -500,
+    "relativeDifference": -0.142857
+  },
+  "breakdown": [
+    {
+      "share": 1.464579
+    },
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {
+      "share": -1.146601
+    }
+  ]
+}

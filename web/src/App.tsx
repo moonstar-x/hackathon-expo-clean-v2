@@ -1,4 +1,10 @@
 import { useMemo, type ReactElement } from 'react';
+import RequestQuoteIcon from '@mui/icons-material/RequestQuote';
+import SettingsIcon from '@mui/icons-material/Settings';
+import { QuoteList } from './quotes/QuoteList';
+import { QuoteShow } from './quotes/QuoteShow';
+import { QuoteEdit } from './quotes/QuoteEdit';
+import { CatalogList, CatalogEdit, CatalogCreate, ParametersEdit } from './quotes/Settings';
 import { Admin, Resource, type AuthProvider } from 'react-admin';
 import Dashboard from './components/dashboard/Dashboard';
 import LoginPage from './components/login/LoginPage';
@@ -41,10 +47,13 @@ const App = ({ config }: AppProps): ReactElement => {
       disableTelemetry
     >
       <Resource name="measurements" {...measurements} />
+      <Resource name="quotes" list={QuoteList} show={QuoteShow} edit={QuoteEdit} icon={RequestQuoteIcon} />
       <Resource name="products" {...products} />
       <Resource name="stock-movements" {...stockMovements} />
       <Resource name="categories" {...categories} />
       <Resource name="suppliers" {...suppliers} />
+      <Resource name="quote-parameters" edit={ParametersEdit} icon={SettingsIcon} />
+      {['quote-zone-types','quote-schedules','quote-products','quote-location-types'].map((resource: string): ReactElement => <Resource key={resource} name={resource} list={<CatalogList resource={resource} />} edit={<CatalogEdit resource={resource} />} create={resource === 'quote-location-types' ? undefined : <CatalogCreate resource={resource} />} />)}
       <Resource name="users" {...users} />
     </Admin>
   );

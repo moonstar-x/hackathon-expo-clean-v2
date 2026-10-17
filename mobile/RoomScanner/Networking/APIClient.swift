@@ -4,6 +4,7 @@ protocol APIClientProtocol: Sendable {
     func login(email: String, password: String) async throws -> Session
     func me(token: String) async throws -> Session.User
     func health() async throws
+    func quotingOptions(token: String) async throws -> QuotingOptions
     func upload(file: URL, boundary: String, token: String) async throws -> Int64
 }
 final class APIClient: APIClientProtocol, @unchecked Sendable {
@@ -53,6 +54,9 @@ final class APIClient: APIClientProtocol, @unchecked Sendable {
     }
     func me(token: String) async throws -> Session.User {
         try APICoding.decoder().decode(Session.User.self, from: await data(request("/api/auth/me", token: token)))
+    }
+    func quotingOptions(token: String) async throws -> QuotingOptions {
+        try APICoding.decoder().decode(QuotingOptions.self, from: await data(request("/api/quoting/options", token: token)))
     }
     func health() async throws { _ = try await data(request("/health")) }
     func upload(file: URL, boundary: String, token: String) async throws -> Int64 {

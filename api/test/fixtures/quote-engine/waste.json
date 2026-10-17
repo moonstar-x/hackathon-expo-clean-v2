@@ -1,0 +1,29 @@
+{
+  "rows": [
+    {
+      "realWasteRate": 0.012518,
+      "excess": 0,
+      "excessCost": 0,
+      "status": "ok"
+    },
+    {
+      "realWasteRate": 0.088295,
+      "excess": 0.72136,
+      "excessCost": 2.428194,
+      "status": "watch"
+    },
+    {
+      "realWasteRate": 0.244029,
+      "excess": 2.33952,
+      "excessCost": 3.640443,
+      "status": "alert"
+    },
+    {
+      "realWasteRate": null,
+      "excess": null,
+      "excessCost": null,
+      "status": "noData"
+    }
+  ],
+  "totalExcessCost": 6.068637
+}

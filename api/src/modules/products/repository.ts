@@ -1,3 +1,4 @@
+import { compatibleInventoryUnit } from '../quotes/inventory.ts';
 import type Database from 'better-sqlite3';
 import { conflict, type FieldErrors, validationError } from '../../lib/errors.ts';
 import { boolFilter, enumFilter, intFilter, type ListSpec, type ParsedListQuery, queryList, toBool } from '../../lib/listQuery.ts';
@@ -173,6 +174,10 @@ export function createProductsRepository(db: Database.Database) {
       checkWrite(data, id);
       if (data.unit !== current.unit && movementCount.get(id)! > 0) {
         throw validationError({ unit: 'Unit cannot be changed after stock movements exist' });
+      }
+      if (data.unit !== current.unit) {
+        const linked = db.prepare<[number], { unit:string }>('SELECT unit FROM quote_products WHERE inventory_product_id = ?').all(id);
+        if (linked.some((p) => !compatibleInventoryUnit(data.unit,p.unit))) throw validationError({ unit:'Inventory unit is not compatible' });
       }
       withUniqueGuard('sku', SKU_TAKEN, () => updateStmt.run({ ...toParams(data), id, now: nowIso() }));
       return repo.findById(id)!;

@@ -1,5 +1,6 @@
 // Types of the providers that connect react-admin to the inventory API.
 import type { DataProvider } from 'react-admin';
+import type { Quote, WasteControl } from './quotes';
 import type { Stats } from './api';
 
 /** What `httpClient` resolves with; `json` is the parsed body, typed by the caller. */
@@ -36,4 +37,8 @@ export interface LoginParams {
 /** The simple REST provider plus `getStats()` for the dashboard. */
 export interface InventoryDataProvider extends DataProvider {
   getStats: () => Promise<Stats>;
+  quoteAction: (id:number,action:'recalculate' | 'regenerate') => Promise<Quote>;
+  getWaste: (id:number,period:string) => Promise<WasteControl>;
+  saveWaste: (id:number,period:string,rows:{ productId:number;actual:number | null }[]) => Promise<WasteControl>;
+  createMeasurementQuote: (id:number) => Promise<Quote>;
 }

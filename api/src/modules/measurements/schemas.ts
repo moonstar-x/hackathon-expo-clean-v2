@@ -8,12 +8,17 @@ const number = z.number().min(0).max(1_000_000).transform(roundQuantity);
 const count = z.number().int().min(0).max(1_000_000);
 const uuid = z.uuid().transform((s) => s.toLowerCase());
 export const measurementUpdateSchema = z.object({ name: requiredText(100), notes: nullableText(1000) });
+const traffic = z.enum(['low','medium','high']).nullish();
+const quotingSchema = z.object({ scheduleCode: z.string().max(50).regex(/^[a-z0-9]+(-[a-z0-9]+)*$/).nullish(), daysPerMonth: z.number().int().min(1).max(31).nullish(), traffic }).nullish();
+const roomQuotingSchema = z.object({ traffic, fixedPosts: z.number().int().min(0).max(100).optional(), fixtures: z.object({ toilets:z.number().int().min(0).max(500), urinals:z.number().int().min(0).max(500), sinks:z.number().int().min(0).max(500) }).nullish() }).nullish();
 export const metadataSchema = z.object({
+  quoting: quotingSchema,
   clientId: uuid, name: requiredText(100),
   scannedAt: z.iso.datetime({ offset: true }).transform((v) => new Date(v).toISOString()),
   footprint: z.object({ width: number, length: number }).nullable(),
   isMerged: z.boolean(), geometryVersion: z.number().int().min(1).max(1_000_000),
   rooms: z.array(z.object({
+    locationType: z.string().regex(/^[A-Za-z][A-Za-z0-9]{0,49}$/).nullish(), quoting:roomQuotingSchema,
     id: uuid, index: count, name: requiredText(100),
     type: z.enum(['bedroom', 'bathroom', 'kitchen', 'livingRoom', 'diningRoom']).nullable(),
     floorArea: number.nullable(), isFloorApproximate: z.boolean(), perimeter: number,

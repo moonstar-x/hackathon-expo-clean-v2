@@ -1,3 +1,5 @@
+import pino from 'pino';
+import { createQuoteWorker } from '../modules/quotes/worker.ts';
 import { readFileSync } from 'node:fs';
 import type Database from 'better-sqlite3';
 import { createCategoriesRepository } from '../modules/categories/repository.ts';
@@ -104,6 +106,8 @@ export interface SeedResult {
  */
 export function seed(db: Database.Database, { createdBy }: { createdBy: string }): SeedResult {
   seedMeasurement(db, createdBy);
+  const worker = createQuoteWorker({ db,logger:pino({ level:'silent' }),config:{ quoteWorkerPollMs:1000,quoteJobMaxAttempts:5 } });
+  while (worker.processNextJob()) { /* synchronous demo calculation */ }
   const count = (sql: string) => db.prepare<[], number>(sql).pluck().get()!;
   if (count('SELECT COUNT(*) FROM products') > 0) return { seeded: false };
 

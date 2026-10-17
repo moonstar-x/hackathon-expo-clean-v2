@@ -1,0 +1,64 @@
+{
+  "status": "needsReview",
+  "zones": [
+    {
+      "cleaningsPerMonth": 22,
+      "dailyCleaningHours": 3.45098,
+      "laborCost": 14.561234,
+      "fte": 0.022028,
+      "totalCost": 96.000327,
+      "targetPrice": 147.692811
+    },
+    {
+      "cleaningsPerMonth": 22,
+      "dailyCleaningHours": 2.415686,
+      "laborCost": 10.192864,
+      "fte": 0.015419,
+      "totalCost": 67.200229,
+      "targetPrice": 103.384968
+    }
+  ],
+  "costs": {
+    "laborCost": 24.754098,
+    "chemicalsTheoretical": 1.824093,
+    "chemicalsWaste": 0.091205,
+    "eppAndHygiene": 0.561702,
+    "utensils": 2.72,
+    "directCost": 29.951098,
+    "supervision": 1.348085,
+    "operatingCost": 141.299183,
+    "administration": 14.129918,
+    "contingency": 7.771455,
+    "totalCost": 163.200556
+  },
+  "pricing": {
+    "offeredPrice": 251.077779,
+    "minimumPrice": 233.143652,
+    "profit": 87.877223,
+    "margin": 0.35,
+    "marginStatus": "healthy",
+    "vat": 37.661667,
+    "totalWithVat": 288.739445,
+    "pricePerM2": 7.384641,
+    "negotiationRoom": 17.934127
+  },
+  "staffing": {
+    "personHours": 5.866667,
+    "fte": 0.037447,
+    "peopleToHire": 1
+  },
+  "purchasePlan": {
+    "rows": [
+      {
+        "theoretical": 0.11968,
+        "containers": 1,
+        "purchaseCost": 27.304348
+      },
+      {
+        "theoretical": 0.2992,
+        "containers": 1,
+        "purchaseCost": 12.791304
+      }
+    ]
+  }
+}

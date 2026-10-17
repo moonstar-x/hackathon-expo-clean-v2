@@ -143,6 +143,7 @@ struct CaptureFlowView: View {
         RoomReviewSheet(
             name: $model.reviewName,
             type: $model.reviewType,
+            quoting: $model.reviewQuoting,
             roomNumber: model.roomNumber,
             room: model.currentIssue == nil ? model.completedRooms.last?.geometry : nil,
             issue: model.currentIssue,
@@ -158,6 +159,7 @@ struct CaptureFlowView: View {
     private var saveSheet: some View {
         SaveLocationSheet(
             name: $model.locationName,
+            quoting: $model.locationQuoting,
             roomNames: model.completedRooms.map(\.name),
             totalArea: model.completedArea,
             isAreaApproximate: model.completedGeometries.contains(where: \.isFloorApproximate),

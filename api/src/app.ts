@@ -15,6 +15,8 @@ import { productsRouter } from './modules/products/router.ts';
 import { statsRouter } from './modules/stats/router.ts';
 import { stockMovementsRouter } from './modules/stockMovements/router.ts';
 import { suppliersRouter } from './modules/suppliers/router.ts';
+import { quotesRouter } from './modules/quotes/router.ts';
+import { settingsRouter } from './modules/quotes/settings.ts';
 import { usersRouter } from './modules/users/router.ts';
 
 /** Paths never written to logs: credentials and tokens. */
@@ -44,7 +46,7 @@ export function createLogger(config: Config): Logger {
 }
 
 /** Builds the Express app. Does not listen, so tests can drive it with supertest. */
-export function createApp({ db, config, logger = createLogger(config) }: AppDeps & { logger?: Logger }) {
+export function createApp({ db, config, logger = createLogger(config), nudgeQuotes = () => {} }: AppDeps & { logger?: Logger; nudgeQuotes?: () => void }) {
   const app = express();
   app.set('trust proxy', config.trustProxy);
   app.disable('x-powered-by');
@@ -61,7 +63,7 @@ export function createApp({ db, config, logger = createLogger(config) }: AppDeps
     }),
   );
   app.use(pinoHttp({ logger }));
-  app.use(express.json({ limit: '100kb' }));
+  app.use(express.json({ limit: '1mb' }));
 
   app.get('/health', (req, res) => {
     try {
@@ -78,7 +80,9 @@ export function createApp({ db, config, logger = createLogger(config) }: AppDeps
 
   const api = express.Router();
   api.use(requireAuth(deps));
-  api.use('/measurements', measurementsRouter(deps));
+  api.use(settingsRouter(deps));
+  api.use(quotesRouter(deps,nudgeQuotes));
+  api.use('/measurements', measurementsRouter(deps,nudgeQuotes));
   api.use('/categories', categoriesRouter(deps));
   api.use('/suppliers', suppliersRouter(deps));
   api.use('/products', productsRouter(deps));

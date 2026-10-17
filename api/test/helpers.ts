@@ -14,6 +14,7 @@ export const ORIGIN = 'http://admin.test';
 
 export const testEnv = Object.freeze({
   NODE_ENV: 'test',
+  QUOTE_WORKER: 'off',
   PUBLIC_URL: 'https://api.test',
   DATABASE_PATH: ':memory:',
   CORS_ORIGIN: ORIGIN,

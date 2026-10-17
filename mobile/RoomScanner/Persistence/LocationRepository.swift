@@ -8,6 +8,8 @@ struct StoredRoom: Sendable, Equatable {
     var name: String
     /// Encoded `CapturedRoom`. nil for sample data.
     var capturedRoomJSON: Data?
+    var locationType: String? = nil
+    var quoting: RoomQuotingInputs = .init()
 }
 
 /// The raw RoomPlan data stored for a location, used to finish drafts, rebuild and export.
@@ -42,6 +44,8 @@ protocol LocationRepository: Sendable {
                     capturedRoomJSON: Data?, floorArea: Double, capturedAt: Date) async throws
     func deleteRoom(roomID: UUID) async throws
     func renameRoom(roomID: UUID, to name: String) async throws
+    func setRoomQuoting(roomID: UUID, inputs: RoomQuotingInputs) async throws
+    func setLocationQuoting(locationID: UUID, inputs: LocationQuotingInputs) async throws
     func setRoomType(roomID: UUID, to type: LocationType?) async throws
     func finalize(locationID: UUID, geometry: ScanGeometry, structureJSON: Data?,
                   thumbnail: Data?) async throws
@@ -136,6 +140,28 @@ final class CoreDataLocationRepository: LocationRepository, UploadStore, @unchec
         }
     }
 
+    func setRoomQuoting(roomID: UUID, inputs: RoomQuotingInputs) async throws {
+        try await write { context in
+            guard let room = try Self.room(roomID, in: context) else { return }
+            room.quoteTrafficRaw = inputs.traffic
+            room.quoteFixedPosts = Int16(clamping: inputs.fixedPosts)
+            room.quoteFixturesEnabled = inputs.fixtures != nil
+            room.quoteToilets = Int16(clamping: inputs.fixtures?.toilets ?? 0)
+            room.quoteUrinals = Int16(clamping: inputs.fixtures?.urinals ?? 0)
+            room.quoteSinks = Int16(clamping: inputs.fixtures?.sinks ?? 0)
+            room.location?.updatedAt = .now
+        }
+    }
+    func setLocationQuoting(locationID: UUID, inputs: LocationQuotingInputs) async throws {
+        try await write { context in
+            let location = try Self.location(locationID, in: context)
+            location.quoteScheduleCode = inputs.scheduleCode
+            location.quoteDaysPerMonth = Int16(clamping: inputs.daysPerMonth ?? 0)
+            location.quoteTrafficRaw = inputs.traffic
+            location.updatedAt = .now
+        }
+    }
+
     // MARK: Finalize and load
 
     func finalize(locationID: UUID, geometry: ScanGeometry, structureJSON: Data?,
@@ -183,7 +209,9 @@ final class CoreDataLocationRepository: LocationRepository, UploadStore, @unchec
             let rooms = location.sortedRooms.compactMap { room -> StoredRoom? in
                 guard let id = room.id else { return nil }
                 return StoredRoom(id: id, index: Int(room.index), name: room.displayName,
-                                  capturedRoomJSON: room.capturedRoomJSON)
+                                  capturedRoomJSON: room.capturedRoomJSON, locationType: room.typeRaw,
+                                  quoting: RoomQuotingInputs(traffic: room.quoteTrafficRaw, fixedPosts: Int(room.quoteFixedPosts),
+                                      fixtures: room.quoteFixturesEnabled ? QuoteFixtures(toilets: Int(room.quoteToilets), urinals: Int(room.quoteUrinals), sinks: Int(room.quoteSinks)) : nil))
             }
             return StoredRawData(structureJSON: location.payload?.structureJSON, rooms: rooms)
         }
@@ -198,10 +226,14 @@ final class CoreDataLocationRepository: LocationRepository, UploadStore, @unchec
                   let json = location.payload?.geometryJSON else { return nil }
             let raw = StoredRawData(structureJSON: location.payload?.structureJSON, rooms: location.sortedRooms.compactMap { room in
                 guard let id = room.id else { return nil }
-                return StoredRoom(id: id, index: Int(room.index), name: room.displayName, capturedRoomJSON: room.capturedRoomJSON)
+                return StoredRoom(id: id, index: Int(room.index), name: room.displayName, capturedRoomJSON: room.capturedRoomJSON, locationType: room.typeRaw,
+                                  quoting: RoomQuotingInputs(traffic: room.quoteTrafficRaw, fixedPosts: Int(room.quoteFixedPosts),
+                                      fixtures: room.quoteFixturesEnabled ? QuoteFixtures(toilets: Int(room.quoteToilets), urinals: Int(room.quoteUrinals), sinks: Int(room.quoteSinks)) : nil))
             })
             return UploadSnapshot(id: locationID, name: location.displayName, createdAt: location.createdAt ?? .now,
-                                  geometryJSON: json, thumbnailPNG: location.thumbnailPNG, raw: raw)
+                                  geometryJSON: json, thumbnailPNG: location.thumbnailPNG, raw: raw,
+                                  quoting: LocationQuotingInputs(scheduleCode: location.quoteScheduleCode,
+                                      daysPerMonth: location.quoteDaysPerMonth == 0 ? nil : Int(location.quoteDaysPerMonth), traffic: location.quoteTrafficRaw))
         }
     }
 

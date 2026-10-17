@@ -53,3 +53,5 @@ cd web && npm ci && npm run lint && npm run typecheck && npm test && npm run bui
 cd mobile && xcodegen generate && xcodebuild -project RoomScanner.xcodeproj -scheme RoomScanner \
   -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=latest' build test
 ```
+
+Measurements now become monthly cleaning-service quotes automatically (SPEC-005). An atomic database trigger queues each measurement, and the API worker derives zones and applies the workbook's cost model using editable company settings. The admin reviews assumptions, compares prices, edits zones and records chemical waste; the iPhone captures schedules, traffic, fixed posts and sanitary fixtures. Existing quotes retain their calculation snapshots until explicitly recalculated.

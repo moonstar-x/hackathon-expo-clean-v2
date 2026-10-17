@@ -26,7 +26,7 @@ final class UploadQueue {
     }
     deinit { monitor.cancel(); worker?.cancel(); retryTimer?.cancel() }
     func run() {
-        guard session.session != nil else { return }
+        guard session.session != nil, !session.isCapturing else { return }
         retryTimer?.cancel(); retryTimer = nil
         guard worker == nil else { rerun = true; return }
         worker = Task { await process() }
@@ -52,7 +52,7 @@ final class UploadQueue {
             }
         }
         guard let current = session.session, let client = session.client else { return }
-        while !Task.isCancelled && session.session?.token == current.token {
+        while !Task.isCancelled && !session.isCapturing && session.session?.token == current.token {
             let ids: [UUID]
             do { ids = try await store.readyUploadIDs(userID: current.user.id, now: .now) }
             catch { Log.persistence.error("Upload queue read failed: \(error)"); return }

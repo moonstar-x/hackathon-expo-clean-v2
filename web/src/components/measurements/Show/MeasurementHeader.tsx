@@ -1,3 +1,4 @@
+import { MeasurementQuoteLink } from '../../../quotes/MeasurementQuoteLink';
 import type { ReactElement } from 'react';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import {
@@ -24,8 +25,9 @@ const MeasurementHeader = (): ReactElement | null => {
       actions={
         <>
           <ListButton label="ra.action.back" icon={<ArrowBackIcon />} />
+          <MeasurementQuoteLink />
           <EditButton variant="outlined" />
-          <DeleteButton mutationMode="pessimistic" />
+          <DeleteButton mutationMode="pessimistic" confirmContent="La cotización se conserva." />
         </>
       }
     />

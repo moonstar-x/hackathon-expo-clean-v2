@@ -1,0 +1,420 @@
+{
+  "zones": [
+    {
+      "name": "Quirófano 1",
+      "zoneTypeId": 10,
+      "floorArea": 36,
+      "wallArea": 72,
+      "traffic": "medium",
+      "scheduleId": 4,
+      "daysPerMonth": 30,
+      "terminalsPerMonth": null,
+      "fixedPosts": 1,
+      "toilets": 0,
+      "urinals": 0,
+      "sinks": 0,
+      "fixtureVisitsPerDay": null,
+      "minutesPerFixture": null,
+      "solutionLitersPerFixture": null,
+      "paperSoapMonthly": 0,
+      "fixturesExcludeFloor": false,
+      "position": 0,
+      "origin": "manual",
+      "roomId": null,
+      "isFloorApproximate": false,
+      "measurementSource": "measured",
+      "observation": null,
+      "sources": {}
+    },
+    {
+      "name": "Baño público",
+      "zoneTypeId": 5,
+      "floorArea": 12,
+      "wallArea": 30,
+      "traffic": "high",
+      "scheduleId": 2,
+      "daysPerMonth": 30,
+      "terminalsPerMonth": null,
+      "fixedPosts": 0,
+      "toilets": 3,
+      "urinals": 1,
+      "sinks": 3,
+      "fixtureVisitsPerDay": 4,
+      "minutesPerFixture": 3,
+      "solutionLitersPerFixture": 0.5,
+      "paperSoapMonthly": 40,
+      "fixturesExcludeFloor": true,
+      "position": 1,
+      "origin": "manual",
+      "roomId": null,
+      "isFloorApproximate": false,
+      "measurementSource": "measured",
+      "observation": null,
+      "sources": {}
+    },
+    {
+      "name": "Pasillo principal",
+      "zoneTypeId": 3,
+      "floorArea": 120,
+      "wallArea": null,
+      "traffic": "high",
+      "scheduleId": 2,
+      "daysPerMonth": 30,
+      "terminalsPerMonth": null,
+      "fixedPosts": 0,
+      "toilets": 0,
+      "urinals": 0,
+      "sinks": 0,
+      "fixtureVisitsPerDay": null,
+      "minutesPerFixture": null,
+      "solutionLitersPerFixture": null,
+      "paperSoapMonthly": 0,
+      "fixturesExcludeFloor": false,
+      "position": 2,
+      "origin": "manual",
+      "roomId": null,
+      "isFloorApproximate": false,
+      "measurementSource": "measured",
+      "observation": null,
+      "sources": {}
+    },
+    {
+      "name": "Oficinas",
+      "zoneTypeId": 1,
+      "floorArea": 80,
+      "wallArea": null,
+      "traffic": "low",
+      "scheduleId": 1,
+      "daysPerMonth": 22,
+      "terminalsPerMonth": 2,
+      "fixedPosts": 0,
+      "toilets": 1,
+      "urinals": 0,
+      "sinks": 1,
+      "fixtureVisitsPerDay": 2,
+      "minutesPerFixture": 3,
+      "solutionLitersPerFixture": 0.4,
+      "paperSoapMonthly": 8,
+      "fixturesExcludeFloor": true,
+      "position": 3,
+      "origin": "manual",
+      "roomId": null,
+      "isFloorApproximate": false,
+      "measurementSource": "measured",
+      "observation": null,
+      "sources": {}
+    }
+  ],
+  "expected": {
+    "status": "simulation",
+    "zones": [
+      {
+        "hoursBetweenCleanings": 4.0,
+        "cleaningsPerDay": 6.0,
+        "cleaningsPerMonth": 180.0,
+        "terminalsPerMonth": 30.0,
+        "terminalArea": 108.0,
+        "fixtures": {
+          "hours": 0.0,
+          "solutionLiters": 0.0
+        },
+        "dailyCleaningHours": 127.058824,
+        "terminalHours": 95.294118,
+        "presenceHours": 720.0,
+        "billableHours": 720.0,
+        "nightFraction": 0.458333,
+        "holidayFraction": 0.030137,
+        "laborCost": 3477.663682,
+        "fte": 4.595745,
+        "m2PerPersonInService": 36.0,
+        "dailySolutionLiters": 388.8,
+        "terminalSolutionLiters": 194.4,
+        "cleaningConcentrate": 5.832,
+        "dailyDisinfectantConcentrate": 1.5552,
+        "terminalDisinfectantConcentrate": 1.944,
+        "chemicalsTheoretical": 477.367216,
+        "chemicalsWithWaste": 501.235577,
+        "eppAndHygiene": 183.829787,
+        "utensils": 2.88,
+        "directCost": 4165.609047,
+        "allocatedIndirect": 941.851737,
+        "totalCost": 5107.460784,
+        "targetPrice": 7857.631975,
+        "costPerM2": 141.873911,
+        "pricePerM2": 218.267555,
+        "flatRateRevenue": 74.16,
+        "flatRateMargin": -67.87083,
+        "flatRateStatus": "loss",
+        "technical": {
+          "solutionPerDailyCleaning": 2.16,
+          "disinfectantPerCleaning": 8.64
+        }
+      },
+      {
+        "hoursBetweenCleanings": 2.0,
+        "cleaningsPerDay": 8.0,
+        "cleaningsPerMonth": 240.0,
+        "terminalsPerMonth": 4.0,
+        "terminalArea": 42.0,
+        "fixtures": {
+          "hours": 49.411765,
+          "solutionLiters": 420.0
+        },
+        "dailyCleaningHours": 105.882353,
+        "terminalHours": 7.905882,
+        "presenceHours": 0.0,
+        "billableHours": 113.788235,
+        "nightFraction": 0.1875,
+        "holidayFraction": 0.0,
+        "laborCost": 502.629394,
+        "fte": 0.726308,
+        "m2PerPersonInService": 50.620347,
+        "dailySolutionLiters": 592.8,
+        "terminalSolutionLiters": 10.08,
+        "cleaningConcentrate": 6.0288,
+        "dailyDisinfectantConcentrate": 11.856,
+        "terminalDisinfectantConcentrate": 0.2016,
+        "chemicalsTheoretical": 39.056139,
+        "chemicalsWithWaste": 41.008946,
+        "eppAndHygiene": 50.894618,
+        "utensils": 0.96,
+        "directCost": 595.492958,
+        "allocatedIndirect": 134.642034,
+        "totalCost": 730.134993,
+        "targetPrice": 1123.284604,
+        "costPerM2": 60.844583,
+        "pricePerM2": 93.60705,
+        "flatRateRevenue": 24.72,
+        "flatRateMargin": -28.536205,
+        "flatRateStatus": "loss",
+        "technical": {
+          "solutionPerDailyCleaning": 2.47,
+          "disinfectantPerCleaning": 49.4
+        }
+      },
+      {
+        "hoursBetweenCleanings": 4.0,
+        "cleaningsPerDay": 4.0,
+        "cleaningsPerMonth": 120.0,
+        "terminalsPerMonth": 2.0,
+        "terminalArea": 120.0,
+        "fixtures": {
+          "hours": 0.0,
+          "solutionLiters": 0.0
+        },
+        "dailyCleaningHours": 67.764706,
+        "terminalHours": 4.705882,
+        "presenceHours": 0.0,
+        "billableHours": 72.470588,
+        "nightFraction": 0.1875,
+        "holidayFraction": 0.0,
+        "laborCost": 320.11963,
+        "fte": 0.462578,
+        "m2PerPersonInService": 794.805195,
+        "dailySolutionLiters": 576.0,
+        "terminalSolutionLiters": 9.6,
+        "cleaningConcentrate": 5.856,
+        "dailyDisinfectantConcentrate": 2.304,
+        "terminalDisinfectantConcentrate": 0.0384,
+        "chemicalsTheoretical": 35.701499,
+        "chemicalsWithWaste": 37.486574,
+        "eppAndHygiene": 6.938673,
+        "utensils": 9.6,
+        "directCost": 374.144878,
+        "allocatedIndirect": 84.594833,
+        "totalCost": 458.739711,
+        "targetPrice": 705.753402,
+        "costPerM2": 3.822831,
+        "pricePerM2": 5.881278,
+        "flatRateRevenue": 247.2,
+        "flatRateMargin": -0.855743,
+        "flatRateStatus": "loss",
+        "technical": {
+          "solutionPerDailyCleaning": 4.8,
+          "disinfectantPerCleaning": 19.2
+        }
+      },
+      {
+        "hoursBetweenCleanings": 24.0,
+        "cleaningsPerDay": 1.0,
+        "cleaningsPerMonth": 22.0,
+        "terminalsPerMonth": 2.0,
+        "terminalArea": 80.0,
+        "fixtures": {
+          "hours": 5.176471,
+          "solutionLiters": 35.2
+        },
+        "dailyCleaningHours": 18.980392,
+        "terminalHours": 3.137255,
+        "presenceHours": 0.0,
+        "billableHours": 22.117647,
+        "nightFraction": 0.0,
+        "holidayFraction": 0.0,
+        "laborCost": 93.324273,
+        "fte": 0.141176,
+        "m2PerPersonInService": 636.595745,
+        "dailySolutionLiters": 105.6,
+        "terminalSolutionLiters": 6.4,
+        "cleaningConcentrate": 1.12,
+        "dailyDisinfectantConcentrate": 0.4224,
+        "terminalDisinfectantConcentrate": 0.0256,
+        "chemicalsTheoretical": 6.828156,
+        "chemicalsWithWaste": 7.169563,
+        "eppAndHygiene": 10.117647,
+        "utensils": 6.4,
+        "directCost": 117.011483,
+        "allocatedIndirect": 26.456508,
+        "totalCost": 143.467991,
+        "targetPrice": 220.719987,
+        "costPerM2": 1.79335,
+        "pricePerM2": 2.759,
+        "flatRateRevenue": 164.8,
+        "flatRateMargin": 0.129442,
+        "flatRateStatus": "belowMinimum",
+        "technical": {
+          "solutionPerDailyCleaning": 4.8,
+          "disinfectantPerCleaning": 19.2
+        }
+      }
+    ],
+    "labor": {
+      "annualLaborCost": 7932.5632,
+      "hourlyCost": 4.219449,
+      "fteHoursPerMonth": 156.666667
+    },
+    "costs": {
+      "laborCost": 4393.736979,
+      "chemicalsTheoretical": 558.953011,
+      "chemicalsWaste": 27.947651,
+      "eppAndHygiene": 251.780726,
+      "utensils": 19.84,
+      "directCost": 5252.258366,
+      "supervision": 213.329061,
+      "equipment": 40,
+      "transport": 60,
+      "insurance": 10,
+      "operatingCost": 5575.587428,
+      "administration": 557.558743,
+      "contingency": 306.657309,
+      "totalCost": 6439.803479,
+      "indirectToAllocate": 1187.545113
+    },
+    "pricing": {
+      "targetPrice": 9907.389968,
+      "minimumPrice": 9199.719256,
+      "breakEvenPrice": 6439.803479,
+      "offeredPrice": 9907.389968,
+      "profit": 3467.586489,
+      "margin": 0.35,
+      "marginStatus": "healthy",
+      "vat": 1486.108495,
+      "totalWithVat": 11393.498463,
+      "annualProfit": 41611.037864,
+      "pricePerM2": 39.949153,
+      "negotiationRoom": 707.670712
+    },
+    "staffing": {
+      "personHours": 928.376471,
+      "fte": 5.925807,
+      "peopleToHire": 6,
+      "supervisors": 0.237032
+    },
+    "chemicals": {
+      "withWaste": 586.900661,
+      "uncontrolledWasteCost": 83.842952,
+      "controlledWasteCost": 27.947651,
+      "monthlyWasteSavings": 55.895301,
+      "annualWasteSavings": 670.743613,
+      "shareOfCost": 0.091136
+    },
+    "flatRate": {
+      "rate": 2.06,
+      "revenue": 510.88,
+      "margin": -11.605315,
+      "zonesAtLoss": 3,
+      "zonesBelowMinimum": 1
+    },
+    "reference": {
+      "difference": 6407.389968,
+      "relativeDifference": 1.830683
+    },
+    "breakdown": [
+      {
+        "share": 0.443481
+      },
+      {
+        "share": 0.059239
+      },
+      {
+        "share": 0.025413
+      },
+      {
+        "share": 0.002003
+      },
+      {
+        "share": 0.021532
+      },
+      {
+        "share": 0.011103,
+        "amount": 110
+      },
+      {
+        "share": 0.087229,
+        "amount": 864.216051
+      },
+      {
+        "share": 0.35
+      }
+    ],
+    "purchasePlan": {
+      "rows": [
+        {
+          "theoretical": 4.3456,
+          "waste": 0.21728,
+          "total": 4.56288,
+          "containers": 2,
+          "stock": 0,
+          "toBuy": 2,
+          "purchaseCost": 54.608696,
+          "wasteCost": 1.483172,
+          "name": "Amonio cuaternario 5ª gen"
+        },
+        {
+          "theoretical": 18.8368,
+          "waste": 0.94184,
+          "total": 19.77864,
+          "containers": 6,
+          "stock": 2,
+          "toBuy": 4,
+          "purchaseCost": 51.165217,
+          "wasteCost": 3.170358,
+          "name": "Detergente neutro"
+        },
+        {
+          "theoretical": 12.0576,
+          "waste": 0.60288,
+          "total": 12.66048,
+          "containers": 4,
+          "stock": 0,
+          "toBuy": 4,
+          "purchaseCost": 23.652174,
+          "wasteCost": 0.93812,
+          "name": "Hipoclorito de sodio 5%"
+        },
+        {
+          "theoretical": 1.944,
+          "waste": 0.0972,
+          "total": 2.0412,
+          "containers": 41,
+          "stock": 0,
+          "toBuy": 41,
+          "purchaseCost": 471.5,
+          "wasteCost": 22.356,
+          "name": "Monopersulfato de potasio"
+        }
+      ],
+      "totalPurchaseCost": 600.926087,
+      "totalWasteCost": 27.947651
+    }
+  }
+}

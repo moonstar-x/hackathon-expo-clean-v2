@@ -8,7 +8,7 @@ import { parseId } from '../../lib/validation.ts';
 import { createMeasurementsRepository, measurementListSpec } from './repository.ts';
 import { FILE_SUFFIXES, FILE_TYPES, type FileKind, measurementUpdateSchema, validateUpload } from './schemas.ts';
 
-export function measurementsRouter({ db, config }: AppDeps) {
+export function measurementsRouter({ db, config }: AppDeps, nudge: () => void = () => {}) {
   const repository = createMeasurementsRepository(db, config);
   const router = express.Router();
   const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: config.uploadMaxFileBytes, fields: 1, files: 6, parts: 7, fieldSize: 1024 * 1024 } }).fields(Object.keys(FILE_TYPES).map((name) => ({ name, maxCount: 1 })));
@@ -33,6 +33,7 @@ export function measurementsRouter({ db, config }: AppDeps) {
         req.log.info({ measurementId: result.record.id, clientId: data.clientId, fileKinds: Object.keys(files), totalBytes: Object.values(files).reduce((n, a) => n + a[0].size, 0) }, 'measurement upload');
         if (result.created) res.location(publicUrlFor(config, `/api/measurements/${result.record.id}`));
         res.status(result.created ? 201 : 200).json(result.record);
+        nudge();
       } catch (error) { next(error); }
     });
   });

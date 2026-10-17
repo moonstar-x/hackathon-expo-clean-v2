@@ -5,6 +5,7 @@ struct RoomScannerApp: App {
     private let persistence = PersistenceController.shared
 
     @State private var session: SessionStore
+    @State private var quotingOptions = QuotingOptionsStore()
     @State private var queue: UploadQueue
     init() {
         let session = SessionStore()
@@ -15,7 +16,7 @@ struct RoomScannerApp: App {
 
     var body: some Scene {
         WindowGroup {
-            RootView(session: session, queue: queue)
+            RootView(session: session, queue: queue, quotingOptions: quotingOptions)
                 .persistence(persistence)
                 .task {
                     // §10.2: defensive cleanup of drafts that never got a room.
