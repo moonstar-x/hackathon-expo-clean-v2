@@ -130,7 +130,9 @@ Page    PageHeader: eyebrow over an h1, optional badge, actions row
   - The record's status is a header badge, the same `OutlinedBadge` the lists use (stock status, movement type, "Inactivo").
   - The first section holds what the page is opened for, as `KeyFigures`: the product's stock on hand with its `StockMeter` against the reorder line, a movement's quantity, change and resulting stock.
   - The fields sit on a `DetailGrid` of `<Labeled>` fields; long ones take the row (`wideFieldSx`). Yes/no values read "Sí"/"No" (`YesNoField`).
-  - Related records come last, in their own card, again through a `ResponsiveSwitch`.
+  - Related records come last, in their own card, again through a `ResponsiveSwitch`; a table in a card sits inset from its sides, as it does from the title above it.
+  - A detail page keeps to the screen below `md` as the lists do (`RaShow` in the theme), and a card of wide tables keeps their width out of the page at any size (`contain: inline-size`): a table wider than its card scrolls inside it. On phones a quote's tables are one card per row.
+  - A note about a whole card of figures rides on it as a ribbon along its foot ("Precio mínimo: no bajar de aquí."), not as an alert between cards. Where a tab has nothing to show yet, its card says what is missing and where to set it, with a button to go there.
 - **Measurement pages** (Mediciones, SPEC-004) follow the same anatomy, with these differences:
   - The list's eyebrow is "RoomScanner", where measurements come from, since Mediciones sits outside the menu sections. Its rows lead with a thumbnail of the plan (`leftIcon` on phones: `leftAvatar` crops to a circle).
   - The detail page puts the views before the fields: a Resumen section (`KeyFigures` of area, rooms, dimensions and the quote's state, the notes, the unjoined-rooms note), then a card of tabs (Plano, 3D, Medidas, Archivos), then Detalles. Seeing the space is what a measurement is opened for.
@@ -138,10 +140,11 @@ Page    PageHeader: eyebrow over an h1, optional badge, actions row
   - The plan and the model each get a framed stage with their actions above it. The plan sits on white paper in both themes, because the phone draws it for white; the thumbnails are the same paper, small.
   - `<TabbedShowLayout.Tab>` labels each child through `<Labeled>`, so each tab's content goes in `TabContent label={false}`, and `measurementTabsSx` lets it fill the tab.
 - **Forms**: `<Create>` / `<Edit>` with `actions={<CreateHeader />}` / `actions={<EditHeader />}` and `sx={formPageSx}`: the card spans the page, and on desktop the toolbar stays at the bottom of the screen while a long form scrolls.
-  - Inside is a `SimpleForm` with `toolbar={<FormToolbar withDelete />}`: Save on the left, a pessimistic Delete that asks first on the right.
+  - Inside is a `SimpleForm` with `toolbar={<FormToolbar withDelete />}`: Save on the left, a pessimistic Delete that asks first on the right. When saving needs a word, it goes beside Save as the toolbar's `note`, once (the quoting parameters and catalogs: existing quotes don't change until recalculated).
   - Fields go in titled `Section`s (with a one-line `hint`) and a `SectionDivider` between them, each field a `<Grid size={{ xs: 12, md: … }}>` cell sized by what it holds (codes and numbers 4, names 6 to 8, long text 12) with its input `fullWidth`. The section's grid drops the inputs' own margins so a row lines up.
+  - A name beside a long note goes in `FieldsBesideNote`: the short inputs stacked in the left half, the note in the right one as tall as they are (Proveedor, Categoría, Medición), so the name is never cut short above a full-width note.
   - A form may show what it will do beside the inputs: the movement form previews the product's stock now and after the movement.
-  - `TabbedForm` (with `ResponsiveTabbedFormTabs`) only when one page is too long: the 44 quoting parameters (one tab per group, tabs not in the URL) and the quote editor (case data, zones).
+  - `TabbedForm` (with `ResponsiveTabbedFormTabs`) only when one page is too long: the 44 quoting parameters (one tab per group, tabs not in the URL) and the quote editor (case data, zones). A parameters tab that mixes topics has titled sections (`PARAMETER_TABS`); a tab about one topic has one untitled `Section` whose hint introduces it. Units sit inside the inputs as adornments, and the helper line is only the value's source.
 - **Sign-in**: a navy split screen whose logo draws itself, then wipes its pane clean. It always uses the dark theme.
 
 ## 4. Component kit
@@ -151,11 +154,12 @@ Page    PageHeader: eyebrow over an h1, optional badge, actions row
 | `PageHeader` | Every page's heading | `eyebrow`, `title`, `badge?`, `actions?` |
 | `CreateHeader` / `EditHeader` | The heading of a create or edit page, passed to `actions` | `eyebrow?` (key), `title?` (key), `actions?` |
 | `ResponsiveSwitch` | One view below `md`, another above | `mobile`, `desktop` |
-| `Section` / `SectionDivider` | A titled block of form fields on an aligned `Grid`; the gap between blocks | `title`, `hint?`, `action?` |
+| `Section` / `SectionDivider` | A titled block of form fields on an aligned `Grid`; the gap between blocks | `title?`, `hint?`, `action?` |
+| `FieldsBesideNote` | Inside a `Section`: short inputs on the left, a long note on the right as tall as they are | `fields`, `note` |
 | `ShowSection` / `DetailGrid` | A titled card of a detail page; its `<Labeled>` fields on an auto-fill grid | `title`, `action?` / children |
 | `KeyFigures` | A record's key numbers, label over value, as many to a row as fit | `items` (`label`, `value`, `hint?`), `size?` |
 | `StockMeter` | Stock against the reorder line, coloured by status; `role="meter"` | `quantity`, `reorderLevel`, `unit`, `size?` |
-| `FormToolbar` | Every form's toolbar | `withDelete?` |
+| `FormToolbar` | Every form's toolbar | `withDelete?`, `note?` |
 | `AppPagination` | Desktop list pagination (10, 25, 50, 100 rows) | react-admin `PaginationProps` |
 | `SearchFilter` | Every list's search box: magnifier first, level with labeled filters | `placeholder` (key, saying what it matches) |
 | `ToggleFilter` | A yes-only filter as a pill as tall as the inputs (with `trueOrRemove`) | `BooleanInput` props |
