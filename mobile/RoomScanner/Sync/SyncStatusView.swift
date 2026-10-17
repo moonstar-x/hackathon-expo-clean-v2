@@ -28,23 +28,38 @@ struct SyncStatusView: View {
         case .failed: "exclamationmark.triangle.fill"
         }
     }
+    private var tone: BrandTone {
+        if anotherAccount { return .neutral }
+        return switch location.syncStatus {
+        case .uploaded: .success
+        case .failed: .error
+        case .uploading, .pending: .info
+        case .localOnly: .neutral
+        }
+    }
     var body: some View {
         if location.status == .complete {
-            VStack(alignment: .leading, spacing: 4) {
-                HStack {
-                    Label(title, systemImage: symbol)
-                        .foregroundStyle(location.syncStatus == .uploaded ? Color.green : location.syncStatus == .failed ? Color.orange : Color.secondary)
-                    if !compact && !anotherAccount {
-                        if location.syncStatus == .localOnly {
-                            Button(.syncUpload) { retry() }
-                        } else if location.syncStatus == .failed || (location.syncStatus == .pending && location.lastUploadError != nil) {
-                            Button(.syncRetry) { retry() }
+            if compact {
+                StatusBadge(title, tone: tone, systemImage: symbol)
+            } else {
+                VStack(alignment: .leading, spacing: Spacing.s) {
+                    HStack(spacing: Spacing.m) {
+                        StatusBadge(title, tone: tone, systemImage: symbol)
+                        if !anotherAccount {
+                            if location.syncStatus == .localOnly {
+                                Button(.syncUpload) { retry() }.font(AppFont.subheadline.weight(.semibold)).frame(minHeight: 44)
+                            } else if location.syncStatus == .failed || (location.syncStatus == .pending && location.lastUploadError != nil) {
+                                Button(.syncRetry) { retry() }.font(AppFont.subheadline.weight(.semibold)).frame(minHeight: 44)
+                            }
                         }
                     }
+                    if !anotherAccount, let error = location.lastUploadError {
+                        Text(.syncError(message: error))
+                            .font(AppFont.footnote)
+                            .foregroundStyle(Color.brandTextSecondary)
+                    }
                 }
-                if !compact, !anotherAccount, let error = location.lastUploadError { Text(.syncError(message: error)).foregroundStyle(.secondary) }
             }
-            .font(.caption)
         }
     }
     private func retry() { if let id = location.id { Task { await queue?.retry(locationID: id) } } }

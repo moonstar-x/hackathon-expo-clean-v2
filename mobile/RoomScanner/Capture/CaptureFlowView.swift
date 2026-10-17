@@ -66,8 +66,9 @@ struct CaptureFlowView: View {
 
             if model.phase == .processing {
                 ProgressView(.captureProcessingRoom)
-                    .padding()
-                    .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+                    .tint(Color.brandAccent)
+                    .padding(Spacing.l)
+                    .background(.regularMaterial, in: RoundedRectangle(cornerRadius: Radius.surface, style: .continuous))
             }
 
             if model.phase == .waitingForNextRoom {
@@ -117,24 +118,26 @@ struct CaptureFlowView: View {
     }
 
     private var nextRoomInterstitial: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: Spacing.l) {
             Image(systemName: "figure.walk.motion")
                 .font(.largeTitle)
+                .foregroundStyle(Color.brandAccent)
+                .frame(width: 72, height: 72)
+                .background(Color.brandAccentSoft, in: Circle())
                 .accessibilityHidden(true)
             Text(.captureNextRoomInstructions)
-                .font(.headline)
+                .font(AppFont.headline)
+                .foregroundStyle(Color.brandTextPrimary)
                 .multilineTextAlignment(.center)
             Button(action: model.startNextRoom) {
                 Text(.captureNextRoomStart)
-                    .font(.headline)
-                    .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
+            .buttonStyle(.brandPrimary)
         }
-        .padding(24)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 20))
-        .padding(32)
+        .padding(Spacing.xl)
+        .background(Color.brandSurface, in: RoundedRectangle(cornerRadius: Radius.dialog, style: .continuous))
+        .dialogShadow()
+        .padding(Spacing.xxl)
     }
 
     // MARK: Sheets

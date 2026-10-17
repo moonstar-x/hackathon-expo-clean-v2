@@ -14,7 +14,7 @@ struct ModelTab: View {
                      accessibilityLabel: accessibilityLabel)
             .ignoresSafeArea(edges: .bottom)
             .overlay(alignment: .bottom) {
-                HStack(spacing: 12) {
+                HStack(spacing: Spacing.m) {
                     Button {
                         resetToken += 1
                     } label: {
@@ -26,12 +26,16 @@ struct ModelTab: View {
                     }
                     .toggleStyle(.button)
                 }
+                .font(AppFont.subheadline.weight(.medium))
+                .tint(Color.brandAccent)
                 .fixedSize()
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
+                .padding(.horizontal, Spacing.l)
+                .padding(.vertical, Spacing.s)
                 .frame(minHeight: 44)
-                .background(.regularMaterial, in: Capsule())
-                .padding(.bottom, 16)
+                .background(Color.brandSurface, in: Capsule())
+                .overlay(Capsule().stroke(Color.brandDivider, lineWidth: 1))
+                .popoverShadow()
+                .padding(.bottom, Spacing.l)
             }
     }
 

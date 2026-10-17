@@ -64,9 +64,12 @@ struct SettingsView: View {
                 Section(.settingsAbout) {
                     LabeledContent(String(localized: .settingsVersion), value: versionText)
                     Text(.settingsStoredOnDevice)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.brandTextSecondary)
                 }
             }
+            .scrollContentBackground(.hidden)
+            .background(Color.brandBackground.ignoresSafeArea())
+            .tint(Color.brandAccent)
             .onAppear { serverURL = session?.configurationValue ?? "" }
             .confirmationDialog(String(localized: .settingsLogoutConfirm), isPresented: $confirmLogout, titleVisibility: .visible) {
                 Button(.settingsLogout, role: .destructive) { session?.logout(); dismiss() }

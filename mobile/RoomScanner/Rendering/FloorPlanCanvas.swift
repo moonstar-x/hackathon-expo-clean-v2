@@ -83,7 +83,18 @@ struct FloorPlanCanvas: View {
 
 /// The drawing code behind `FloorPlanCanvas`, separated so the Canvas closure only captures values.
 struct FloorPlanRenderer {
-    static let roomPalette: [Color] = [.blue, .green, .orange, .purple, .pink, .teal, .yellow, .mint]
+    /// Room tints, derived from the CleanCode palette so the plan reads as part of the brand. Used
+    /// as subtle fills (≈15% opacity); the selected/live room uses the accent.
+    static let roomPalette: [Color] = [
+        Color(hex: "4F46E5"), // indigo
+        Color(hex: "0EA5E9"), // sky
+        Color(hex: "14B8A6"), // teal
+        Color(hex: "8B5CF6"), // violet
+        Color(hex: "6366F1"), // indigo light
+        Color(hex: "06B6D4"), // cyan
+        Color(hex: "F59E0B"), // amber
+        Color(hex: "EC4899"), // pink
+    ]
     static let wallThickness: Float = 0.12
     static let minimumWallWidth: CGFloat = 3
     static let minimumLabeledWallLength: Float = 0.5
@@ -134,7 +145,7 @@ struct FloorPlanRenderer {
             let path = Self.polygonPath(room.floorPolygon, layout: layout)
             let isAccent = room.id == selection || room.id == highlightedRoomID
             let color = isAccent
-                ? Color.accentColor.opacity(0.3)
+                ? Color.brandAccent.opacity(0.3)
                 : Self.roomPalette[index % Self.roomPalette.count].opacity(0.15)
             context.fill(path, with: .color(color))
         }
@@ -197,7 +208,7 @@ struct FloorPlanRenderer {
                     path.move(to: a + normal * (offset * sign))
                     path.addLine(to: b + normal * (offset * sign))
                 }
-                context.stroke(path, with: .color(.blue), lineWidth: 1)
+                context.stroke(path, with: .color(Color(hex: "0EA5E9")), lineWidth: 1)
             case .opening:
                 var path = Path()
                 path.move(to: a)

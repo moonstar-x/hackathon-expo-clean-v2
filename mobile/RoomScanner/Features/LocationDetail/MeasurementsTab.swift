@@ -27,6 +27,9 @@ struct MeasurementsTab: View {
             }
         }
         .listStyle(.insetGrouped)
+        .scrollContentBackground(.hidden)
+        .background(Color.brandBackground.ignoresSafeArea())
+        .tint(Color.brandAccent)
         .alert(Text(.measurementsRenameRoom),
                isPresented: Binding(get: { renamingRoom != nil }, set: { if !$0 { renamingRoom = nil } }),
                presenting: renamingRoom) { target in
@@ -49,7 +52,7 @@ struct MeasurementsTab: View {
             LabeledContent(String(localized: .quoteSchedule), value: location?.quoteScheduleCode ?? String(localized: .quoteServerDefault))
             LabeledContent(String(localized: .quoteDays), value: (location?.quoteDaysPerMonth ?? 0) == 0 ? String(localized: .quoteDefault) : "\(location?.quoteDaysPerMonth ?? 0)")
             LabeledContent(String(localized: .quoteUsualTraffic), value: location?.quoteTrafficRaw.flatMap(QuoteTraffic.init(rawValue:))?.displayName ?? String(localized: .quoteDefault))
-            Text(.quoteSavedHelp).font(.caption).foregroundStyle(.secondary)
+            Text(.quoteSavedHelp).font(AppFont.caption).foregroundStyle(Color.brandTextSecondary)
         }
     }
 

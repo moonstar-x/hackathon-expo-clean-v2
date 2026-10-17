@@ -25,34 +25,42 @@ struct ScanTipsView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
+                VStack(alignment: .leading, spacing: Spacing.xl) {
                     Text(.scanTipsTitle)
-                        .font(.largeTitle.bold())
-                    ForEach(tips) { tip in
-                        HStack(alignment: .top, spacing: 16) {
-                            Image(systemName: tip.symbol)
-                                .font(.title2)
-                                .foregroundStyle(.tint)
-                                .frame(width: 36)
-                                .accessibilityHidden(true)
-                            Text(AttributedString(localized: tip.text))
-                                .fixedSize(horizontal: false, vertical: true)
+                        .font(AppFont.display)
+                        .brandHeadingTracking()
+                        .foregroundStyle(Color.brandTextPrimary)
+                    VStack(alignment: .leading, spacing: Spacing.l) {
+                        ForEach(tips) { tip in
+                            HStack(alignment: .top, spacing: Spacing.l) {
+                                Image(systemName: tip.symbol)
+                                    .font(.title3.weight(.semibold))
+                                    .foregroundStyle(Color.brandAccent)
+                                    .frame(width: 44, height: 44)
+                                    .background(Color.brandAccentSoft, in: RoundedRectangle(cornerRadius: Radius.control, style: .continuous))
+                                    .accessibilityHidden(true)
+                                Text(AttributedString(localized: tip.text))
+                                    .font(AppFont.body)
+                                    .foregroundStyle(Color.brandTextPrimary)
+                                    .brandBodyLineSpacing()
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
                         }
                     }
                 }
-                .padding()
+                .padding(Spacing.xl)
             }
+            .background(Color.brandBackground.ignoresSafeArea())
             .safeAreaInset(edge: .bottom) {
                 Button(action: onStart) {
                     Text(mode == .firstRun ? .scanTipsStartScanning : .commonDone)
-                        .font(.headline)
-                        .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
-                .padding()
+                .buttonStyle(.brandPrimary)
+                .padding(Spacing.l)
                 .background(.bar)
             }
+            .tint(Color.brandAccent)
             .toolbar {
                 if let onCancel {
                     ToolbarItem(placement: .cancellationAction) {

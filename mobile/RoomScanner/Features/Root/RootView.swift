@@ -9,11 +9,11 @@ struct RootView: View {
     var body: some View {
         Group {
             if session.configuration == nil {
-                ContentUnavailableView {
-                    Label(.configurationMissing, systemImage: "network.slash")
-                } description: {
-                    Text(.configurationInvalid(value: session.configurationValue))
-                }
+                EmptyStateView(systemImage: "network.slash",
+                               title: .configurationMissing,
+                               message: .configurationInvalid(value: session.configurationValue))
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color.brandBackground.ignoresSafeArea())
             } else if session.session != nil || session.isCapturing {
                 HomeView()
             } else {

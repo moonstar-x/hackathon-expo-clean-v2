@@ -33,34 +33,34 @@ struct SaveLocationSheet: View {
                 if case .failed(let message) = state {
                     Section {
                         Label(message, systemImage: "exclamationmark.triangle.fill")
-                            .foregroundStyle(.orange)
+                            .foregroundStyle(Color.brandError)
                         Button(.commonRetry, action: onRetry)
                     } header: {
                         Text(.commonSaveFailedTitle)
                     }
                 }
             }
+            .scrollContentBackground(.hidden)
+            .background(Color.brandBackground.ignoresSafeArea())
+            .tint(Color.brandAccent)
             .navigationTitle(.saveLocationTitle)
             .navigationBarTitleDisplayMode(.inline)
             .safeAreaInset(edge: .bottom) {
                 Button(action: onSave) {
                     Group {
                         if state == .running {
-                            HStack(spacing: 8) {
-                                ProgressView()
+                            HStack(spacing: Spacing.s) {
+                                ProgressView().tint(Brand.white)
                                 Text(.commonBuildingFloorPlan)
                             }
                         } else {
                             Text(.commonSave)
                         }
                     }
-                    .font(.headline)
-                    .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
+                .buttonStyle(.brandPrimary)
                 .disabled(state != .finished)
-                .padding()
+                .padding(Spacing.l)
                 .background(.bar)
             }
         }
@@ -88,7 +88,7 @@ struct SaveLocationSheet: View {
                     Text(traffic.displayName).tag(Optional(traffic.rawValue))
                 }
             }
-            Text(.quoteSavedHelp).font(.caption).foregroundStyle(.secondary)
+            Text(.quoteSavedHelp).font(AppFont.caption).foregroundStyle(Color.brandTextSecondary)
         }
     }
 }
