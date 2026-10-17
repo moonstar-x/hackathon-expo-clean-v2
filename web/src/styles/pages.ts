@@ -1,11 +1,16 @@
 // Styles of the create, edit and detail pages: a column of cards under the PageHeader.
 import type { SxProps, Theme } from '@mui/material/styles';
+import { FILTER_CONTROL_HEIGHT } from '../constants/components';
 import type { FigureSize } from '../types/components';
 
-/** A form section's grid: its inputs' own margins dropped, so a row's inputs line up top to top. */
+/**
+ * A form section's grid: its inputs' own margins dropped, so a row's inputs line up top to top, and
+ * a switch's line as tall as an input, so it sits level with the inputs beside it.
+ */
 export const sectionGridSx: SxProps<Theme> = {
   alignItems: 'flex-start',
   '& .MuiFormControl-root': { mt: 0, mb: 0 },
+  '& .MuiFormGroup-root > .MuiFormControlLabel-root': { minHeight: FILTER_CONTROL_HEIGHT },
 };
 
 /** Key figures: as many columns as fit, each a label over its value; no boxes, no rules. */

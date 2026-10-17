@@ -21,13 +21,22 @@ import {
 import { APP_LOCALE } from '../../constants/app';
 import { emptyActionsSx, emptyBodySx, emptyIconSx, emptyStateSx, emptyStepsSx } from '../../styles/list';
 import type { EmptyStateProps } from '../../types/list';
+import { sameValues } from '../../utils/objects';
 
 /**
  * What a list shows when it has nothing to show, used as every List's, DataTable's and SimpleList's
  * `empty`. With filters set it says nothing matches and offers to clear them; otherwise it says what
  * goes in the list (`app.empty.<resource>`), with the resource's icon and a way to add the first one.
  */
-const EmptyState = ({ variant = 'inline', resource: resourceProp, action, steps, icon, messages }: EmptyStateProps): ReactElement => {
+const EmptyState = ({
+  variant = 'inline',
+  resource: resourceProp,
+  action,
+  steps,
+  icon,
+  messages,
+  defaultFilters,
+}: EmptyStateProps): ReactElement => {
   const translate: TranslateFunction = useTranslate();
   const resource: string | undefined = useResourceContext({ resource: resourceProp });
   const definition: ResourceDefinition = useResourceDefinition({ resource });
@@ -39,15 +48,20 @@ const EmptyState = ({ variant = 'inline', resource: resourceProp, action, steps,
   const getResourceLabel: (resource: string, count?: number) => string = useGetResourceLabel();
   const createPath: ReturnType<typeof useCreatePath> = useCreatePath();
 
-  const filtered: boolean = setFilters !== undefined && Object.keys(filterValues).length > 0;
+  // Only the list's own defaults set (Productos' "active") still counts as nothing filtered.
+  const filtered: boolean =
+    setFilters !== undefined &&
+    Object.keys(filterValues).length > 0 &&
+    !(defaultFilters && sameValues(filterValues, defaultFilters));
   const key: string = filtered ? 'app.empty.filtered' : (messages ?? `app.empty.${resource ?? 'default'}`);
+  const body: string = translate(`${key}.body`, { _: '' });
   // react-admin types a resource's icon as `any`; App.tsx registers an icon component for each.
   const resourceIcon: ComponentType | undefined = definition.icon as ComponentType | undefined;
   const Icon: ComponentType = filtered ? SearchOffIcon : (icon ?? resourceIcon ?? InboxOutlinedIcon);
 
   const clearFilters: ReactNode =
     filtered && setFilters ? (
-      <Button variant="outlined" onClick={(): void => setFilters({}, {})}>
+      <Button variant="outlined" onClick={(): void => setFilters(defaultFilters ?? {}, {})}>
         {translate('ra.navigation.clear_filters')}
       </Button>
     ) : null;
@@ -73,9 +87,11 @@ const EmptyState = ({ variant = 'inline', resource: resourceProp, action, steps,
       >
         {translate(`${key}.title`)}
       </Typography>
-      <Typography variant="body2" sx={emptyBodySx}>
-        {translate(`${key}.body`)}
-      </Typography>
+      {body ? (
+        <Typography variant="body2" sx={emptyBodySx}>
+          {body}
+        </Typography>
+      ) : null}
       {steps && !filtered ? (
         <Box component="ol" sx={emptyStepsSx}>
           {steps.map(

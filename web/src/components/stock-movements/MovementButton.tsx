@@ -19,7 +19,8 @@ const MovementButton = ({ productId, type, label, variant }: MovementButtonProps
     <Button
       component={Link}
       to={createPath({ resource: 'stock-movements', type: 'create' })}
-      state={{ record: { productId, type } }}
+      // As CreateButton does: the form opens at its top even from a scrolled page.
+      state={{ _scrollToTop: true, record: { productId, type } }}
       variant={variant}
       startIcon={<Icon />}
     >

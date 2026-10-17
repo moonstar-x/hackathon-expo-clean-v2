@@ -646,15 +646,19 @@ const buildComponents = (mode: Mode): Components<Omit<Theme, 'components'>> => {
         },
       },
     },
+    // Only the root slot of a filter input is styled by react-admin, so its parts go through it.
     RaFilterFormInput: {
       styleOverrides: {
-        root: { alignItems: 'center', '& .RaFilterFormInput-spacer': { display: 'none' } },
-        // The "remove filter" button: quiet until pointed at.
-        hideButton: ({ theme }: StyleArgs) => ({
-          marginBottom: 0,
-          marginLeft: 2,
-          color: theme.palette.text.disabled,
-          '&:hover': { color: theme.palette.error.main, backgroundColor: alpha(theme.palette.error.main, 0.08) },
+        root: ({ theme }: StyleArgs) => ({
+          alignItems: 'center',
+          '& .RaFilterFormInput-spacer': { display: 'none' },
+          // The "remove filter" button: quiet until pointed at.
+          '& .RaFilterFormInput-hideButton': {
+            marginBottom: 0,
+            marginLeft: 2,
+            color: theme.palette.text.disabled,
+            '&:hover': { color: theme.palette.error.main, backgroundColor: alpha(theme.palette.error.main, 0.08) },
+          },
         }),
       },
     },
@@ -705,9 +709,10 @@ const buildComponents = (mode: Mode): Components<Omit<Theme, 'components'>> => {
           // An expanded panel lays itself out from the card edge.
           '& .RaDataTable-expandRow > td': { paddingLeft: 0, paddingRight: 0 },
           ...tableWrapperScroll,
-          // The scroller clips the rows (hover tints, the expand toggle) to the card's rounded top;
-          // the card itself stays unclipped so the bulk-actions bar can rise out of it.
-          '& .RaDataTable-tableWrapper': { borderTopLeftRadius: 14, borderTopRightRadius: 14 },
+          // The scroller clips the rows (hover and low-stock tints, the expand toggle) to the card's
+          // rounded corners, inside its 1px border; the card itself stays unclipped so the
+          // bulk-actions bar can rise out of it. Pagination sits outside the card.
+          '& .RaDataTable-tableWrapper': { borderRadius: 13 },
         }),
       },
     },

@@ -57,6 +57,11 @@ export interface EmptyStateProps {
   icon?: SvgIconComponent;
   /** Translation key prefix replacing `app.empty.<resource>`, for an empty state of its own. */
   messages?: string;
+  /**
+   * The list's own default filters (Productos shows active ones): with only these set the list
+   * counts as unfiltered, and clearing the filters goes back to them.
+   */
+  defaultFilters?: Record<string, unknown>;
 }
 
 export interface ListTotalProps {
