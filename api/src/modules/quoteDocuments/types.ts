@@ -3,7 +3,7 @@ export interface Area  { value: number; text: string }            // text "248,0
 
 export interface QuoteDocument {
   metadata: { subject: string; issueInstant: string };
-  templateVersion: 1;
+  templateVersion: 2;
   number: string;                                          // "COT-00007"
   revision: number;                                        // ≥ 1
   title: string;                                           // "COTIZACIÓN"
@@ -12,6 +12,8 @@ export interface QuoteDocument {
   validUntil: string; validUntilText: string;
   validityDays: number;
   paperSize: 'A4' | 'LETTER';
+  logo: { sha256: string; contentType: 'image/png' | 'image/jpeg'; width: number; height: number } | null;  // the company's; renderers get its bytes apart
+  colors: { accent: string; onAccent: string; ink: string; tint: string };  // "#RRGGBB", from the company's color (colors.ts)
   issuer: { tradeName: string; lines: string[] };          // §3.3, already joined, empty lines removed
   client: { legalName: string; lines: string[] };
   service: { lines: string[]; totalFloorArea: Area; zoneCount: number };

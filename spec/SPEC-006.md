@@ -7,6 +7,7 @@
 | **Builds on** | [SPEC-002](SPEC-002.md) (API and admin UI), [SPEC-003](SPEC-003.md) (user accounts), [SPEC-005](SPEC-005.md) (quote engine) |
 | **Supersedes** | Nothing. SPEC-005 §15 listed "Exporting a quote to PDF or XLSX" as future work; this spec delivers it. SPEC-005's `PUT /api/quotes/:id` is unchanged: the document data has its own route (§9.2), so editing it never triggers a recalculation. |
 | **Deliverables** | `api/`: issuer and template settings, per-quote client and document data, a document builder, a PDF renderer, an XLSX renderer, an export log, `/api/quotes/:id/document*` · `web/`: the **Documento** page (PDF and Excel preview, download, document data form), the **Empresa y plantilla** settings screen |
+| **Superseded in part by** | [SPEC-007](SPEC-007.md): the company's own logo and color replace the bundled CleanCode logo and indigo (§2, §3.1, §7.1, §8), the issuer's acceptance box (§3.6), the signer labels (§4), and the settings screen and its menu entry (§6, §10.1, §10.5) |
 
 The keywords **MUST**, **MUST NOT**, **SHOULD** and **MAY** are used as in RFC 2119.
 

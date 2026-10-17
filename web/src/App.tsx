@@ -1,6 +1,7 @@
 import { useMemo, type ReactElement } from 'react';
 import { Admin, CustomRoutes, Resource, type AuthProvider, type ResourceProps } from 'react-admin';
-import { Route } from 'react-router-dom';
+import { Navigate, Route } from 'react-router-dom';
+import AuthenticatedRoute from './components/AuthenticatedRoute';
 import Dashboard from './components/dashboard/Dashboard';
 import LoginPage from './components/login/LoginPage';
 import { i18nProvider } from './i18n';
@@ -10,8 +11,10 @@ import { createDataProvider } from './providers/dataProvider';
 import categories from './resources/categories';
 import measurements from './resources/measurements';
 import products from './resources/products';
+import CompanySettings from './quoteDocuments/CompanySettings';
 import { QuoteDocumentRoute } from './quoteDocuments/QuoteDocumentRoute';
-import { quoteCatalogs, quoteDocumentSettings, quoteParameters } from './resources/quote-settings';
+import TemplateSettings from './quoteDocuments/TemplateSettings';
+import { quoteCatalogs, quoteParameters } from './resources/quote-settings';
 import quotes from './resources/quotes';
 import stockMovements from './resources/stock-movements';
 import suppliers from './resources/suppliers';
@@ -56,9 +59,14 @@ const App = ({ config }: AppProps): ReactElement => {
           <Resource key={name} name={name} {...resource} />
         ),
       )}
-      <Resource name="quote-document-settings" {...quoteDocumentSettings} />
       <CustomRoutes>
         <Route path="/quotes/:id/document" element={<QuoteDocumentRoute />} />
+        {/* The quote documents' settings (one record) as two pages under Administración. */}
+        <Route path="/template" element={<AuthenticatedRoute><TemplateSettings /></AuthenticatedRoute>} />
+        <Route path="/company" element={<AuthenticatedRoute><CompanySettings /></AuthenticatedRoute>} />
+        {/* Their former single page, for old links and bookmarks. Exactly this path: a wider one would
+            also catch react-admin's own redirects to the resource's list. */}
+        <Route path="/quote-document-settings/1" element={<Navigate to="/company" replace />} />
       </CustomRoutes>
       <Resource name="users" {...users} />
     </Admin>

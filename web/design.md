@@ -35,7 +35,7 @@ Contrast: navy on white 17.9:1, indigo on white 6.3:1, sky on navy 8.3:1, indigo
 
 These live in `BRAND` (`src/constants/brand.ts`). **No hex value is written anywhere else**: components read the theme palette, and only brand-fixed surfaces (the sign-in page, which is navy in both modes) read `BRAND`.
 
-The one exception is the 3D view of a measurement: its walls, doors, windows, furniture and room tints match the iPhone app's SceneKit scene, not this theme, so a model looks the same on the phone and here. They live in `SCENE_COLORS` and `ROOM_TINTS` (`src/constants/measurements.ts`), with the room legend that names each tint.
+The quote document's palette is another: `constants/quoteDocuments.ts` and `utils/documentColors.ts` derive the document's colors from the company's main color exactly as the API draws the PDF and the workbook, so the Empresa preview matches the files. The other exception is the 3D view of a measurement: its walls, doors, windows, furniture and room tints match the iPhone app's SceneKit scene, not this theme, so a model looks the same on the phone and here. They live in `SCENE_COLORS` and `ROOM_TINTS` (`src/constants/measurements.ts`), with the room legend that names each tint.
 
 ### Logo rules
 
@@ -74,7 +74,7 @@ Where a prop is typed without the theme (DataTable's and SimpleList's `rowSx`), 
 - Headings are bold and slightly tight (`h1`–`h3` 700, `h4`–`h6` 600, negative letter spacing); body text has 1.55 line height; buttons are 600 and never uppercase.
 - The page title is `PageHeader`'s `<h1>` (24 px on phones, 27 px up). Card titles are `h6`.
 - Numbers that change in place (the clock) and columns of numbers (table cells, the dashboard's changes) get fixed-width digits: `fontVariantNumeric: 'tabular-nums'`, or `FixedDigits` for Poppins, which has no tabular figures. A big standalone figure (a stat card's value, the stock on hand) keeps proportional figures, which read tighter at that size.
-- Labels of figures and fields are 13 px, weight 500, `text.secondary`, sentence case: no uppercase micro-labels.
+- Labels of figures and fields are 13 px, weight 500, `text.secondary`, sentence case: no uppercase micro-labels. The menu's section names are the one smaller label: 12 px, weight 600, under a hairline.
 
 ### Shape and depth
 
@@ -96,7 +96,7 @@ Surfaces are flat: cards have a hairline divider border and a near-invisible sha
 - **Filter bars** put every control on one line at `FILTER_CONTROL_HEIGHT` (50 px): the search box (magnifier first, wide enough for its placeholder), labeled selects and inputs, and yes-only filters as `ToggleFilter` pills. The "remove filter" button stays quiet until pointed at.
 - **Chips** keep MUI's label color: the theme no longer forces `text.primary`, which put navy text on filled orange and green chips. Status is shown with `OutlinedBadge` anyway.
 - **Switches** are compact pills in the primary color. In a form `Section`, a switch's line is as tall as an input so it sits level with the inputs beside it.
-- **Menu** items show a muted icon, and the active one is primary. A section label (`SectionLabel`) groups them.
+- **Menu**: the sidebar is 256 px open, wide enough that no name is cut, and react-admin's 50 px strip of icons collapsed. Items are 14 px, weight 500, in full ink beside a muted icon; rows are 36 px from `sm` up and keep MUI's 48 px touch targets on phones. The current page is primary on a 12 % tinted pill (18 % on hover or focus), and keyboard focus is a 2 px inset accent ring. A group starts with `SectionLabel`: a hairline, then the group's name in sentence case on one line. The label is a fixed 40 px block that stays mounted when the sidebar collapses: the name fades out (and back in, 100 ms after the drawer starts opening), the hairline stays under the icons, and nothing below it moves.
 - **Links** are underlined on hover only, so tables full of references stay calm. This one was added for this app.
 - **Focus**: buttons and icon buttons show a 3 px accent ring on keyboard focus; the skip link ("Ir al contenido") appears on the first Tab.
 - `MuiUseMediaQuery` reads the viewport on the first render (`noSsr`). `ResponsiveSwitch` depends on it, so only one of its views ever renders and fetches.
@@ -112,10 +112,9 @@ MUI's defaults: `sm` 600, `md` 900, `lg` 1200.
 
 ```
 AppBar  logo · page title (marquee on phones) · clock, theme, refresh · user menu
-Menu    Inicio, Mediciones, Cotizaciones | INVENTARIO Productos, Movimientos | CATÁLOGO Categorías, Proveedores
-        | CONFIGURACIÓN DE COTIZACIÓN Parámetros, Empresa y plantilla, Tipos de zona, Horarios, Productos de cotización,
-        Equivalencias
-        | ADMINISTRACIÓN Usuarios
+Menu    Inicio, Mediciones, Cotizaciones | Inventario: Productos, Movimientos | Catálogo: Categorías, Proveedores
+        | Configuración de cotización: Parámetros, Tipos de zona, Horarios, Productos de cotización,
+        Equivalencias de tipos | Administración: Usuarios, Plantilla, Empresa
 Page    PageHeader: eyebrow over an h1, optional badge, actions row
         content: a list, a grid of section cards, or a form card, always the page's full width
 ```
@@ -141,6 +140,7 @@ Page    PageHeader: eyebrow over an h1, optional badge, actions row
   - The plan and the model each get a framed stage with their actions above it. The plan sits on white paper in both themes, because the phone draws it for white; the thumbnails are the same paper, small.
   - `<TabbedShowLayout.Tab>` labels each child through `<Labeled>`, so each tab's content goes in `TabContent label={false}`, and `measurementTabsSx` lets it fill the tab.
 - **A quote's Documento** (SPEC-006, `/quotes/:id/document`, a custom route) follows the detail-page anatomy without `<Show>`: the header's eyebrow links back to the quote, its title is the document number and revision ("Nueva revisión" as a blue badge once it changed since the last download), and its actions are the two downloads. Below, "Datos del documento" (the client and the document, in `Section`s, Save at its foot) sits beside the preview (`lg` 4 + 8), whose card holds the warnings, or what is missing with a link to fix each, before the PDF and Excel tabs; the download history closes the page. The list's Documento column and the quote header open it (`DocumentButton`).
+- **Empresa and Plantilla** (SPEC-007) are one settings record edited from two custom routes under Administración, `/company` and `/template` (`DocumentSettingsEdit`): each page's form sends only its own fields, so two open tabs never revert each other, and an API error keeps the user on the page. Empresa ends with **Logo y colores**: a live miniature of the quote's header (logo or trade name, title, a table band and a tinted row) on white paper in both themes, drawn in the colors being edited, beside the logo buttons and the main color (`ColorInput`: the browser's picker as a swatch, the hex code, Restablecer, and up to five colors taken from the logo). The logo saves on upload; the color is a form field, saved with Guardar.
 - **Forms**: `<Create>` / `<Edit>` with `actions={<CreateHeader />}` / `actions={<EditHeader />}` and `sx={formPageSx}`: the card spans the page, and on desktop the toolbar stays at the bottom of the screen while a long form scrolls.
   - Inside is a `SimpleForm` with `toolbar={<FormToolbar withDelete />}`: Save on the left, a pessimistic Delete that asks first on the right. When saving needs a word, it goes beside Save as the toolbar's `note`, once (the quoting parameters and catalogs: existing quotes don't change until recalculated).
   - Fields go in titled `Section`s (with a one-line `hint`) and a `SectionDivider` between them, each field a `<Grid size={{ xs: 12, md: … }}>` cell sized by what it holds (codes and numbers 4, names 6 to 8, long text 12) with its input `fullWidth`. The section's grid drops the inputs' own margins so a row lines up.

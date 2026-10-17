@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { allocateCents, buildQuoteDocument, documentHash, readiness } from '../src/modules/quoteDocuments/builder.ts';
+import { contrast, documentColors } from '../src/modules/quoteDocuments/colors.ts';
 import { numberToSpanishWords } from '../src/modules/quoteDocuments/words.ts';
 import { documentFixture } from './documentFixture.ts';
 describe('resolved commercial document', () => {
@@ -44,6 +45,23 @@ describe('resolved commercial document', () => {
     input.data.clientContactName = 'Otro contacto'; expect(documentHash(buildQuoteDocument(input))).not.toBe(documentHash(d));
     const walk = (v: unknown) => { if (typeof v === 'string') expect(['', '—', 'null']).not.toContain(v); else if (v && typeof v === 'object') Object.values(v).forEach(walk); }; walk(d);
     expect(JSON.stringify(d)).not.toMatch(/totalCost|profit|margin|createdBy|snapshot|purchasePlan/);
+  });
+  it('signs for the legal entity with only the representative data that was given', () => {
+    const input = documentFixture(); expect(buildQuoteDocument(input).acceptance.issuer).toEqual(['Empresa de prueba S.A.']);
+    input.settings.signerName = 'Ana Ejemplo'; expect(buildQuoteDocument(input).acceptance.issuer).toEqual(['Ana Ejemplo', 'Empresa de prueba S.A.']);
+    input.settings.signerTitle = 'Gerente general'; expect(buildQuoteDocument(input).acceptance.issuer).toEqual(['Ana Ejemplo', 'Gerente general', 'Empresa de prueba S.A.']);
+  });
+  it('carries the logo and the company color in the hashed model', () => {
+    const input = documentFixture(), d = buildQuoteDocument(input);
+    expect(d.templateVersion).toBe(2); expect(d.logo).toEqual({ sha256: input.logo!.sha256, contentType: 'image/png', width: 800, height: 151 }); expect(d.colors).toEqual(documentColors('#4F46E5'));
+    expect(documentHash(buildQuoteDocument({ ...input, logo: null }))).not.toBe(documentHash(d));
+    expect(documentHash(buildQuoteDocument({ ...input, settings: { ...input.settings, brandColor: '#16A34A' } }))).not.toBe(documentHash(d));
+  });
+  it.each([
+    ['#4F46E5', '#4F46E5', '#FFFFFF', '#4F46E5', '#EDEDFC'], ['#facc15', '#FACC15', '#0F172A', '#857220', '#FFFAE8'], ['#000000', '#000000', '#FFFFFF', '#000000', '#E6E6E6'],
+    ['#FFFFFF', '#FFFFFF', '#0F172A', '#6F747F', '#FFFFFF'], ['#16A34A', '#16A34A', '#0F172A', '#158744', '#E8F6ED'], ['#38BDF8', '#38BDF8', '#0F172A', '#287BA6', '#EBF8FE'],
+  ])('derives readable document colors from %s', (color, accent, onAccent, ink, tint) => {
+    expect(documentColors(color)).toEqual({ accent, onAccent, ink, tint }); expect(contrast(ink, '#FFFFFF')).toBeGreaterThanOrEqual(4.5);
   });
   it('lists all blockers and treats parameter changes as a warning', () => {
     const input = documentFixture(); input.quote.calculation.isStale = true;

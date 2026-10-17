@@ -123,9 +123,9 @@ Quote contracts live in `src/types/quotes.ts`; Spanish labels, enum names, cause
 
 ## Documentos de cotización (SPEC-006)
 
-The **Documento** action on the quote header and list opens `/quotes/:id/document` in every calculation state. The page lists all missing inputs with fix links, edits client/document data independently of the calculation, and shows saved-data PDF or Excel previews. Unsaved changes show **Cambios sin guardar**. **Empresa y plantilla**, under Configuración de cotización, edits the singleton company, signature, numbering and commercial-text settings.
+The **Documento** action on the quote header and list opens `/quotes/:id/document` in every calculation state. The page lists all missing inputs with fix links, edits client/document data independently of the calculation, and shows saved-data PDF or Excel previews. Unsaved changes show **Cambios sin guardar**. Under Administración, **Empresa** (`/company`) edits the company's logo and main color, its data and its legal representative, and **Plantilla** (`/template`) the numbering, validity, paper and commercial texts. Both edit the same singleton, each sending only its own fields; `/quote-document-settings/1` redirects to Empresa (SPEC-007).
 
-PDF uses a blob iframe and a browser-viewer fallback. ExcelJS is dynamically imported only for the Excel tab; the production build emits a separate `exceljs.min` chunk. The preview parses the API's workbook, including both sheets, merged ranges, cell styles, column widths, row heights and its embedded logo. Its four supported numeric/date formats are independently pinned by tests.
+PDF uses a blob iframe and a browser-viewer fallback. ExcelJS is dynamically imported only for the Excel tab; the production build emits a separate `exceljs.min` chunk. The preview parses the API's workbook, including both sheets, merged ranges, cell styles, column widths, row heights and the company's logo when it has one. Its four supported numeric/date formats are independently pinned by tests.
 
 Authenticated file queries include API URL, user id, quote id, format and content hash. A hash mismatch drops the bytes and refreshes state. Download registers the cached blob's hash first, then saves that same blob; changed or no-longer-ready documents are refreshed without saving. Export history and revisions update after downloads. Low-margin quotes ask for confirmation.
 
@@ -138,4 +138,4 @@ node scripts/document-fixture.ts
 
 ### Notes for SPEC-006
 
-All web P1 items are implemented. Optional P2 canvas PDF viewing and old-revision download are not included. The mandated ExcelJS dependency emits upstream package-deprecation notices during installation; a scoped UUID v11 override resolves its known buffer-bounds advisory. The company editor intentionally has only a Save action because its singleton cannot be deleted.
+All web P1 items are implemented. Optional P2 canvas PDF viewing and old-revision download are not included. The mandated ExcelJS dependency emits upstream package-deprecation notices during installation; a scoped UUID v11 override resolves its known buffer-bounds advisory. The Empresa and Plantilla editors intentionally have only a Save action because their singleton cannot be deleted; the logo saves on upload, outside the form.

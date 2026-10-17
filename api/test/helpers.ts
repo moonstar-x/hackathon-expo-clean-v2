@@ -1,3 +1,6 @@
+import { randomUUID } from 'node:crypto';
+import os from 'node:os';
+import path from 'node:path';
 import type Database from 'better-sqlite3';
 import type { Express } from 'express';
 import request from 'supertest';
@@ -31,11 +34,15 @@ export const testEnv = Object.freeze({
  */
 export const FAST_HASH = Object.freeze({ hashParams: Object.freeze({ N: 2 ** 10, r: 8, p: 1 }) });
 
-/** A fresh app on a migrated in-memory database, with the initial user from ADMIN_EMAIL / ADMIN_PASSWORD. */
+/**
+ * A fresh app on a migrated in-memory database, with the initial user from ADMIN_EMAIL / ADMIN_PASSWORD.
+ * Its files (FILES_PATH) go to a folder of its own under the system's temp folder, created only when
+ * something is written there.
+ */
 export async function makeApp(envOverrides: Record<string, string> = {}) {
   const db = openDatabase(':memory:');
   migrate(db);
-  const config = loadConfig({ ...testEnv, ...envOverrides });
+  const config = loadConfig({ ...testEnv, FILES_PATH: path.join(os.tmpdir(), 'cleaning-api-tests', randomUUID()), ...envOverrides });
   await ensureInitialUser(db, config, FAST_HASH);
   const app = createApp({ db, config });
   return { app, db, config };

@@ -46,7 +46,7 @@ function Sheet({ sheet, book }: { sheet: ExcelJS.Worksheet; book: ExcelJS.Workbo
       const left: number = sheet.columns.slice(0, col).reduce((sum: number, c: Partial<ExcelJS.Column>): number => sum + pixels(c.width), 16);
       const top: number = rows.slice(0, row).reduce((sum: number, r: ExcelJS.Row): number => sum + (r.height ?? 15) * 4 / 3, 16);
       const extent: { width: number; height: number } = (range as ExcelJS.ImageRange & { ext?: { width: number; height: number } }).ext ?? { width: 208, height: 55 };
-      return <img key={placement.imageId} alt="Logo CleanCode" src={mediaUrl(book.getImage(Number(placement.imageId)))} style={{ position: 'absolute', left, top, width: extent.width, height: extent.height }} />;
+      return <img key={placement.imageId} alt="Logo de la empresa" src={mediaUrl(book.getImage(Number(placement.imageId)))} style={{ position: 'absolute', left, top, width: extent.width, height: extent.height }} />;
     })}
   </Box></Box>;
 }

@@ -46,7 +46,7 @@ function PdfPreview({ blob }: { blob: Blob }): ReactElement {
   return <iframe title="Vista previa PDF" src={objectUrl} style={{ width: '100%', minHeight: '70vh', border: 0 }} />;
 }
 function blockerLink(issue: DocumentIssue, id: number): string {
-  if (issue.code === 'ISSUER_FIELD_MISSING') return '/quote-document-settings/1';
+  if (issue.code === 'ISSUER_FIELD_MISSING') return '/company';
   if (issue.code === 'CLIENT_FIELD_MISSING' || issue.code === 'PAYMENT_TERMS_MISSING') return '#document-data';
   return `/quotes/${id}/${issue.code === 'PRICE_ZERO' ? '' : 'show'}`;
 }

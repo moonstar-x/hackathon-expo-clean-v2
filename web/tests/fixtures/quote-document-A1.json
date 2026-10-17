@@ -3,7 +3,7 @@
     "subject": "Clínica de prueba",
     "issueInstant": "2026-10-16T05:00:00.000Z"
   },
-  "templateVersion": 1,
+  "templateVersion": 2,
   "number": "COT-00007",
   "revision": 1,
   "title": "COTIZACIÓN",
@@ -14,6 +14,18 @@
   "validUntilText": "15/11/2026",
   "validityDays": 30,
   "paperSize": "A4",
+  "logo": {
+    "sha256": "6085ecee9cb76d9d585839ff66dd9d68fe5e573f9c7649baac117b85c61719f5",
+    "contentType": "image/png",
+    "width": 800,
+    "height": 151
+  },
+  "colors": {
+    "accent": "#4F46E5",
+    "onAccent": "#FFFFFF",
+    "ink": "#4F46E5",
+    "tint": "#EDEDFC"
+  },
   "issuer": {
     "tradeName": "CleanCode",
     "lines": [
@@ -221,7 +233,7 @@
   "clientNotes": null,
   "acceptance": {
     "issuer": [
-      "CleanCode"
+      "Empresa de prueba S.A."
     ],
     "client": [
       "Aceptado por: Hospital Ejemplo S.A.",

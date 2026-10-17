@@ -33,12 +33,14 @@ describe('document routes', () => {
   it('seeds no invented company facts, validates settings, and leaves engine revisions alone', async () => {
     ctx = await makeClient(); const { api, db } = ctx;
     let s = (await api.get('/api/quote-document-settings/1')).body;
-    expect(s).toMatchObject({ tradeName: 'CleanCode', legalName: null, taxId: null, paymentTerms: null, numberPrefix: 'COT' });
+    expect(s).toMatchObject({ tradeName: 'CleanCode', legalName: null, taxId: null, paymentTerms: null, numberPrefix: 'COT', brandColor: '#4F46E5' });
     const before = db.prepare('SELECT revision FROM quote_parameters').pluck().get();
-    for (const [field, value] of [['taxId', '12'], ['email', 'invalid'], ['website', 'ftp://test'], ['phone', 'abc'], ['numberPrefix', 'bad'], ['validityDays', 0], ['paperSize', 'A3']] as const) {
+    for (const [field, value] of [['taxId', '12'], ['email', 'invalid'], ['website', 'ftp://test'], ['phone', 'abc'], ['numberPrefix', 'bad'], ['validityDays', 0], ['paperSize', 'A3'], ['brandColor', 'red'], ['brandColor', '#12345'], ['brandColor', null]] as const) {
       const response = await api.put('/api/quote-document-settings/1', { [field]: value }); expect(response.status).toBe(422); expect(response.body.errors).toHaveProperty(field);
     }
     s = (await api.put('/api/quote-document-settings/1', { legalName: '   ' })).body; expect(s.legalName).toBeNull();
+    expect((await api.put('/api/quote-document-settings/1', { brandColor: 'red' })).body.errors.brandColor).toBe('Must be a hex color like #4F46E5');
+    s = (await api.put('/api/quote-document-settings/1', { brandColor: '#abcdef' })).body; expect(s.brandColor).toBe('#ABCDEF');
     expect(db.prepare('SELECT revision FROM quote_parameters').pluck().get()).toBe(before);
     expect((await api.get('/api/quote-document-settings/2')).status).toBe(404);
     seed(db, { createdBy: 'admin@example.com' }); const state = (await api.get('/api/quotes/1/document')).body;
@@ -64,8 +66,9 @@ describe('document routes', () => {
   });
   it('serves authenticated files with all headers without registering an export', async () => {
     const { api, app } = await setup();
-    for (const route of ['/quote-document-settings/1', '/quotes/1/document', '/quotes/1/document/pdf', '/quotes/1/document/xlsx', '/quotes/1/document/exports']) expect((await request(app).get(`/api${route}`)).status).toBe(401);
-    for (const route of ['/quote-document-settings/1', '/quotes/1/document']) expect((await request(app).put(`/api${route}`).send({})).status).toBe(401);
+    for (const route of ['/quote-document-settings/1', '/quote-document-settings/1/logo', '/quotes/1/document', '/quotes/1/document/pdf', '/quotes/1/document/xlsx', '/quotes/1/document/exports']) expect((await request(app).get(`/api${route}`)).status).toBe(401);
+    for (const route of ['/quote-document-settings/1', '/quote-document-settings/1/logo', '/quotes/1/document']) expect((await request(app).put(`/api${route}`).send({})).status).toBe(401);
+    expect((await request(app).delete('/api/quote-document-settings/1/logo')).status).toBe(401);
     expect((await request(app).post('/api/quotes/1/document/exports').send({})).status).toBe(401);
     for (const format of ['pdf', 'xlsx']) {
       const r = await api.get(`/api/quotes/1/document/${format}`, { download: 1 }); expect(r.status).toBe(200); expect(r.headers['content-disposition']).toMatch(/^attachment;.*filename\*=/); expect(r.headers['cache-control']).toBe('no-store'); expect(r.headers['x-document-hash']).toMatch(/^[a-f0-9]{64}$/); expect(r.headers['x-document-revision']).toBe('1');
@@ -81,17 +84,29 @@ async function pdfText(bytes: Buffer) {
   const pages = []; for (let i = 1; i <= pdf.numPages; i++) pages.push((await (await pdf.getPage(i)).getTextContent()).items.map(item => 'str' in item ? item.str : '').join(' '));
   return { pdf, text: pages.join(' ') };
 }
+// The first text drawn on page 1: the title when a logo leads the header, the trade name in its place otherwise.
+async function firstText(bytes: Buffer) {
+  const pdf = await getDocument({ data: new Uint8Array(bytes), useSystemFonts: true }).promise;
+  const item = (await (await pdf.getPage(1)).getTextContent()).items.find(i => 'str' in i && i.str.trim()); await pdf.loadingTask.destroy();
+  return item && 'str' in item ? item.str : null;
+}
+function headerStyle(book: ExcelJS.Workbook) {
+  let header: ExcelJS.Row | undefined; book.getWorksheet('Cotización')!.eachRow(row => { if (row.getCell(2).value === 'Descripción') header = row; });
+  const cell = header!.getCell(2); return { fill: (cell.fill as ExcelJS.FillPattern).fgColor?.argb, text: cell.font.color?.argb };
+}
 describe('rendered files', () => {
   it('prints the complete model, typed workbook cells and deterministic metadata, without internal figures', async () => {
     for (const manual of [null, 3000]) {
       const input = documentFixture(manual), d = buildQuoteDocument(input);
-      const bytes = await renderPdf(d), { pdf, text } = await pdfText(bytes);
+      const bytes = await renderPdf(d, input.logoData), { pdf, text } = await pdfText(bytes);
+      expect(bytes.includes('/Subtype /Image')).toBe(true); expect(await firstText(bytes)).toBe('COTIZACIÓN');
       for (const expected of [d.number, d.issueDateText, d.validUntilText, ...d.lines.flatMap(l => [l.description, l.amount.text]), d.subtotal.text, d.vat.text, d.total.text, ...d.scope.rows.map(r => r.zone), ...d.conditions.map(c => c.label), 'ACEPTACIÓN', 'Página 1 de']) expect(text).toContain(expected);
       const metadata = await pdf.getMetadata(); expect(metadata.info).toMatchObject({ Title: `Cotización ${d.number}`, Author: 'CleanCode', Creator: 'CleanCode', Subject: d.metadata.subject });
       const info = metadata.info as Record<string, unknown>;
       const pdfDate = `D:${d.metadata.issueInstant.replace(/\D/g, '').slice(0, 14)}Z`;
       expect(info.CreationDate).toBe(pdfDate); expect(info.ModDate).toBe(pdfDate); expect(info.Producer).toBeUndefined();
-      const book = new ExcelJS.Workbook(); await book.xlsx.load(await renderXlsx(d) as unknown as ExcelJS.Buffer);
+      const book = new ExcelJS.Workbook(); await book.xlsx.load(await renderXlsx(d, input.logoData) as unknown as ExcelJS.Buffer);
+      expect(book.getWorksheet('Cotización')!.getImages()).toHaveLength(1); expect(headerStyle(book)).toEqual({ fill: '4F46E5', text: 'FFFFFF' });
       expect(book.worksheets.map(s => s.name)).toEqual(['Cotización', 'Alcance']); expect(book.created.toISOString()).toBe(d.metadata.issueInstant);
       expect(book.modified.toISOString()).toBe(d.metadata.issueInstant); expect(book.creator).toBe('CleanCode'); expect(book.lastModifiedBy).toBe('CleanCode'); expect(book.title).toBe(`Cotización ${d.number}`);
       const values: unknown[] = []; let dates = 0; const amounts: number[] = [];
@@ -108,12 +123,21 @@ describe('rendered files', () => {
       await pdf.loadingTask.destroy();
     }
   });
+  it('prints the trade name where there is no logo and the company color on headings and bands', async () => {
+    const input = documentFixture(); input.logo = null; input.logoData = null; input.settings.brandColor = '#FACC15';
+    const d = buildQuoteDocument(input); expect(d.logo).toBeNull(); expect(d.colors).toEqual({ accent: '#FACC15', onAccent: '#0F172A', ink: '#857220', tint: '#FFFAE8' });
+    const bytes = await renderPdf(d, null); expect(bytes.includes('/Subtype /Image')).toBe(false); expect(await firstText(bytes)).toBe('CleanCode');
+    const book = new ExcelJS.Workbook(); await book.xlsx.load(await renderXlsx(d, null) as unknown as ExcelJS.Buffer);
+    const main = book.getWorksheet('Cotización')!; expect(main.getImages()).toHaveLength(0); expect(main.getCell('A1').value).toBe('CleanCode'); expect(main.getCell('A1').alignment?.wrapText).toBeFalsy();
+    expect(headerStyle(book)).toEqual({ fill: 'FACC15', text: '0F172A' });
+    const other = documentFixture(); expect(() => renderPdf(d, other.logoData)).toThrow('The logo does not match the document'); await expect(renderXlsx(buildQuoteDocument(other), null)).rejects.toThrow('The logo does not match the document');
+  });
   it('renders 100 zones in under two seconds with at most twelve pages', async () => {
     const input = documentFixture(); const original = input.quote.result!.technicalOffer[0];
     input.quote.result!.technicalOffer = Array.from({ length: 100 }, (_, i) => ({ ...original, name: `Zona ${i + 1}` }));
     input.quote.zones = Array.from({ length: 100 }, (_, i) => ({ ...input.quote.zones![0], position: i, name: `Zona ${i + 1}` }));
     input.quote.result!.zones = Array.from({ length: 100 }, (_, i) => ({ ...input.quote.result!.zones[0], position: i }));
-    const d = buildQuoteDocument(input), start = performance.now(), bytes = await renderPdf(d); expect(performance.now() - start).toBeLessThan(2000);
+    const d = buildQuoteDocument(input), start = performance.now(), bytes = await renderPdf(d, input.logoData); expect(performance.now() - start).toBeLessThan(2000);
     const { pdf } = await pdfText(bytes); expect(pdf.numPages).toBeLessThanOrEqual(12); await pdf.loadingTask.destroy();
   });
   it('upgrades an existing quote database without changing quotes', () => {
@@ -122,8 +146,19 @@ describe('rendered files', () => {
       for (const file of fs.readdirSync(MIGRATIONS_DIR).filter(f => /^00[1-5]_/.test(f))) fs.copyFileSync(path.join(MIGRATIONS_DIR, file), path.join(directory, file));
       // Raw rows: the repository already reads columns that later migrations add.
       migrate(db, directory); seed(db, { createdBy: 'fixture@example.test' }); const before = db.prepare('SELECT * FROM quotes WHERE id = 1').get() as object;
-      expect(migrate(db)).toEqual(['006_quote_documents', '007_quote_target_margin']); expect(db.prepare('SELECT * FROM quotes WHERE id = 1').get()).toEqual({ ...before, target_margin: null }); expect(quotesRepository(db).get(1).targetMargin).toBeNull();
-      expect(db.prepare('SELECT legal_name, payment_terms FROM quote_document_settings').get()).toEqual({ legal_name: null, payment_terms: null });
+      expect(migrate(db)).toEqual(['006_quote_documents', '007_quote_target_margin', '008_company_branding']); expect(db.prepare('SELECT * FROM quotes WHERE id = 1').get()).toEqual({ ...before, target_margin: null }); expect(quotesRepository(db).get(1).targetMargin).toBeNull();
+      expect(db.prepare('SELECT legal_name, payment_terms, brand_color FROM quote_document_settings').get()).toEqual({ legal_name: null, payment_terms: null, brand_color: '#4F46E5' });
+    } finally { db.close(); fs.rmSync(directory, { recursive: true, force: true }); }
+  });
+  it('adds the company color and an empty logo to existing document settings', () => {
+    const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'spec006-branding-')), db = openDatabase(':memory:');
+    try {
+      for (const file of fs.readdirSync(MIGRATIONS_DIR).filter(f => /^00[1-6]_/.test(f))) fs.copyFileSync(path.join(MIGRATIONS_DIR, file), path.join(directory, file));
+      migrate(db, directory); seed(db, { createdBy: 'fixture@example.test' }); db.prepare("UPDATE quote_document_settings SET legal_name = 'Empresa de prueba S.A.', signer_name = 'Ana Ejemplo'").run();
+      expect(migrate(db)).toEqual(['007_quote_target_margin', '008_company_branding']);
+      expect(db.prepare('SELECT legal_name, signer_name, brand_color FROM quote_document_settings').get()).toEqual({ legal_name: 'Empresa de prueba S.A.', signer_name: 'Ana Ejemplo', brand_color: '#4F46E5' });
+      expect(db.prepare('SELECT count(*) FROM quote_document_logo').pluck().get()).toBe(0);
+      expect(() => db.prepare("UPDATE quote_document_settings SET brand_color = '#abcdef'").run()).toThrow(/CHECK/);
     } finally { db.close(); fs.rmSync(directory, { recursive: true, force: true }); }
   });
   it('validates the document timezone at startup', () => {

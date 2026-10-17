@@ -33,6 +33,7 @@ Every setting comes from environment variables. `src/server.ts` loads `api/.env`
 | `TRUST_PROXY` | no | `false` | Express trusted proxies: boolean, hop count, IP/subnet list or named ranges. Usually `1` behind a tunnel. |
 | `UPLOAD_MAX_FILE_MB` | no | `50` | Maximum bytes per measurement file, in MB (integer 1–500). |
 | `DATABASE_PATH` | no | `./data/inventory.db` | SQLite file, relative to `api/`. `:memory:` is allowed. The parent directory is created if missing. |
+| `FILES_PATH` | no | `./data/files` | Folder for uploaded files kept outside the database (the company logo, under `logos/`), relative to `api/`. Created when the first file is written. Back it up with the database. |
 | `CORS_ORIGIN` | **yes** | – | Comma-separated origins allowed to call the API, e.g. `http://localhost:5173` |
 | `JWT_SECRET` | **yes** | – | At least 32 characters. Generate one with `node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"` |
 | `JWT_EXPIRES_IN` | no | `8h` | Token lifetime (`30m`, `8h`, `7d`, …) |
@@ -330,12 +331,19 @@ All routes require a bearer token. Company and per-quote document data use merge
 
 | Method | Path | Result |
 |---|---|---|
-| GET, PUT | `/api/quote-document-settings/1` | Singleton issuer, signature, numbering, paper and commercial text settings; other ids return 404. |
+| GET, PUT | `/api/quote-document-settings/1` | Singleton issuer, signature, numbering, paper and commercial text settings, and `brandColor` (`#RRGGBB`, stored uppercase, default `#4F46E5`); other ids return 404. |
+| GET | `/api/quote-document-settings/1/logo` | The company logo's bytes with its type, `ETag` (sha256) and `Cache-Control: private, no-cache`; 304 on `If-None-Match`; 404 `Logo not found` when there is none. |
+| PUT | `/api/quote-document-settings/1/logo` | Replaces the logo with the raw request body (`Content-Type: image/png` or `image/jpeg`, at most 1 MB) and returns its `contentType`, `width`, `height`, `size`, `sha256`, `updatedBy` and `updatedAt`. |
+| DELETE | `/api/quote-document-settings/1/logo` | Removes the logo; 204 even when there is none. |
 | GET, PUT | `/api/quotes/:id/document` | Readiness, all blockers/warnings, raw client/document data, defaults, resolved Spanish model, hash, revision and filenames. |
 | GET | `/api/quotes/:id/document/pdf` | Embedded Poppins PDF, inline; `?download=1` selects attachment. |
 | GET | `/api/quotes/:id/document/xlsx` | Literal-value, two-sheet Excel workbook; the same disposition option. |
 | POST | `/api/quotes/:id/document/exports` | `{format, contentHash}` registers the previewed content atomically, freezes the number and returns its revision. |
 | GET | `/api/quotes/:id/document/exports` | Latest 100 exports, newest first. |
+
+A logo must be an 8-bit, non-interlaced RGB or RGBA PNG, or an RGB JPEG without EXIF metadata, at most 2000 px a side. Anything else is refused before it is stored: 415 for another content type, 413 above 1 MB, and 422 with `errors.logo` for corrupt or unsupported images. PNGs are fully inflated and checked first, because the PDF library decodes them where an error would stop the process. The admin re-encodes every upload in the browser, so its uploads always qualify.
+
+The document model carries the logo's metadata (sha256, type, size) and the colors derived from `brandColor`: bands in the color itself, white or navy text on them by contrast, headings darkened toward navy until they read at 4.5:1 on white, and a 10% tint for rows (`colors.ts`). A new logo or color is a new revision, like any other settings change. Each file request reads the logo once, before rendering, so the document and its bytes always match. Without a logo, the PDF and the workbook print the trade name in its place: installs upgraded from the bundled CleanCode logo show the trade name until a logo is uploaded. The export log stores the logo's metadata, never its bytes. The bytes are a file, `FILES_PATH/logos/<sha256>.png|jpg`; the `quote_document_logo` row keeps only the logo's details, and a row whose file is missing counts as no logo.
 
 Files have `Cache-Control: no-store`, `X-Document-Hash` and `X-Document-Revision` (both exposed through CORS). Fetching a preview does not register an export. A changed hash returns `409 DOCUMENT_CHANGED` without inserting anything. The audit row stores the allow-listed document model, exporter and timestamp. Quote deletion cascades to document data and history.
 
@@ -353,7 +361,7 @@ This curl example retrieves bytes only. The admin registers `/document/exports` 
 
 All P1 features are implemented: global line mode, Spanish amount in words, contract value, margin confirmation, quote-list document action and download history. P2 features remain optional future work.
 
-The document model additionally carries `metadata.subject` and `metadata.issueInstant`, resolved by the builder, so renderers never derive the site name or timezone offset. Excel print-title names are the built-in names required by repeated print headers; no custom defined names exist. ExcelJS's missing TypeScript enum entry for Letter is represented by the standard OOXML paper id 1. Assets include the unchanged SVG, its 800-pixel PNG, and Poppins Regular/SemiBold with the OFL license.
+The document model additionally carries `metadata.subject` and `metadata.issueInstant`, resolved by the builder, so renderers never derive the site name or timezone offset. Excel print-title names are the built-in names required by repeated print headers; no custom defined names exist. ExcelJS's missing TypeScript enum entry for Letter is represented by the standard OOXML paper id 1. Assets are Poppins Regular/SemiBold with the OFL license; the former bundled logo's 800-pixel PNG is now the fixture company's logo in `test/fixtures/quote-document/logo.png`.
 
 Regenerate the committed web workbook/model fixtures and the temporary PDF with `node scripts/document-fixture.ts` from `api/`. The test party identities are explicitly fictional fixtures; they are never seeded into company settings. PDF text, metadata, privacy, 100-zone performance, workbook structure/types, routes, rounding, revision and auth checks run in `npm test`.
 

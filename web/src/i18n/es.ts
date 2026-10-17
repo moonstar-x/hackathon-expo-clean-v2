@@ -96,11 +96,12 @@ const appSpanish: StringMap = {
     menu: {
       quoting: 'Configuración de cotización',
       parameters: 'Parámetros',
-      documentSettings: 'Empresa y plantilla',
       inventory: 'Inventario',
       movements: 'Movimientos',
       catalog: 'Catálogo',
       administration: 'Administración',
+      template: 'Plantilla',
+      company: 'Empresa',
     },
     page: { editing: 'Editar %{name}' },
     auth: {
