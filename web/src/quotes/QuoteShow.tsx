@@ -1,11 +1,16 @@
-import DescriptionIcon from '@mui/icons-material/Description';
 import { useEffect, useState, type ReactElement, type ReactNode, type ChangeEvent, type SyntheticEvent } from 'react';
-import { Accordion, AccordionDetails, AccordionSummary, Alert, Box, Button, Card, CardContent, Chip, CircularProgress, Link, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tabs, TextField, Typography } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Alert, Box, Button, Card, CardContent, CircularProgress, Grid, Link, Stack, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tabs, TextField, Typography } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import { DeleteButton, EditButton, Show, useDataProvider, useNotify, useRecordContext, useRedirect, useShowContext } from 'react-admin';
+import { DeleteButton, EditButton, Show, useDataProvider, useNotify, useRecordContext, useRedirect, useShowContext, useTranslate, type TranslateFunction } from 'react-admin';
 import { Link as RouterLink } from 'react-router-dom';
 import PageHeader from '../components/PageHeader';
+import KeyFigures from '../components/KeyFigures';
+import OutlinedBadge from '../components/list/OutlinedBadge';
+import ShowSection from '../components/show/ShowSection';
+import DocumentButton from '../components/quotes/List/DocumentButton';
+import { detailPageSx } from '../styles/pages';
+import { quoteMetaSx, quoteTabPanelSx, quoteTabsSx } from '../styles/quotes';
 import ConfirmButton from '../components/ConfirmButton';
 import { useAppConfig } from '../AppConfigContext';
 import { quoteEnums, quoteFields, quoteIssues, quoteText } from '../i18n/quotes';
@@ -14,7 +19,7 @@ import type { Issue, PurchasePlanRow, Quote, TechnicalOfferRow, TechnicalProduct
 import { formatCurrency } from '../utils/format';
 import { formatDateTime } from '../utils/dates';
 import { QuoteStatus, StateChip } from './Chips';
-import { parameterGroups } from './Settings';
+import { PARAMETER_GROUPS } from '../constants/quoteSettings';
 import { parameterFields } from './parameterFields';
 import { number, percent, previewWaste } from './format';
 const tabs: string[] = [quoteText.summary, quoteText.zones, quoteText.technicalOffer, quoteText.purchasePlan, quoteText.flatRate, quoteText.wasteControl, quoteText.assumptions];
@@ -163,18 +168,20 @@ const subset = (value: object, keys: string[]): Record<string, unknown> => Objec
     string,
     unknown
 ] => [k, (value as Record<string, unknown>)[k]]));
-function ZoneDetails({ quote }: {
+function ZoneDetails({ quote, openZone }: {
     quote: Quote;
+    /** The position of a zone to show open and scroll to ("Ir a la zona"). */
+    openZone?: number;
 }): ReactElement {
     const redirect: ReturnType<typeof useRedirect> = useRedirect();
-    return <>{quote.zones.map((z: ZoneInput, i: number): ReactElement => { const result: ZoneResult = quote.result!.zones[i]; return <Accordion key={z.id} id={`zone-${z.position}`} defaultExpanded={window.location.hash === `#zone-${z.position}`}>
+    return <>{quote.zones.map((z: ZoneInput, i: number): ReactElement => { const result: ZoneResult = quote.result!.zones[i]; return <Accordion key={z.id} id={`zone-${z.position}`} defaultExpanded={openZone === z.position}>
     <AccordionSummary expandIcon={<ExpandMoreIcon />}><Typography>
     {z.name}
-    {!result.active && <Chip size="small" label={quoteText.inactive} color="warning"/>}
+    {!result.active && <OutlinedBadge label={quoteText.inactive} tone="orange" dense/>}
     </Typography></AccordionSummary>
     <AccordionDetails>
     {result.causes.map((cause: Issue): ReactElement => <Alert key={cause.code} severity="warning">{issueMessage(cause)}</Alert>)}
-    <Button onClick={(): void => redirect('edit', 'quotes', quote.id)}>{quoteText.editZone}</Button>
+    <Button onClick={(): void => redirect(`/quotes/${quote.id}/zones`)}>{quoteText.editZone}</Button>
     <Typography variant="h6">{quoteText.inputsSources}</Typography>
     <Table size="small"><TableBody>{Object.entries(z).filter(([key]: [
         string,
@@ -185,7 +192,7 @@ function ZoneDetails({ quote }: {
     ]): ReactElement => <TableRow key={key}>
     <TableCell>{quoteFields[key]}</TableCell>
     <TableCell><DisplayValue field={key} value={key === 'zoneTypeId' ? quote.snapshot!.zoneTypes[Number(v)]?.name ?? null : key === 'scheduleId' ? quote.snapshot!.schedules[Number(v)]?.name ?? null : v}/></TableCell>
-    <TableCell>{z.sources[key] && <Chip size="small" variant="outlined" label={quoteEnums[z.sources[key]]}/>}</TableCell>
+    <TableCell>{z.sources[key] && <OutlinedBadge label={quoteEnums[z.sources[key]]} dense/>}</TableCell>
     </TableRow>)}</TableBody></Table>
     {zoneGroups.map(([title, keys]: [
         string,
@@ -201,10 +208,23 @@ export function QuoteDetail(): ReactElement | null {
         number,
         (v: number) => void
     ] = useState<number>(0);
+    const [openZone, setOpenZone]: [
+        number | undefined,
+        (v: number | undefined) => void
+    ] = useState<number | undefined>(undefined);
     const provider: InventoryDataProvider = useDataProvider<InventoryDataProvider>();
     const notify: ReturnType<typeof useNotify> = useNotify();
+    const translate: TranslateFunction = useTranslate();
+    const { currency }: {
+        currency: string;
+    } = useAppConfig();
     if (!quote)
         return null;
+    const goToZone = (position: number): void => {
+        setOpenZone(position);
+        setTab(1);
+        requestAnimationFrame((): void => { document.getElementById(`zone-${position}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+    };
     const recalculate = async (): Promise<void> => { try {
         await provider.quoteAction(quote.id, 'recalculate');
         await refetch();
@@ -214,22 +234,36 @@ export function QuoteDetail(): ReactElement | null {
     } };
     const result: Quote['result'] = quote.result;
     return <Box>
-    <PageHeader eyebrow={quoteText.quotes} title={quote.name} badge={<QuoteStatus quote={quote}/>} actions={<><Button component={RouterLink} to={`/quotes/${quote.id}/document`} startIcon={<DescriptionIcon />} variant="outlined">Documento</Button><Button variant="contained" onClick={recalculate}>{quoteText.recalculate}</Button><EditButton variant="outlined"/><DeleteButton mutationMode="pessimistic"/><ConfirmButton label={quoteText.regenerate} disabled={quote.measurementId === null} confirmContent={quoteText.regenerateConfirm} onConfirm={async (): Promise<void> => { await provider.quoteAction(quote.id, 'regenerate'); await refetch(); }}/></>}/>
-    <Typography color="text.secondary" sx={{ mb: 1 }}>{quoteText.notValidated}</Typography>
-    {quote.measurementId !== null && <Link component={RouterLink} to={`/measurements/${quote.measurementId}/show`}>{quoteText.measurement} {quote.measurementId}</Link>}
-    <Typography variant="body2">{quoteText.calculatedOn} {quote.calculation.calculatedAt ? formatDateTime(quote.calculation.calculatedAt) : '—'}</Typography>
+    <PageHeader eyebrow={quoteText.quotes} title={quote.name} badge={<QuoteStatus quote={quote}/>} actions={<><DocumentButton variant="outlined"/><Button variant="contained" onClick={recalculate}>{quoteText.recalculate}</Button><EditButton variant="outlined"/><ConfirmButton label={quoteText.regenerate} variant="outlined" disabled={quote.measurementId === null} confirmContent={quoteText.regenerateConfirm} onConfirm={async (): Promise<void> => { await provider.quoteAction(quote.id, 'regenerate'); await refetch(); }}/><DeleteButton mutationMode="pessimistic"/></>}/>
+    <Grid container spacing={2} sx={detailPageSx}>
+    <Grid size={12}><ShowSection title={translate('app.quotes.glance')}>
+    <KeyFigures items={[
+        { label: quoteFields.offeredPrice, value: formatCurrency(quote.summary.offeredPrice, currency) },
+        { label: quoteFields.margin, value: <Stack component="span" direction="row" spacing={1} sx={{ alignItems: 'center' }}><span>{percent(quote.summary.margin)}</span>{quote.summary.marginStatus && <StateChip value={quote.summary.marginStatus}/>}</Stack> },
+        { label: quoteFields.totalCost, value: formatCurrency(quote.summary.totalCost, currency) },
+        { label: quoteFields.fte, value: number(quote.summary.fte) },
+        { label: quoteFields.totalFloorArea, value: number(quote.summary.totalFloorArea) },
+    ]}/>
+    <Box sx={quoteMetaSx}>
+    <Typography variant="body2" color="text.secondary">{quoteText.notValidated}</Typography>
+    {quote.measurementId !== null && <Link component={RouterLink} to={`/measurements/${quote.measurementId}/show`} variant="body2">{quoteText.measurement} {quote.measurementId}</Link>}
+    <Typography variant="body2" color="text.secondary">{quoteText.calculatedOn} {quote.calculation.calculatedAt ? formatDateTime(quote.calculation.calculatedAt) : '—'}</Typography>
+    </Box>
+    </ShowSection></Grid>
+    <Grid size={12}><Stack spacing={1.5}>
     <CalculationProgress key={quote.calculation.inputRevision} state={quote.calculation.state} refetch={refetch}/>
     {quote.calculation.state === 'failed' && <Alert severity="error">{quoteText.calculationError} {quote.calculation.error} <Button onClick={recalculate}>{quoteText.recalculate}</Button></Alert>}
     {quote.calculation.isStale && <Alert severity="warning">{quoteText.staleBanner} <Button onClick={recalculate}>{quoteText.recalculate}</Button></Alert>}
-    {quote.status === 'needsReview' && <Alert severity="warning" sx={{ my: 2 }}>
+    {quote.status === 'needsReview' && <Alert severity="warning">
     <Typography fontWeight={600}>{quoteText.preliminary}</Typography>
     {result?.causes.map((cause: Issue, i: number): ReactElement => <Typography component="div" key={i}>
     {issueMessage(cause)}
-    {cause.zoneIndex !== undefined && <Button size="small" onClick={(): void => { setTab(1); window.location.hash = `zone-${cause.zoneIndex}`; }}>{quoteText.goToZone}</Button>}
+    {cause.zoneIndex !== undefined && <Button size="small" onClick={(): void => goToZone(cause.zoneIndex!)}>{quoteText.goToZone}</Button>}
     </Typography>)}
     </Alert>}
-    {result?.warnings.map((warning: Issue, i: number): ReactElement => <Alert key={i} severity="warning" sx={{ my: 1 }}>{issueMessage(warning)}</Alert>)}
-        {result && <><Tabs value={tab} onChange={(_event: SyntheticEvent, value: number): void => setTab(value)} variant="scrollable" scrollButtons="auto" sx={{ my: 2 }}>{tabs.map((title: string): ReactElement => <Tab key={title} label={title}/>)}</Tabs><Box role="tabpanel" aria-label={tabs[tab]}>
+    {result?.warnings.map((warning: Issue, i: number): ReactElement => <Alert key={i} severity="warning">{issueMessage(warning)}</Alert>)}
+    </Stack></Grid>
+        {result && <Grid size={12}><Card><Tabs value={tab} onChange={(_event: SyntheticEvent, value: number): void => setTab(value)} variant="scrollable" scrollButtons="auto" allowScrollButtonsMobile sx={quoteTabsSx}>{tabs.map((title: string): ReactElement => <Tab key={title} label={title}/>)}</Tabs><Box role="tabpanel" aria-label={tabs[tab]} sx={quoteTabPanelSx}>
         {tab === 0 && <><Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: '1fr 1fr' }, gap: 2 }}>
         <Box>
         <Values title={`${quoteText.monthlyResult}${result.pricing.isManualPrice ? ` ${quoteText.manualPriceSuffix}` : ''}`} values={subset(result.pricing, ['offeredPrice', 'vat', 'totalWithVat', 'profit', 'margin', 'marginStatus', 'annualProfit', 'pricePerM2'])}/>
@@ -249,13 +283,14 @@ export function QuoteDetail(): ReactElement | null {
             amount: number;
             share: number | null;
         }): object => ({ name: quoteFields[r.key], totalCost: r.amount, share: r.share }))}/><Typography variant="h6">{quoteText.zoneBreakdown}</Typography><Rows fields={['name', 'zoneTypeName', 'risk', 'floorArea', 'fte', 'totalCost', 'targetPrice', 'pricePerM2']} rows={[...result.zones.map((z: ZoneResult, i: number): object => ({ ...z, zoneTypeName: quote.snapshot!.zoneTypes[quote.zones[i].zoneTypeId!]?.name })), { name: quoteText.grandTotal, ...result.totals }]}/></>}
-        {tab === 1 && <ZoneDetails quote={quote}/>}
+        {tab === 1 && <ZoneDetails quote={quote} openZone={openZone}/>}
         {tab === 2 && <Rows rows={result.technicalOffer.map((r: TechnicalOfferRow): object => ({ ...r, hoursBetweenCleanings: `${quoteText.every} ${number(r.hoursBetweenCleanings, 0)} h · ${number(r.cleaningsPerDay, 0)} ${quoteText.perDay}`, disinfectantPerCleaning: `${number(r.disinfectantPerCleaning, 3)} ${r.dailyDisinfectant.doseUnit}` }))} fields={['name', 'zoneTypeName', 'risk', 'scheduleName', 'hoursBetweenCleanings', 'terminalsPerMonth', 'cleaningProduct', 'dailyDisinfectant', 'terminalDisinfectant', 'solutionPerDailyCleaning', 'disinfectantPerCleaning', 'fte']}/>}
         {tab === 3 && <><Rows fields={['name', 'unit', 'presentationSize', 'pricePerContainer', 'pricePerUnit', 'theoretical', 'waste', 'total', 'containers', 'stock', 'toBuy', 'purchaseCost', 'wasteCost']} rows={result.purchasePlan.rows.map((r: PurchasePlanRow): object => ({ ...r, stock: quote.snapshot!.products[r.productId]?.inventoryProductId ? `${number(r.stock, 0)} · ${quoteText.inventorySource}` : r.stock }))}/><Values title={quoteText.totals} values={{ purchaseCost: result.purchasePlan.totalPurchaseCost, wasteCost: result.purchasePlan.totalWasteCost }}/></>}
         {tab === 4 && <>{result.flatRate.rate > 0 ? <Values title={quoteText.flatRate} values={result.flatRate}/> : <Alert severity="info">{quoteText.noFlatRate}</Alert>}<Rows fields={['name', 'floorArea', 'totalCost', 'flatRateRevenue', 'flatRateMargin', 'status']} rows={result.zones.map((z: ZoneResult): object => ({ ...z, status: z.flatRateStatus }))}/>{result.reference.price ? <Values title={quoteFields.externalReferencePrice} values={result.reference}/> : <Alert severity="info">{quoteText.referencePrompt}</Alert>}</>}
         {tab === 5 && <WasteEditor quote={quote}/>}
-        {tab === 6 && quote.snapshot && <><Typography variant="h6">{quoteText.snapshot}</Typography>{Object.values(quote.snapshot.zoneTypes).map((type: ZoneTypeValues): ReactElement => <Values key={type.id} title={type.name} values={{ ...type,cleaningProductId:quote.snapshot!.products[type.cleaningProductId]?.name,dailyDisinfectantId:quote.snapshot!.products[type.dailyDisinfectantId]?.name,terminalDisinfectantId:quote.snapshot!.products[type.terminalDisinfectantId]?.name,hoursBetweenLow:type.hoursBetweenCleanings.low,hoursBetweenMedium:type.hoursBetweenCleanings.medium,hoursBetweenHigh:type.hoursBetweenCleanings.high }} />)}{parameterGroups.map(([title,start,end]: [string,number,number]): ReactElement => <Values key={title} title={title} values={subset(quote.snapshot!.parameters,parameterFields.slice(start,end).map((f: typeof parameterFields[number]): string => f.name))} />)}<Rows rows={Object.values(quote.snapshot.zoneTypes)} fields={['name', 'risk', 'dailyRateM2PerHour', 'terminalRateM2PerHour', 'solutionLitersPerM2']}/><Rows rows={Object.values(quote.snapshot.schedules)} fields={['name', 'serviceHoursPerDay', 'nightHoursFraction', 'includesHolidays']}/><Rows rows={Object.values(quote.snapshot.products)} fields={['name', 'presentationSize', 'unit', 'publishedPrice', 'dosePerLiter', 'effectiveStock']}/></>}
-        </Box></>}
+        {tab === 6 && quote.snapshot && <><Typography variant="h6">{quoteText.snapshot}</Typography>{Object.values(quote.snapshot.zoneTypes).map((type: ZoneTypeValues): ReactElement => <Values key={type.id} title={type.name} values={{ ...type,cleaningProductId:quote.snapshot!.products[type.cleaningProductId]?.name,dailyDisinfectantId:quote.snapshot!.products[type.dailyDisinfectantId]?.name,terminalDisinfectantId:quote.snapshot!.products[type.terminalDisinfectantId]?.name,hoursBetweenLow:type.hoursBetweenCleanings.low,hoursBetweenMedium:type.hoursBetweenCleanings.medium,hoursBetweenHigh:type.hoursBetweenCleanings.high }} />)}{PARAMETER_GROUPS.map(([title,start,end]: [string,number,number]): ReactElement => <Values key={title} title={title} values={subset(quote.snapshot!.parameters,parameterFields.slice(start,end).map((f: typeof parameterFields[number]): string => f.name))} />)}<Rows rows={Object.values(quote.snapshot.zoneTypes)} fields={['name', 'risk', 'dailyRateM2PerHour', 'terminalRateM2PerHour', 'solutionLitersPerM2']}/><Rows rows={Object.values(quote.snapshot.schedules)} fields={['name', 'serviceHoursPerDay', 'nightHoursFraction', 'includesHolidays']}/><Rows rows={Object.values(quote.snapshot.products)} fields={['name', 'presentationSize', 'unit', 'publishedPrice', 'dosePerLiter', 'effectiveStock']}/></>}
+        </Box></Card></Grid>}
+    </Grid>
     </Box>;
 }
 export const QuoteShow = (): ReactElement => <Show actions={false} component="div" emptyWhileLoading><QuoteDetail /></Show>;

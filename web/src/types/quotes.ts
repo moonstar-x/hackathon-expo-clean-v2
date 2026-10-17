@@ -1,4 +1,5 @@
 // API contract duplicated intentionally; this app compiles independently.
+import type { ParameterField } from '../quotes/parameterFields';
 export interface QuoteParameterValues {
     monthlyWage: number;
     basicWage: number;
@@ -316,4 +317,42 @@ export interface StateChipProps {
 export interface QuoteStatusProps {
     quote: Pick<Quote, 'status' | 'calculation'>;
     dense?: boolean;
+}
+export type CatalogFieldType = 'boolean' | 'number' | 'fraction' | 'select' | 'text' | 'reference';
+/** One input of a quoting catalog's form. */
+export interface CatalogField {
+    name: string;
+    /** Already in Spanish; the field's own label (quoteFields) by default. */
+    label?: string;
+    type?: CatalogFieldType;
+    reference?: string;
+    choices?: string[];
+    /** Columns of 12 it takes from `md`; codes and numbers 4 by default, text 6, notes 12. */
+    size?: number;
+}
+/** A titled block of a catalog's form; `title` and `hint` are translation keys. */
+export interface CatalogSection {
+    title: string;
+    hint?: string;
+    fields: CatalogField[];
+}
+/** A screen of one of the quoting catalogs (zone types, schedules, products, location types). */
+export interface CatalogProps {
+    resource: string;
+}
+/** One quoting parameter's input, with the note on where its value comes from. */
+export interface ParameterInputProps {
+    field: ParameterField;
+    note?: string;
+}
+export interface CatalogInputProps {
+    field: CatalogField;
+}
+export interface CatalogFormProps extends CatalogProps {
+    /** Edit pages add a Delete button. */
+    withDelete?: boolean;
+}
+export interface CatalogActionsProps {
+    /** Icons instead of labelled buttons, for the card layout. */
+    compact?: boolean;
 }

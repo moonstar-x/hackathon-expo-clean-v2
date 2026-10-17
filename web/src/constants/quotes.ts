@@ -1,3 +1,4 @@
+import type { SortPayload } from 'react-admin';
 import type { Tone } from '../types/list';
 
 /**
@@ -17,3 +18,12 @@ export const QUOTE_STATE_TONE: Record<string, Tone> = {
   healthy: 'green',
   ok: 'green',
 };
+
+/** Newest first, as the API sorts quotes by default. */
+export const QUOTE_SORT: SortPayload = { field: 'createdAt', order: 'DESC' };
+
+/** Fields the API can sort quotes by that the phone list offers (api/src/modules/quotes). */
+export const QUOTE_SORT_FIELDS: string[] = ['createdAt', 'name', 'offeredPrice', 'margin'];
+
+/** The statuses a quote can be filtered by; labels from quoteEnums, untranslated. */
+export const QUOTE_STATUSES: string[] = ['needsReview', 'simulation'];

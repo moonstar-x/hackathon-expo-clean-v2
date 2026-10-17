@@ -3,13 +3,7 @@ import { AutocompleteInput, NullableBooleanInput, ReferenceInput } from 'react-a
 import { CATALOG_SORT } from '../../../constants/catalog';
 import SearchFilter from '../../SearchFilter';
 import ToggleFilter from '../../ToggleFilter';
-
-/**
- * Only `true` is sent. Switching the toggle off must remove the filter rather than send
- * `false` (which means "not low stock"). react-admin ignores an `undefined` change but
- * strips empty strings from the filter, so off becomes ''.
- */
-const trueOrRemove = (value: boolean): true | '' => (value ? true : '');
+import { trueOrRemove } from '../../../utils/filters';
 
 /**
  * The product filters, shared by the desktop table (the low-stock switch always shown, as SPEC-002
