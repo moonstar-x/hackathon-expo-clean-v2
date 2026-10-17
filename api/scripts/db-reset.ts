@@ -5,6 +5,7 @@ import { migrate } from '../src/db/migrate.ts';
 import { seed } from '../src/db/seed.ts';
 import { LOGO_FOLDER } from '../src/modules/quoteDocuments/logo.ts';
 import { SIGNATURE_FOLDER } from '../src/modules/quoteDocuments/signature.ts';
+import { TDR_FOLDER } from '../src/modules/tdrDocuments/schemas.ts';
 import { ensureInitialUser } from '../src/modules/users/initialUser.ts';
 import { loadScriptConfig } from './common.ts';
 
@@ -16,7 +17,7 @@ if (config.databasePath !== ':memory:') {
   }
   console.log(`Deleted ${config.databasePath}`);
   // The files the deleted rows pointed to. Only the API's own folders: FILES_PATH itself may hold more.
-  for (const folder of [LOGO_FOLDER, SIGNATURE_FOLDER]) {
+  for (const folder of [LOGO_FOLDER, SIGNATURE_FOLDER, TDR_FOLDER]) {
     const files = path.join(config.filesPath, folder);
     fs.rmSync(files, { recursive: true, force: true });
     console.log(`Deleted ${files}`);

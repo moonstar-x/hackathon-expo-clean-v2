@@ -6,7 +6,7 @@ import { Menu } from 'react-admin';
 import SectionLabel from './SectionLabel';
 
 /**
- * Home, Mediciones and Cotizaciones first (SPEC-004), then the screens by what they are for: the
+ * Home, Mediciones, Cotizaciones and Documentos TDR first (SPEC-004, SPEC-009), then the screens by what they are for: the
  * stock itself, the catalog behind it (what is stocked and who supplies it), how quotes are worked
  * out, and the administration: who can sign in, the template of every quote, and the company that
  * issues them. SPEC-002's menu order is kept.
@@ -16,6 +16,8 @@ const AppMenu = (): ReactElement => (
     <Menu.DashboardItem />
     <Menu.ResourceItem name="measurements" />
     <Menu.ResourceItem name="quotes" />
+    {/* Quotes from a client's TDR document (SPEC-009). */}
+    <Menu.ResourceItem name="tdr-documents" />
     <SectionLabel label="app.menu.inventory" />
     <Menu.ResourceItem name="products" />
     {/* "Movimientos de inventario" would still be cut at the sidebar's width; under Inventario, "Movimientos" says it. */}

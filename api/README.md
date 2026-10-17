@@ -400,3 +400,20 @@ Regenerate the test signatures (a test authority, its signer and her `.p12` file
 ### Notes for SPEC-008
 
 `npm test` checks signed PDFs with Node's own crypto rather than forge: the byte ranges cover the whole file but the signature, the signed digest matches, the signature opens with the holder's key, and the certificate comes from the test authority. On 2026-10-17 a signed fixture quote also passed poppler's `pdfsig` ("Signature is Valid", "Total document signed"; the test authority is, rightly, untrusted), and its QR decoded to the lines above at 300, 150 and 110 dpi. A browser walkthrough on a disposable database (API port 4017, admin port 5177) showed Empresa without a signature, with one (the stamp, holder, issuer, expiry), expired and removed, and the Documento preview with the stamp on the company's line and, once expired, the warning with **Ir a Empresa**. The browser automation can't attach a `.p12` file, so that walkthrough loaded the test signature through the API; the dialog itself is covered by the admin's component tests.
+
+## TDR documents (SPEC-009)
+
+`/api/tdr-documents` takes a client's TDR (términos de referencia, ficha técnica) as a PDF or Word `.docx` (multipart `file`, at most 20 MB, judged by its content) and analyzes it as a job: the row is its own job (`pending → running → done | failed`), and an in-process worker sends the document to Claude Haiku through OpenRouter, one at a time, outside any transaction. PDFs go to the model as files (OpenRouter's `native` engine); `.docx` files as their text (mammoth). The reply is a forced tool call (`registrar_tdr`) whose arguments are normalized before they are stored, in Spanish whatever the document's language. `POST /api/tdr-documents/:id/quote` creates a quote with no measurement from the reviewed data, one manual zone per area, the client's data in its document, and queues its calculation. Originals live in `FILES_PATH/tdr/`.
+
+| Variable | Default | |
+|---|---|---|
+| `OPENROUTER_API_KEY` | — | Optional. Without it the API starts and documents upload, but their analysis fails with `OPENROUTER_API_KEY_MISSING`; **Reintentar** works once it is set. |
+| `OPENROUTER_MODEL` | `anthropic/claude-haiku-5.5` | Any OpenRouter model that reads files and calls tools. |
+| `TDR_WORKER` | `on` | `off` in tests, which drive the worker themselves. |
+
+Network errors, timeouts (3 minutes), 408, 429 and 5xx are retried after 10 s and 20 s (3 attempts); a refused key, no credit, other 4xx, an empty or unreadable Word file are not. Startup puts interrupted analyses back in the queue. Each analysis logs the entry, the attempt, the model, the outcome and the time, never the document or the key.
+
+### Notes for SPEC-009
+
+- **Not strict structured output.** `response_format` with `strict: true` was the first choice, but Anthropic refuses an `enum` beside a `['string', 'null']` type and, past that, allows at most 16 nullable fields; the extraction has about 30. A forced tool call has neither limit, and the API validates the arguments anyway.
+- **Measured on 2026-10-17** with the 18-page *ficha técnica* of the Hospital General San Francisco de Quito, against a real API on a disposable database: upload to `done` in 30 s (58 000 input and 8 000 output tokens, about USD 0.01), 20 zones with their 24 h and 8 h posts in the right columns (checked against the PDF's layout), 30.4 days a month from "365 días del año", the USD 93 507,74 reference price, 12 machines, 51 supplies and 13 requirements; the quote it created calculated in 5 ms. That document gives posts per area but no area per zone, so its zones stay **Revisar** until someone enters their m², as SPEC-005 §0.5 requires.

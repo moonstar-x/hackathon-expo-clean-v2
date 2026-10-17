@@ -86,6 +86,10 @@ const schema = z
     QUOTE_WORKER: env(z.enum(['on','off']).default('on')),
     QUOTE_WORKER_POLL_MS: env(z.coerce.number().int().min(100).max(60000).default(1000)),
     QUOTE_JOB_MAX_ATTEMPTS: env(z.coerce.number().int().min(1).max(20).default(5)),
+    // TDR documents (SPEC-009): read with Claude Haiku through OpenRouter. Without a key, analyses fail with a clear reason.
+    OPENROUTER_API_KEY: env(z.string().trim().optional()),
+    OPENROUTER_MODEL: env(z.string().trim().regex(/^[\w.~:/-]+$/, 'must be an OpenRouter model id such as anthropic/claude-haiku-5.5').default('anthropic/claude-haiku-5.5')),
+    TDR_WORKER: env(z.enum(['on','off']).default('on')),
     LOG_LEVEL: env(z.enum(LOG_LEVELS).default('info')),
   })
   .superRefine((cfg, ctx) => {
@@ -153,6 +157,9 @@ export function loadConfig(source: Record<string, string | undefined> = process.
     quoteWorker: e.QUOTE_WORKER,
     quoteWorkerPollMs: e.QUOTE_WORKER_POLL_MS,
     quoteJobMaxAttempts: e.QUOTE_JOB_MAX_ATTEMPTS,
+    openRouterApiKey: e.OPENROUTER_API_KEY ?? null,
+    openRouterModel: e.OPENROUTER_MODEL,
+    tdrWorker: e.TDR_WORKER,
   });
 }
 

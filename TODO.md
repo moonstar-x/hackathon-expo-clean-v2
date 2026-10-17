@@ -1,2 +1,1 @@
 - Add a manual way to create the floor plan dimensions.
-- Add a way to process a document and generate a quote from it.

@@ -19,6 +19,7 @@ import { quotesRouter } from './modules/quotes/router.ts';
 import { settingsRouter } from './modules/quotes/settings.ts';
 import { usersRouter } from './modules/users/router.ts';
 import { quoteDocumentsRouter } from './modules/quoteDocuments/router.ts';
+import { tdrDocumentsRouter } from './modules/tdrDocuments/router.ts';
 
 /** Paths never written to logs: credentials and tokens. */
 export const LOG_REDACT_PATHS = [
@@ -31,6 +32,8 @@ export const LOG_REDACT_PATHS = [
   'req.body.password',
   'token',
   '*.token',
+  'apiKey',
+  '*.apiKey',
 ];
 
 /** What every router and middleware factory receives. */
@@ -47,7 +50,7 @@ export function createLogger(config: Config): Logger {
 }
 
 /** Builds the Express app. Does not listen, so tests can drive it with supertest. */
-export function createApp({ db, config, logger = createLogger(config), nudgeQuotes = () => {} }: AppDeps & { logger?: Logger; nudgeQuotes?: () => void }) {
+export function createApp({ db, config, logger = createLogger(config), nudgeQuotes = () => {}, nudgeTdr = () => {} }: AppDeps & { logger?: Logger; nudgeQuotes?: () => void; nudgeTdr?: () => void }) {
   const app = express();
   app.set('trust proxy', config.trustProxy);
   app.disable('x-powered-by');
@@ -85,6 +88,7 @@ export function createApp({ db, config, logger = createLogger(config), nudgeQuot
   api.use(settingsRouter(deps));
   api.use(quotesRouter(deps,nudgeQuotes));
   api.use('/measurements', measurementsRouter(deps,nudgeQuotes));
+  api.use('/tdr-documents', tdrDocumentsRouter(deps, { nudge: nudgeTdr, nudgeQuotes }));
   api.use('/categories', categoriesRouter(deps));
   api.use('/suppliers', suppliersRouter(deps));
   api.use('/products', productsRouter(deps));

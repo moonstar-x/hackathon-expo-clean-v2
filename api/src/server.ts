@@ -5,6 +5,8 @@ import { createApp, createLogger } from './app.ts';
 import { openDatabase } from './db/connection.ts';
 import { migrate } from './db/migrate.ts';
 import { createQuoteWorker } from './modules/quotes/worker.ts';
+import { createTdrWorker } from './modules/tdrDocuments/worker.ts';
+import { fileStore } from './lib/fileStore.ts';
 import { ensureInitialUser } from './modules/users/initialUser.ts';
 
 // Real environment variables take precedence over values in api/.env.
@@ -30,7 +32,10 @@ if (initialUser) logger.info({ email: initialUser.email }, 'created the initial 
 
 const worker = createQuoteWorker({ db,config,logger });
 if (config.quoteWorker === 'on') worker.start();
-const app = createApp({ db, config, logger, nudgeQuotes:() => worker.nudge() });
+const tdrWorker = createTdrWorker({ db, config, logger, files: fileStore(config.filesPath) });
+if (config.tdrWorker === 'on') tdrWorker.start();
+if (!config.openRouterApiKey) logger.warn('OPENROUTER_API_KEY is not set: TDR documents can be uploaded but not analyzed');
+const app = createApp({ db, config, logger, nudgeQuotes:() => worker.nudge(), nudgeTdr: () => tdrWorker.nudge() });
 const server = app.listen(config.port, (err) => {
   if (err) {
     logger.fatal({ err }, 'failed to start HTTP server');
@@ -46,6 +51,7 @@ function shutdown(signal: NodeJS.Signals) {
   shuttingDown = true;
   logger.info({ signal }, 'shutting down');
   worker.stop();
+  tdrWorker.stop();
   server.close(() => {
     db.close();
     process.exit(0);

@@ -16,7 +16,15 @@ const messages: Record<string, string> = {
   'Does not exist':'El registro no existe.',
   'A quoting record with this name or code already exists':'Ya existe un registro con este nombre o código.',
   'The measurement no longer exists':'La medición ya no existe.',
-  'A quote already exists':'La medición ya tiene una cotización.',
+  'A quote already exists':'Ya existe una cotización creada a partir de este registro.',
+  'Must be a PDF or Word (.docx) file': 'Debe ser un PDF o un documento de Word (.docx).',
+  'Must be at most 20 MB': 'El archivo debe pesar como máximo 20 MB.',
+  'Invalid multipart body: send one "file"': 'Envía un solo archivo.',
+  'Malformed multipart body': 'El formulario de archivos no es válido.',
+  'The document has not been analyzed yet': 'El documento todavía no se ha analizado.',
+  'The document is already being analyzed': 'El documento ya se está analizando.',
+  'Add at least one zone': 'Agrega al menos una zona para crear la cotización.',
+  'File not found': 'No se encontró el archivo.',
   'The quote has no results yet':'La cotización aún no tiene resultados.',
   'Zone does not belong to this quote':'La zona no pertenece a esta cotización.',
   'Product is not in the purchase plan':'El producto no está en el plan de compras.',
@@ -118,6 +126,8 @@ export const translateApiMessage = (message: unknown, fallback: string = REQUEST
   if (match) return `Debe tener ${match[1] === 'most' ? 'como máximo' : 'al menos'} ${match[2]} caracteres.`;
   match = /^Must be (greater than|at least|at most) (\d+(?:\.\d+)?)$/.exec(message);
   if (match) return `Debe ser ${comparisons[match[1]]} ${formatQuantity(Number(match[2]))}.`;
+  match = /^Must have at most (\d+) items$/.exec(message);
+  if (match) return `Puede tener como máximo ${match[1]} filas.`;
   match = /^Must have at most (\d+) decimal places$/.exec(message);
   if (match) return `Debe tener como máximo ${match[1]} decimales.`;
   match = /^(Category|Supplier|Product|Stock movement|User|Measurement) (\d+) (does not exist|not found)$/.exec(message);

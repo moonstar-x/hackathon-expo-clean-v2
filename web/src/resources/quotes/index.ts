@@ -4,7 +4,7 @@ import { QuoteEdit } from '../../quotes/QuoteEdit';
 import { QuoteList } from '../../quotes/QuoteList';
 import { QuoteShow } from '../../quotes/QuoteShow';
 
-// No create: a quote starts from a measurement ("Crear cotización" on its page).
+// No create: a quote starts from a measurement or a TDR document ("Crear cotización" on its page).
 const quotes: Omit<ResourceProps, 'name'> = {
   list: QuoteList,
   show: QuoteShow,

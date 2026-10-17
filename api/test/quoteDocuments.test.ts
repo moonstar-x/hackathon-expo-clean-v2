@@ -146,7 +146,7 @@ describe('rendered files', () => {
       for (const file of fs.readdirSync(MIGRATIONS_DIR).filter(f => /^00[1-5]_/.test(f))) fs.copyFileSync(path.join(MIGRATIONS_DIR, file), path.join(directory, file));
       // Raw rows: the repository already reads columns that later migrations add.
       migrate(db, directory); seed(db, { createdBy: 'fixture@example.test' }); const before = db.prepare('SELECT * FROM quotes WHERE id = 1').get() as object;
-      expect(migrate(db)).toEqual(['006_quote_documents', '007_quote_target_margin', '008_company_branding', '009_company_signature', '010_quote_labor_rates', '011_quote_machines_areas']); expect(db.prepare('SELECT * FROM quotes WHERE id = 1').get()).toEqual({ ...before, target_margin: null, overrides_json: '{}' }); expect(quotesRepository(db).get(1).targetMargin).toBeNull();
+      expect(migrate(db)).toEqual(['006_quote_documents', '007_quote_target_margin', '008_company_branding', '009_company_signature', '010_quote_labor_rates', '011_quote_machines_areas', '012_tdr_documents']); expect(db.prepare('SELECT * FROM quotes WHERE id = 1').get()).toEqual({ ...before, target_margin: null, overrides_json: '{}' }); expect(quotesRepository(db).get(1).targetMargin).toBeNull();
       expect(db.prepare('SELECT legal_name, payment_terms, brand_color FROM quote_document_settings').get()).toEqual({ legal_name: null, payment_terms: null, brand_color: '#4F46E5' });
     } finally { db.close(); fs.rmSync(directory, { recursive: true, force: true }); }
   });
@@ -155,7 +155,7 @@ describe('rendered files', () => {
     try {
       for (const file of fs.readdirSync(MIGRATIONS_DIR).filter(f => /^00[1-6]_/.test(f))) fs.copyFileSync(path.join(MIGRATIONS_DIR, file), path.join(directory, file));
       migrate(db, directory); seed(db, { createdBy: 'fixture@example.test' }); db.prepare("UPDATE quote_document_settings SET legal_name = 'Empresa de prueba S.A.', signer_name = 'Ana Ejemplo'").run();
-      expect(migrate(db)).toEqual(['007_quote_target_margin', '008_company_branding', '009_company_signature', '010_quote_labor_rates', '011_quote_machines_areas']);
+      expect(migrate(db)).toEqual(['007_quote_target_margin', '008_company_branding', '009_company_signature', '010_quote_labor_rates', '011_quote_machines_areas', '012_tdr_documents']);
       expect(db.prepare('SELECT legal_name, signer_name, brand_color FROM quote_document_settings').get()).toEqual({ legal_name: 'Empresa de prueba S.A.', signer_name: 'Ana Ejemplo', brand_color: '#4F46E5' });
       expect(db.prepare('SELECT count(*) FROM quote_document_logo').pluck().get()).toBe(0); expect(db.prepare('SELECT count(*) FROM quote_document_signature').pluck().get()).toBe(0);
       expect(() => db.prepare("UPDATE quote_document_settings SET brand_color = '#abcdef'").run()).toThrow(/CHECK/);

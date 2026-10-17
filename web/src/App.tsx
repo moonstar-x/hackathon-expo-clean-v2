@@ -18,6 +18,7 @@ import { quoteCatalogs, quoteParameters } from './resources/quote-settings';
 import quotes from './resources/quotes';
 import stockMovements from './resources/stock-movements';
 import suppliers from './resources/suppliers';
+import tdrDocuments from './resources/tdr-documents';
 import users from './resources/users';
 import { darkTheme, lightTheme } from './theme';
 import type { AppProps } from './types/config';
@@ -49,6 +50,7 @@ const App = ({ config }: AppProps): ReactElement => {
     >
       <Resource name="measurements" {...measurements} />
       <Resource name="quotes" {...quotes} />
+      <Resource name="tdr-documents" {...tdrDocuments} />
       <Resource name="products" {...products} />
       <Resource name="stock-movements" {...stockMovements} />
       <Resource name="categories" {...categories} />

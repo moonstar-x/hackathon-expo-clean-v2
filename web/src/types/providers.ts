@@ -2,6 +2,7 @@
 import type { DataProvider } from 'react-admin';
 import type { Quote, QuotePreview, SummaryEdits, WasteControl, ZonePatch } from './quotes';
 import type { Stats } from './api';
+import type { TdrDocument } from './tdr';
 
 /** What `httpClient` resolves with; `json` is the parsed body, typed by the caller. */
 export interface HttpResponse<T> {
@@ -41,6 +42,10 @@ export interface InventoryDataProvider extends DataProvider {
   getWaste: (id:number,period:string) => Promise<WasteControl>;
   saveWaste: (id:number,period:string,rows:{ productId:number;actual:number | null }[]) => Promise<WasteControl>;
   createMeasurementQuote: (id:number) => Promise<Quote>;
+  /** Queues a TDR document's analysis again (SPEC-009 §5.1); it replaces the edits. */
+  analyzeTdr: (id:number) => Promise<TdrDocument>;
+  /** Creates the quote of a reviewed TDR document. */
+  createTdrQuote: (id:number) => Promise<Quote>;
   /** `zones`, when given, replace the saved ones as PUT /quotes/:id takes them: every zone, by id, with only what changes. */
   previewQuote: (id:number,edits:SummaryEdits,zones?:({ id?: number } & ZonePatch)[]) => Promise<QuotePreview>;
 }
