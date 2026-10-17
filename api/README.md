@@ -155,10 +155,10 @@ curl -sg -D - "$API/api/products?sort=[\"quantity\",\"ASC\"]&range=[0,4]&filter=
 
 # Create a category, then a product with opening stock (recorded as an IN movement)
 CATEGORY_ID=$(curl -s -X POST $API/api/categories -H "Authorization: Bearer $TOKEN" \
-  -H 'Content-Type: application/json' -d '{"name":"Kitchen"}' | node -pe 'JSON.parse(require("fs").readFileSync(0)).id')
+  -H 'Content-Type: application/json' -d '{"name":"Cocina"}' | node -pe 'JSON.parse(require("fs").readFileSync(0)).id')
 
 curl -s -X POST $API/api/products -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d "{
-  \"sku\": \"kit-degr-1\", \"name\": \"Kitchen degreaser\", \"categoryId\": $CATEGORY_ID,
+  \"sku\": \"kit-degr-1\", \"name\": \"Desengrasante de cocina\", \"categoryId\": $CATEGORY_ID,
   \"unit\": \"L\", \"reorderLevel\": 5, \"unitCost\": 3.2, \"hazardous\": true, \"initialQuantity\": 10
 }"
 # → 201 {"id":18,"sku":"KIT-DEGR-1",...,"quantity":10,"stockValue":32,...}
@@ -170,7 +170,7 @@ curl -s -X POST $API/api/users -H "Authorization: Bearer $TOKEN" -H 'Content-Typ
 
 # Record usage
 curl -s -X POST $API/api/stock-movements -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
-  -d '{"productId":18,"type":"OUT","quantity":4,"reason":"Used at Office Tower job","reference":"WO-1042"}'
+  -d '{"productId":18,"type":"OUT","quantity":4,"reason":"Usado en trabajo de Torre de Oficinas","reference":"WO-1042"}'
 # → 201 {"type":"OUT","quantity":4,"delta":-4,"balanceAfter":6,...}
 
 # Too much → 409 INSUFFICIENT_STOCK, nothing changes
@@ -179,7 +179,7 @@ curl -s -X POST $API/api/stock-movements -H "Authorization: Bearer $TOKEN" -H 'C
 
 # Physical count
 curl -s -X POST $API/api/stock-movements -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
-  -d '{"productId":18,"type":"ADJUSTMENT","quantity":5,"reason":"Monthly count"}'
+  -d '{"productId":18,"type":"ADJUSTMENT","quantity":5,"reason":"Conteo mensual"}'
 # → delta -1, balanceAfter 5
 
 # Archive instead of delete (products with history cannot be deleted)
