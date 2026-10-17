@@ -28,7 +28,8 @@ export interface PageHeaderProps {
 }
 
 export interface SectionProps {
-  title: ReactNode;
+  /** Left out when the section is a form's or tab's only one: its hint then introduces it. */
+  title?: ReactNode;
   children: ReactNode;
   /** Muted line under the title. */
   hint?: ReactNode;
@@ -107,6 +108,8 @@ export interface QuickFilterProps {
 export interface FormToolbarProps {
   /** Adds a Delete button (pessimistic, with a confirmation) on the right. */
   withDelete?: boolean;
+  /** A short line beside Save about what saving does. */
+  note?: ReactNode;
 }
 
 export interface FormHeaderProps {

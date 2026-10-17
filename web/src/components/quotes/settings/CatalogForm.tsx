@@ -1,5 +1,4 @@
 import { Fragment, type ReactElement } from 'react';
-import Alert from '@mui/material/Alert';
 import Grid from '@mui/material/Grid';
 import { SimpleForm, useTranslate, type TranslateFunction } from 'react-admin';
 import { CATALOG_SECTIONS } from '../../../constants/quoteSettings';
@@ -17,16 +16,16 @@ const fieldSize = ({ size, type }: CatalogField): number => size ?? (type && typ
 
 /**
  * A quoting catalog's form, in titled sections (CATALOG_SECTIONS). Changing a value changes no
- * existing quote until it is recalculated, which the form says first.
+ * existing quote until it is recalculated, which the toolbar says beside Save.
  */
 const CatalogForm = ({ resource, withDelete = false }: CatalogFormProps): ReactElement => {
   const translate: TranslateFunction = useTranslate();
   const sections: CatalogSection[] = CATALOG_SECTIONS[resource] ?? [];
   return (
-    <SimpleForm defaultValues={DEFAULT_VALUES} toolbar={<FormToolbar withDelete={withDelete} />}>
-      <Alert severity="info" sx={{ width: '100%', mb: 1 }}>
-        {translate('app.quoteSettings.advice')}
-      </Alert>
+    <SimpleForm
+      defaultValues={DEFAULT_VALUES}
+      toolbar={<FormToolbar withDelete={withDelete} note={translate('app.quoteSettings.advice')} />}
+    >
       {sections.map(
         (section: CatalogSection, index: number): ReactElement => (
           <Fragment key={section.title}>

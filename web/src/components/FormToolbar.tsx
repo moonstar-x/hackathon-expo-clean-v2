@@ -1,12 +1,20 @@
 import type { ReactElement } from 'react';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 import { DeleteButton, SaveButton, Toolbar } from 'react-admin';
-import { formToolbarSx } from '../styles/pages';
+import { formToolbarNoteSx, formToolbarStartSx, formToolbarSx } from '../styles/pages';
 import type { FormToolbarProps } from '../types/components';
 
-/** Save on the left and, on edit pages, Delete on the right; it asks first and waits for the API. */
-const FormToolbar = ({ withDelete = false }: FormToolbarProps): ReactElement => (
+/**
+ * Save on the left, with a line beside it when saving needs a word, and, on edit pages, Delete on
+ * the right; it asks first and waits for the API.
+ */
+const FormToolbar = ({ withDelete = false, note }: FormToolbarProps): ReactElement => (
   <Toolbar sx={formToolbarSx}>
-    <SaveButton />
+    <Box sx={formToolbarStartSx}>
+      <SaveButton />
+      {note ? <Typography sx={formToolbarNoteSx}>{note}</Typography> : null}
+    </Box>
     {withDelete ? <DeleteButton mutationMode="pessimistic" /> : null}
   </Toolbar>
 );

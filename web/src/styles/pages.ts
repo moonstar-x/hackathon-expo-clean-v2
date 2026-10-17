@@ -95,6 +95,11 @@ export const formToolbarSx: SxProps<Theme> = {
   borderColor: 'divider',
 };
 
+/** Save and the line beside it. */
+export const formToolbarStartSx: SxProps<Theme> = { display: 'flex', alignItems: 'center', gap: 2, minWidth: 0 };
+
+export const formToolbarNoteSx: SxProps<Theme> = { fontSize: 13, lineHeight: 1.4, color: 'text.secondary', minWidth: 0 };
+
 /** A detail page's section cards, on a Grid that spans the page. */
 export const detailPageSx: SxProps<Theme> = { pb: 3 };
 

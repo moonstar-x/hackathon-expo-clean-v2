@@ -1,6 +1,7 @@
 import type { SortPayload } from 'react-admin';
 import { quoteFields, quoteText } from '../i18n/quotes';
-import type { CatalogField, CatalogSection } from '../types/quotes';
+import { parameterFields, type ParameterField } from '../quotes/parameterFields';
+import type { CatalogField, CatalogSection, ParameterTab, ParameterUnit } from '../types/quotes';
 
 const note: CatalogField = { name: 'note', size: 12 };
 const active: CatalogField = { name: 'active', type: 'boolean' };
@@ -113,14 +114,113 @@ export const CATALOG_SORT: Record<string, SortPayload> = {
   'quote-location-types': { field: 'label', order: 'ASC' },
 };
 
-/** The quoting parameters by group: the group's title, then the slice of parameterFields it holds. */
-export const PARAMETER_GROUPS: [string, number, number][] = [
-  [quoteText.payrollGroup, 0, 15],
-  [quoteText.supervisionGroup, 15, 22],
-  [quoteText.fixedGroup, 22, 27],
-  [quoteText.marginGroup, 27, 31],
-  [quoteText.chemicalsGroup, 31, 33],
-  [quoteText.comparisonGroup, 33, 35],
-  [quoteText.defaultsGroup, 35, 39],
-  [quoteText.fixturesGroup, 39, 44],
+/** The quoting parameters by name, for the tabs below. */
+const byName = (...names: string[]): ParameterField[] =>
+  names.map((name: string): ParameterField => {
+    const field: ParameterField | undefined = parameterFields.find((candidate: ParameterField): boolean => candidate.name === name);
+    if (!field) throw new Error(`Unknown quoting parameter: ${name}`);
+    return field;
+  });
+
+/**
+ * The parameters form's tabs, SPEC-005 §3.1's groups, each in sections by topic; a tab about one
+ * topic has a single, untitled one. The quote's Supuestos tab lists the parameters in the same order.
+ */
+export const PARAMETER_TABS: ParameterTab[] = [
+  {
+    title: quoteText.payrollGroup,
+    sections: [
+      {
+        id: 'wage',
+        fields: byName('monthlyWage', 'basicWage', 'employerContributionRate', 'reserveFundRate', 'applyReserveFund', 'otherPayrollRate'),
+      },
+      {
+        id: 'workdays',
+        fields: byName(
+          'theoreticalWorkdaysPerYear',
+          'nonWorkedHolidaysPerYear',
+          'vacationWorkdaysPerYear',
+          'otherAbsenceDaysPerYear',
+          'hoursPerWorkday',
+          'productiveFraction',
+        ),
+      },
+      { id: 'surcharges', fields: byName('nightSurchargeRate', 'holidaySurchargeRate', 'nationalHolidaysPerYear') },
+    ],
+  },
+  {
+    title: quoteText.supervisionGroup,
+    sections: [
+      { id: 'supervision', fields: byName('supervisorMonthlyCost', 'operatorsPerSupervisor') },
+      { id: 'epp', fields: byName('baseEppPerFte', 'criticalEppPerFte') },
+      { id: 'mops', fields: byName('mopCoverageM2', 'mopCost', 'mopReplacementsPerMonth') },
+    ],
+  },
+  {
+    title: quoteText.fixedGroup,
+    sections: [
+      { id: 'monthly', fields: byName('equipmentMonthly', 'transportMonthly', 'insuranceMonthly') },
+      { id: 'overhead', fields: byName('administrationRate', 'contingencyRate') },
+    ],
+  },
+  {
+    title: quoteText.marginGroup,
+    sections: [
+      { id: 'margin', fields: byName('targetMargin', 'minimumMargin') },
+      { id: 'vat', fields: byName('vatRate', 'purchaseVatRate') },
+    ],
+  },
+  { title: quoteText.chemicalsGroup, sections: [{ id: 'chemicals', fields: byName('targetWasteRate', 'uncontrolledWasteRate') }] },
+  { title: quoteText.comparisonGroup, sections: [{ id: 'comparison', fields: byName('flatRatePerM2', 'monthsPerYear') }] },
+  {
+    title: quoteText.defaultsGroup,
+    sections: [
+      { id: 'defaults', fields: byName('defaultTraffic', 'defaultScheduleId', 'defaultDaysPerMonth', 'defaultZoneTypeId') },
+    ],
+  },
+  {
+    title: quoteText.fixturesGroup,
+    sections: [
+      {
+        id: 'fixtures',
+        fields: byName(
+          'defaultFixtureVisitsPerDay',
+          'defaultMinutesPerFixture',
+          'defaultSolutionLitersPerFixture',
+          'defaultPaperSoapPerFixtureMonthly',
+          'fixtureDefaultsExcludeFloor',
+        ),
+      },
+    ],
+  },
 ];
+
+/**
+ * The unit beside each numeric parameter's input (SPEC-005 §3.1). Shares are percentages and need no
+ * entry; counts whose label names what they count ("Operarios por supervisor") get none. Money is per
+ * month when the label or the section says so.
+ */
+export const PARAMETER_UNITS: Record<string, ParameterUnit> = {
+  monthlyWage: 'money',
+  basicWage: 'money',
+  theoreticalWorkdaysPerYear: 'days',
+  nonWorkedHolidaysPerYear: 'days',
+  vacationWorkdaysPerYear: 'days',
+  otherAbsenceDaysPerYear: 'days',
+  hoursPerWorkday: 'hours',
+  nationalHolidaysPerYear: 'days',
+  supervisorMonthlyCost: 'money',
+  baseEppPerFte: 'money',
+  criticalEppPerFte: 'money',
+  mopCoverageM2: 'squareMeters',
+  mopCost: 'money',
+  equipmentMonthly: 'money',
+  transportMonthly: 'money',
+  insuranceMonthly: 'money',
+  flatRatePerM2: 'moneyPerM2',
+  monthsPerYear: 'months',
+  defaultDaysPerMonth: 'days',
+  defaultMinutesPerFixture: 'minutes',
+  defaultSolutionLitersPerFixture: 'liters',
+  defaultPaperSoapPerFixtureMonthly: 'money',
+};

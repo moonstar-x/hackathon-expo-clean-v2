@@ -341,6 +341,18 @@ export interface CatalogProps {
     resource: string;
 }
 /** One quoting parameter's input, with the note on where its value comes from. */
+/** The unit beside a parameter's input, in `app.quoteSettings.units`. */
+export type ParameterUnit = 'percent' | 'money' | 'moneyPerM2' | 'days' | 'hours' | 'minutes' | 'liters' | 'squareMeters' | 'months';
+export interface ParameterSection {
+    /** Names the section's title and hint: `app.quoteSettings.parameterSections` and `parameterHints`. */
+    id: string;
+    fields: ParameterField[];
+}
+/** A tab of the parameters form: one of SPEC-005 §3.1's groups, in sections by topic. */
+export interface ParameterTab {
+    title: string;
+    sections: ParameterSection[];
+}
 export interface ParameterInputProps {
     field: ParameterField;
     note?: string;

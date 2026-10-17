@@ -5,6 +5,12 @@ import { sectionGridSx } from './pages';
 /** A parameter tab's inputs: aligned like a form section's, across the whole tab. */
 export const parametersGridSx: SxProps<Theme> = [sectionGridSx, { width: '100%' }] as SxProps<Theme>;
 
+/**
+ * A parameter's unit, level with its value: a filled input's value sits below its label, and MUI only
+ * lowers start adornments to match.
+ */
+export const parameterUnitSx: SxProps<Theme> = { mt: 2 };
+
 /** The fold with the notes on where each parameter comes from: a hairline box, not a floating card. */
 export const notesAccordionSx: SxProps<Theme> = {
   width: '100%',

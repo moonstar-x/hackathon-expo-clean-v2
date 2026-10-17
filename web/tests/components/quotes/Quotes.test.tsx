@@ -68,7 +68,7 @@ describe('quote screens', (): void => {
         renderWithAdmin(<Routes><Route path="/quote-parameters/:id" element={<><ParametersEdit/><CurrentRoute/></>}/><Route path="*" element={<CurrentRoute/>}/></Routes>,{ resource:'quote-parameters',at:'/quote-parameters/1',dataProvider });
         // The margin lives in its own tab; the other tabs' inputs are hidden until theirs is open.
         fireEvent.click(await screen.findByRole('tab',{ name:'Margen e impuestos' }));
-        const margin: HTMLElement = await screen.findByRole('spinbutton',{ name:'Margen objetivo sobre venta (%)' });
+        const margin: HTMLElement = await screen.findByRole('spinbutton',{ name:'Margen objetivo sobre venta' });
         fireEvent.change(margin,{ target:{ value:'40' } });
         fireEvent.click(screen.getByRole('button',{ name:/Guardar/ }));
         await waitFor((): void => { expect(saved).toBe(true); });
