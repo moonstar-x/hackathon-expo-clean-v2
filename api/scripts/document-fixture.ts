@@ -1,0 +1,14 @@
+import fs from 'node:fs';
+import { documentFixture } from '../test/documentFixture.ts';
+import { buildQuoteDocument } from '../src/modules/quoteDocuments/builder.ts';
+import { renderPdf } from '../src/modules/quoteDocuments/pdf.ts';
+import { renderXlsx } from '../src/modules/quoteDocuments/xlsx.ts';
+const input = documentFixture();
+input.data.issueDate = '2026-10-16';
+const document = buildQuoteDocument(input);
+fs.mkdirSync(new URL('../../web/tests/fixtures/', import.meta.url), { recursive: true });
+fs.writeFileSync(new URL('../../web/tests/fixtures/quote-document-A1.xlsx', import.meta.url), await renderXlsx(document));
+fs.writeFileSync(new URL('../../web/tests/fixtures/quote-document-A1.json', import.meta.url), JSON.stringify(document, null, 2) + '\n');
+fs.mkdirSync('/tmp/spec006', { recursive: true });
+fs.writeFileSync('/tmp/spec006/quote-A1.pdf', await renderPdf(document));
+console.log('Regenerated web document fixtures and /tmp/spec006/quote-A1.pdf');

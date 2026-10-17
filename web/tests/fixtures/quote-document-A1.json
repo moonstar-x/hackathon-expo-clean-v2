@@ -1,0 +1,233 @@
+{
+  "metadata": {
+    "subject": "Clínica de prueba",
+    "issueInstant": "2026-10-16T05:00:00.000Z"
+  },
+  "templateVersion": 1,
+  "number": "COT-00007",
+  "revision": 1,
+  "title": "COTIZACIÓN",
+  "numberText": "N.º COT-00007",
+  "issueDate": "2026-10-16",
+  "issueDateText": "16/10/2026",
+  "validUntil": "2026-11-15",
+  "validUntilText": "15/11/2026",
+  "validityDays": 30,
+  "paperSize": "A4",
+  "issuer": {
+    "tradeName": "CleanCode",
+    "lines": [
+      "Empresa de prueba S.A.",
+      "RUC 0999999999001",
+      "Calle de prueba 123",
+      "empresa@example.test"
+    ]
+  },
+  "client": {
+    "legalName": "Hospital Ejemplo S.A.",
+    "lines": [
+      "Hospital Ejemplo S.A.",
+      "Atención: Ana Ejemplo"
+    ]
+  },
+  "service": {
+    "lines": [
+      "Instalación: Clínica de prueba",
+      "Tipo: Hospital privado",
+      "Ciudad: Guayaquil",
+      "Superficie total: 248,00 m² en 4 zonas",
+      "Visita técnica: 16/10/2026"
+    ],
+    "totalFloorArea": {
+      "value": 248,
+      "text": "248,00"
+    },
+    "zoneCount": 4
+  },
+  "introText": "De nuestra consideración: ponemos a su disposición nuestra propuesta económica para el servicio de limpieza y desinfección de sus instalaciones, de acuerdo con el alcance que se detalla a continuación.",
+  "lines": [
+    {
+      "position": 1,
+      "description": "Limpieza y desinfección: Quirófano 1",
+      "detail": "Quirófano · Riesgo crítico · 36,00 m² · 24/7 · 30 días/mes",
+      "quantity": 1,
+      "unit": "Mes",
+      "unitPrice": {
+        "value": 7857.63,
+        "text": "7.857,63"
+      },
+      "amount": {
+        "value": 7857.63,
+        "text": "7.857,63"
+      }
+    },
+    {
+      "position": 2,
+      "description": "Limpieza y desinfección: Baño público",
+      "detail": "Baño · Riesgo semicrítico · 12,00 m² · Extendido 16 h · 30 días/mes",
+      "quantity": 1,
+      "unit": "Mes",
+      "unitPrice": {
+        "value": 1123.29,
+        "text": "1.123,29"
+      },
+      "amount": {
+        "value": 1123.29,
+        "text": "1.123,29"
+      }
+    },
+    {
+      "position": 3,
+      "description": "Limpieza y desinfección: Pasillo principal",
+      "detail": "Pasillo / circulación · Riesgo no crítico · 120,00 m² · Extendido 16 h · 30 días/mes",
+      "quantity": 1,
+      "unit": "Mes",
+      "unitPrice": {
+        "value": 705.75,
+        "text": "705,75"
+      },
+      "amount": {
+        "value": 705.75,
+        "text": "705,75"
+      }
+    },
+    {
+      "position": 4,
+      "description": "Limpieza y desinfección: Oficinas",
+      "detail": "Oficina · Riesgo no crítico · 80,00 m² · Diurno 8 h · 22 días/mes",
+      "quantity": 1,
+      "unit": "Mes",
+      "unitPrice": {
+        "value": 220.72,
+        "text": "220,72"
+      },
+      "amount": {
+        "value": 220.72,
+        "text": "220,72"
+      }
+    }
+  ],
+  "subtotal": {
+    "value": 9907.39,
+    "text": "9.907,39"
+  },
+  "vatLabel": "IVA 15 %",
+  "vatRate": 0.15,
+  "vat": {
+    "value": 1486.11,
+    "text": "1.486,11"
+  },
+  "total": {
+    "value": 11393.5,
+    "text": "11.393,50"
+  },
+  "totalLabel": "TOTAL MENSUAL",
+  "amountInWords": "Son: once mil trescientos noventa y tres con 50/100 dólares",
+  "contract": null,
+  "scope": {
+    "columns": [
+      "Zona",
+      "Tipo de zona",
+      "Riesgo",
+      "Superficie (m²)",
+      "Horario",
+      "Días por mes",
+      "Frecuencia",
+      "Limpiezas terminales por mes"
+    ],
+    "rows": [
+      {
+        "zone": "Quirófano 1",
+        "zoneType": "Quirófano",
+        "risk": "crítico",
+        "floorArea": {
+          "value": 36,
+          "text": "36,00"
+        },
+        "schedule": "24/7",
+        "daysPerMonth": 30,
+        "frequency": "Cada 4 h · 6 por día",
+        "terminalsPerMonth": "30"
+      },
+      {
+        "zone": "Baño público",
+        "zoneType": "Baño",
+        "risk": "semicrítico",
+        "floorArea": {
+          "value": 12,
+          "text": "12,00"
+        },
+        "schedule": "Extendido 16 h",
+        "daysPerMonth": 30,
+        "frequency": "Cada 2 h · 8 por día",
+        "terminalsPerMonth": "4"
+      },
+      {
+        "zone": "Pasillo principal",
+        "zoneType": "Pasillo / circulación",
+        "risk": "no crítico",
+        "floorArea": {
+          "value": 120,
+          "text": "120,00"
+        },
+        "schedule": "Extendido 16 h",
+        "daysPerMonth": 30,
+        "frequency": "Cada 4 h · 4 por día",
+        "terminalsPerMonth": "2"
+      },
+      {
+        "zone": "Oficinas",
+        "zoneType": "Oficina",
+        "risk": "no crítico",
+        "floorArea": {
+          "value": 80,
+          "text": "80,00"
+        },
+        "schedule": "Diurno 8 h",
+        "daysPerMonth": 22,
+        "frequency": "Cada 24 h · 1 por día",
+        "terminalsPerMonth": "2"
+      }
+    ],
+    "productsText": "Productos: Amonio cuaternario 5ª gen (4 ml por litro de agua), Detergente neutro (10 ml por litro de agua), Hipoclorito de sodio 5% (20 ml por litro de agua), Monopersulfato de potasio (10 g por litro de agua)"
+  },
+  "conditions": [
+    {
+      "label": "Validez de la oferta",
+      "text": [
+        "30 días, hasta el 15/11/2026."
+      ]
+    },
+    {
+      "label": "Forma de pago",
+      "text": [
+        "Mensual, a 30 días de la factura."
+      ]
+    },
+    {
+      "label": "Moneda e impuestos",
+      "text": [
+        "Valores en dólares de los Estados Unidos de América (USD). Los precios unitarios y el subtotal no incluyen IVA."
+      ]
+    },
+    {
+      "label": "Términos generales",
+      "text": [
+        "El valor mensual corresponde a la superficie, las frecuencias y los horarios descritos en el alcance del servicio. Cualquier cambio en el alcance requiere una nueva cotización.",
+        "El valor incluye mano de obra, supervisión, productos químicos, equipos de protección personal, utensilios, equipos, transporte y seguros."
+      ]
+    }
+  ],
+  "clientNotes": null,
+  "acceptance": {
+    "issuer": [
+      "CleanCode"
+    ],
+    "client": [
+      "Aceptado por: Hospital Ejemplo S.A.",
+      "Nombre, firma y fecha"
+    ]
+  },
+  "footer": "CleanCode · COT-00007 Rev. 1",
+  "fileBaseName": "Cotizacion-COT-00007-Clínica-de-prueba"
+}

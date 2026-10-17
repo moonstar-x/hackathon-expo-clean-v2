@@ -1,3 +1,4 @@
+import DescriptionIcon from '@mui/icons-material/Description';
 import { useEffect, useState, type ReactElement, type ReactNode, type ChangeEvent, type SyntheticEvent } from 'react';
 import { Accordion, AccordionDetails, AccordionSummary, Alert, Box, Button, Card, CardContent, Chip, CircularProgress, Link, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tabs, TextField, Typography } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -213,7 +214,7 @@ export function QuoteDetail(): ReactElement | null {
     } };
     const result: Quote['result'] = quote.result;
     return <Box>
-    <PageHeader eyebrow={quoteText.quotes} title={quote.name} badge={<QuoteStatus quote={quote}/>} actions={<><Button variant="contained" onClick={recalculate}>{quoteText.recalculate}</Button><EditButton variant="outlined"/><DeleteButton mutationMode="pessimistic"/><ConfirmButton label={quoteText.regenerate} disabled={quote.measurementId === null} confirmContent={quoteText.regenerateConfirm} onConfirm={async (): Promise<void> => { await provider.quoteAction(quote.id, 'regenerate'); await refetch(); }}/></>}/>
+    <PageHeader eyebrow={quoteText.quotes} title={quote.name} badge={<QuoteStatus quote={quote}/>} actions={<><Button component={RouterLink} to={`/quotes/${quote.id}/document`} startIcon={<DescriptionIcon />} variant="outlined">Documento</Button><Button variant="contained" onClick={recalculate}>{quoteText.recalculate}</Button><EditButton variant="outlined"/><DeleteButton mutationMode="pessimistic"/><ConfirmButton label={quoteText.regenerate} disabled={quote.measurementId === null} confirmContent={quoteText.regenerateConfirm} onConfirm={async (): Promise<void> => { await provider.quoteAction(quote.id, 'regenerate'); await refetch(); }}/></>}/>
     <Typography color="text.secondary" sx={{ mb: 1 }}>{quoteText.notValidated}</Typography>
     {quote.measurementId !== null && <Link component={RouterLink} to={`/measurements/${quote.measurementId}/show`}>{quoteText.measurement} {quote.measurementId}</Link>}
     <Typography variant="body2">{quoteText.calculatedOn} {quote.calculation.calculatedAt ? formatDateTime(quote.calculation.calculatedAt) : '—'}</Typography>
