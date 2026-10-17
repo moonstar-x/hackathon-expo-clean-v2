@@ -1,9 +1,10 @@
 // Shared styles of the list kit: the visual language every mobile and
 // desktop list composes, so rows, badges and meta lines look the same everywhere.
 import { blue, green, orange } from '@mui/material/colors';
-import { darken, type SxProps, type Theme } from '@mui/material/styles';
-import { createBreakpoints } from '@mui/system';
-import type { ListRowOptions, Tone } from '../types/list';
+import { alpha, darken, type SxProps, type Theme } from '@mui/material/styles';
+import { createBreakpoints, type SystemStyleObject } from '@mui/system';
+import { FILTER_CONTROL_HEIGHT } from '../constants/components';
+import type { EmptyStateVariant, ListRowOptions, Tone } from '../types/list';
 
 /** orange[800] reads 3.1:1 on white, too faint for a badge's small label; this step reads 5.1:1. */
 const LIGHT_ORANGE: string = darken(orange[800], 0.25);
@@ -140,7 +141,74 @@ export const statBarValueSx: SxProps<Theme> = {
  * that says what it searches ("Buscar por SKU, nombre o descripción"); the whole row on phones.
  */
 export const searchFilterSx: SxProps<Theme> = {
-  mb: 0.5,
-  minWidth: { xs: '100%', sm: 360 },
-  '& .MuiFilledInput-root': { minHeight: 50 },
+  minWidth: { xs: '100%', sm: 420 },
+  '& .MuiFilledInput-root': { minHeight: FILTER_CONTROL_HEIGHT },
+  '& .MuiInputAdornment-positionStart': { color: 'text.disabled', mr: 0.5 },
 };
+
+/**
+ * A yes-only filter as a pill as tall as the inputs beside it: their fill and hairline, its label
+ * before a compact switch, and a primary tint while it is on.
+ */
+export const toggleFilterSx = (theme: Theme): SystemStyleObject<Theme> => ({
+  height: FILTER_CONTROL_HEIGHT,
+  justifyContent: 'center',
+  px: 1.75,
+  borderRadius: '10px',
+  border: '1px solid',
+  borderColor: alpha(theme.palette.text.primary, 0.06),
+  bgcolor: alpha(theme.palette.text.primary, 0.04),
+  transition: 'background-color 140ms ease, border-color 140ms ease, box-shadow 140ms ease',
+  '&:hover': { bgcolor: alpha(theme.palette.text.primary, 0.06) },
+  '&:has(.Mui-checked)': {
+    bgcolor: alpha(theme.palette.primary.main, 0.08),
+    borderColor: alpha(theme.palette.primary.main, 0.4),
+  },
+  '&:has(.Mui-focusVisible)': { boxShadow: `0 0 0 3px ${alpha(theme.palette.primary.main, 0.18)}` },
+  '& .MuiFormControlLabel-root': { m: 0, gap: 1.5, flexDirection: 'row-reverse' },
+  '& .MuiFormControlLabel-label': { fontSize: 14, fontWeight: 500, whiteSpace: 'nowrap' },
+  '& .MuiSwitch-root': { m: 0 },
+});
+
+/** An empty state: centered, roomier when it stands alone than inside a list or a dashboard panel. */
+export const emptyStateSx = (variant: EmptyStateVariant): SxProps<Theme> => ({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  textAlign: 'center',
+  gap: variant === 'compact' ? 0.75 : 1,
+  px: 3,
+  py: { page: { xs: 6, sm: 8 }, inline: 6, compact: 3 }[variant],
+});
+
+/** The resource's icon on a soft primary tile. */
+export const emptyIconSx = (variant: EmptyStateVariant): SxProps<Theme> => {
+  const size: number = variant === 'compact' ? 40 : 56;
+  return {
+    width: size,
+    height: size,
+    mb: variant === 'compact' ? 0.5 : 1,
+    display: 'grid',
+    placeItems: 'center',
+    borderRadius: variant === 'compact' ? '10px' : '14px',
+    color: 'primary.main',
+    bgcolor: (theme: Theme): string => alpha(theme.palette.primary.main, 0.08),
+    '& .MuiSvgIcon-root': { fontSize: variant === 'compact' ? 22 : 28 },
+  };
+};
+
+export const emptyBodySx: SxProps<Theme> = { maxWidth: '52ch', color: 'text.secondary', textWrap: 'pretty' };
+
+/** The steps that fill a list (Mediciones), numbered: they are a real sequence. */
+export const emptyStepsSx: SxProps<Theme> = {
+  m: 0,
+  mt: 0.5,
+  pl: 2.5,
+  textAlign: 'left',
+  color: 'text.secondary',
+  fontSize: 14,
+  lineHeight: 1.6,
+  '& li::marker': { color: 'primary.main', fontWeight: 600 },
+};
+
+export const emptyActionsSx: SxProps<Theme> = { mt: 1.5 };

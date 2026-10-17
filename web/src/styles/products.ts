@@ -1,5 +1,45 @@
 import { alpha, type SxProps, type Theme } from '@mui/material/styles';
+import { STOCK_METER_HEIGHT } from '../constants/products';
 import type { Product } from '../types/api';
+import type { FigureSize, StatusColor } from '../types/components';
+
+/** The meter and, under it, the legend of its reorder line. */
+export const stockMeterSx: SxProps<Theme> = { display: 'flex', flexDirection: 'column', gap: 0.75, minWidth: 0 };
+
+/** The track: a light step of the status colour, so the state reads across the whole bar. */
+export const stockMeterTrackSx = (color: StatusColor, size: FigureSize): SxProps<Theme> => ({
+  position: 'relative',
+  height: STOCK_METER_HEIGHT[size],
+  borderRadius: 999,
+  bgcolor: (theme: Theme): string => alpha(theme.palette[color].main, 0.16),
+});
+
+/** The stock on hand; a sliver stays visible however little is left. */
+export const stockMeterFillSx = (color: StatusColor, ratio: number): SxProps<Theme> => ({
+  height: '100%',
+  width: `${Math.min(ratio, 1) * 100}%`,
+  minWidth: ratio > 0 ? 6 : 0,
+  borderRadius: 'inherit',
+  bgcolor: `${color}.main`,
+  transition: 'width 200ms cubic-bezier(0.23, 1, 0.32, 1)',
+  '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
+});
+
+/** The reorder line: a tick standing a little proud of the track. */
+export const stockMeterTickSx = (ratio: number): SxProps<Theme> => ({
+  position: 'absolute',
+  top: -3,
+  bottom: -3,
+  left: `calc(${Math.min(ratio, 1) * 100}% - 1px)`,
+  width: 2,
+  borderRadius: 1,
+  bgcolor: 'text.secondary',
+});
+
+export const stockMeterLegendSx: SxProps<Theme> = { display: 'flex', alignItems: 'center', gap: 0.75, color: 'text.secondary' };
+
+/** The tick again, small, so the legend points at the line it names. */
+export const stockMeterLegendTickSx: SxProps<Theme> = { width: 2, height: 10, borderRadius: 1, bgcolor: 'text.secondary', flexShrink: 0 };
 
 /**
  * Low-stock rows get a light tint of the warning colour, readable on light and dark paper (SPEC-002

@@ -1,7 +1,7 @@
 // Values used by the shared components in src/components.
 import type { PopoverOrigin } from '@mui/material/Popover';
 import type { MovementType, StockStatus } from '../types/api';
-import type { RibbonColor, RibbonSize, RibbonSizeConfig } from '../types/components';
+import type { RibbonColor, RibbonSize, RibbonSizeConfig, StatusColor } from '../types/components';
 import type { Tone } from '../types/list';
 
 /** Shown where a value is missing. */
@@ -9,6 +9,9 @@ export const NONE: string = '—';
 
 /** Rows-per-page choices of every desktop list; all within the API's 1000-row page. */
 export const ROWS_PER_PAGE: number[] = [10, 25, 50, 100];
+
+/** Height of every control in a list's filter bar: a small filled input with its label and border. */
+export const FILTER_CONTROL_HEIGHT: number = 50;
 
 export const RIBBON_SIZES: Record<RibbonSize, RibbonSizeConfig> = {
   small: { py: '4px', px: '10px', fontSize: '0.75rem', fold: 8 },
@@ -37,6 +40,20 @@ export const STOCK_STATUS_RIBBON: Record<StockStatus, RibbonColor> = {
   outOfStock: 'error',
   lowStock: 'warning',
   inStock: 'success',
+};
+
+/** Palette color per stock status: the stock meter's fill (red empty, orange at the reorder line or below). */
+export const STOCK_STATUS_COLOR: Record<StockStatus, StatusColor> = {
+  outOfStock: 'error',
+  lowStock: 'warning',
+  inStock: 'success',
+};
+
+/** Palette color per movement type, for the tile behind its icon in the dashboard feed. */
+export const MOVEMENT_TYPE_COLOR: Record<MovementType, StatusColor> = {
+  IN: 'success',
+  OUT: 'error',
+  ADJUSTMENT: 'info',
 };
 
 /** Badge tone per movement type: IN green, OUT red, ADJUSTMENT blue (SPEC-002 §7.3). */

@@ -2,10 +2,12 @@ import type { ReactElement } from 'react';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
+import { sectionGridSx } from '../styles/pages';
 import type { SectionProps } from '../types/components';
 
-// A titled block of a form or show layout. Children are <Grid> items, so give them
-// responsive sizes, e.g. <Grid size={{ xs: 12, md: 6 }}>.
+// A titled block of a form. Children are <Grid> items, so give them responsive sizes, e.g.
+// <Grid size={{ xs: 12, md: 6 }}>, and their inputs `fullWidth`. The grid drops the inputs' own
+// margins (SelectInput brings a dense one the text inputs don't), so a row's inputs line up.
 const Section = ({ title, children, hint, action }: SectionProps): ReactElement => (
   <Box sx={{ width: '100%', mt: 1 }}>
     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, mb: hint ? 0.5 : 1 }}>
@@ -19,7 +21,7 @@ const Section = ({ title, children, hint, action }: SectionProps): ReactElement 
         {hint}
       </Typography>
     ) : null}
-    <Grid container spacing={2}>
+    <Grid container spacing={2} sx={sectionGridSx}>
       {children}
     </Grid>
   </Box>

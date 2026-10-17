@@ -100,6 +100,65 @@ const appSpanish: StringMap = {
       submit: 'Entrar',
     },
     copy: { copied: '%{label} copiado', failed: 'No se pudo copiar' },
+    // What each list says before it has anything in it (components/list/EmptyState), by resource.
+    empty: {
+      default: { title: 'Todavía no hay registros', body: 'Lo que añadas aparecerá aquí.' },
+      filtered: {
+        title: 'No hay resultados con estos filtros',
+        body: 'Prueba con otros filtros o bórralos para ver todo.',
+      },
+      products: {
+        title: 'Todavía no hay productos',
+        body: 'Crea el primer producto para llevar sus existencias, su costo y su nivel de reposición.',
+      },
+      'stock-movements': {
+        title: 'Todavía no hay movimientos',
+        body: 'Cada entrada, salida o ajuste de inventario queda registrado aquí.',
+        action: 'Registrar movimiento',
+      },
+      categories: {
+        title: 'Todavía no hay categorías',
+        body: 'Las categorías agrupan los productos, por ejemplo «Desinfectantes» o «Papel y desechables».',
+      },
+      suppliers: {
+        title: 'Todavía no hay proveedores',
+        body: 'Guarda a quién le compras cada producto y cómo contactarlo.',
+      },
+      users: { title: 'Todavía no hay usuarios', body: 'Crea una cuenta para cada persona que use el panel.' },
+      measurements: {
+        title: 'Todavía no hay mediciones',
+        body: 'Las mediciones llegan desde RoomScanner, la app de iPhone. Aparecen aquí en cuanto se suben:',
+        steps: {
+          scan: 'Escanea las habitaciones del espacio.',
+          save: 'Guarda la ubicación al terminar.',
+          upload: 'La medición se sube sola y aparece en esta lista.',
+        },
+      },
+      quotes: {
+        title: 'Todavía no hay cotizaciones',
+        body: 'Las cotizaciones se crean desde una medición: ábrela y pulsa «Crear cotización».',
+        action: 'Ver mediciones',
+      },
+      'quote-zone-types': {
+        title: 'Todavía no hay tipos de zona',
+        body: 'Cada tipo de zona define su riesgo, su rendimiento de limpieza y los productos que usa.',
+      },
+      'quote-schedules': {
+        title: 'Todavía no hay horarios',
+        body: 'Los horarios definen cuántas horas al día se presta el servicio y si incluye noches o feriados.',
+      },
+      'quote-products': {
+        title: 'Todavía no hay productos de cotización',
+        body: 'Son los químicos que calcula la cotización, con su presentación, su precio y su dosis.',
+      },
+      'quote-location-types': {
+        title: 'Todavía no hay equivalencias',
+        body: 'Aparecen al subir mediciones con tipos de habitación nuevos; aquí les asignas un tipo de zona.',
+      },
+      history: { title: 'Todavía no hay movimientos', body: 'Las entradas, salidas y ajustes de este producto aparecerán aquí.' },
+      restock: { title: 'Todo en orden', body: 'Todos los productos activos superan su nivel de reposición.' },
+      activity: { title: 'Todavía no hay movimientos', body: 'Las entradas, salidas y ajustes aparecerán aquí al registrarlos.' },
+    },
     measurements: {
       eyebrow: 'RoomScanner',
       total: '1 medición |||| %{smart_count} mediciones',
@@ -209,6 +268,8 @@ const appSpanish: StringMap = {
       status: { outOfStock: 'Sin existencias', lowStock: 'Existencias bajas', inStock: 'Con existencias' },
       stockLine: '%{quantity} (reposición: %{reorder})',
       currentStock: 'Existencias actuales',
+      meter: '%{quantity}; nivel de reposición: %{reorder}',
+      reorderLine: 'Nivel de reposición: %{reorder}',
       history: 'Historial de inventario',
       historyEmpty: 'Todavía no hay movimientos.',
       sections: { general: 'General', stock: 'Inventario', safety: 'Seguridad', details: 'Detalles' },

@@ -1,9 +1,20 @@
+import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
+import FactCheckIcon from '@mui/icons-material/FactCheck';
+import RemoveShoppingCartIcon from '@mui/icons-material/RemoveShoppingCart';
+import type { SvgIconComponent } from '@mui/icons-material';
 import type { SortPayload } from 'react-admin';
 import type { MovementType } from '../types/api';
 import type { Choice } from '../types/components';
 import type { QuantityLabel } from '../types/fields';
 
 export const MOVEMENT_TYPES: MovementType[] = ['IN', 'OUT', 'ADJUSTMENT'];
+
+/** One icon per movement type, on the product's actions and in the dashboard's feed alike. */
+export const MOVEMENT_TYPE_ICON: Record<MovementType, SvgIconComponent> = {
+  IN: AddShoppingCartIcon,
+  OUT: RemoveShoppingCartIcon,
+  ADJUSTMENT: FactCheckIcon,
+};
 
 /** The type radio of the movement form; names are translation keys (react-admin translates choices). */
 export const MOVEMENT_TYPE_CHOICES: Choice<MovementType>[] = MOVEMENT_TYPES.map(

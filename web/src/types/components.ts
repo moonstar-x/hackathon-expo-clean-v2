@@ -65,6 +65,32 @@ export interface SectionProps {
   action?: ReactNode;
 }
 
+/** A palette color that carries a status: a stock level, a movement type. */
+export type StatusColor = 'success' | 'warning' | 'error' | 'info';
+
+/** `small` for narrow cards (a room) and list rows; `medium` for a page's summary. */
+export type FigureSize = 'medium' | 'small';
+
+export interface KeyFigure {
+  /** Already translated. */
+  label: string;
+  value: ReactNode;
+  /** Muted line under the value. */
+  hint?: ReactNode;
+}
+
+export interface KeyFiguresProps {
+  items: KeyFigure[];
+  size?: FigureSize;
+}
+
+export interface ShowSectionProps {
+  title: ReactNode;
+  children: ReactNode;
+  /** Button or link at the right of the title. */
+  action?: ReactNode;
+}
+
 export interface ExpandMoreProps extends Omit<IconButtonProps, 'children'> {
   expand: boolean;
 }
